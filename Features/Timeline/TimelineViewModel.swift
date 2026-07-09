@@ -18,5 +18,6 @@ public final class TimelineViewModel {
 
     public func load() async {
         entries = await timelineProvider.loadEntries(relativeTo: Date())
+            .sorted { $0.date < $1.date }
     }
 }
