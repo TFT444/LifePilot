@@ -15,4 +15,10 @@ final class ColorTokenTests: XCTestCase {
         XCTAssertLessThan(CornerRadius.md, CornerRadius.lg)
         XCTAssertLessThan(CornerRadius.lg, CornerRadius.full)
     }
+
+    func testIconSizeTokensAreOrderedAscending() {
+        XCTAssertLessThan(IconSize.sm, IconSize.md)
+        XCTAssertLessThan(IconSize.md, IconSize.lg)
+        XCTAssertLessThan(IconSize.lg, IconSize.xl)
+    }
 }

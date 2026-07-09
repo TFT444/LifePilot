@@ -20,10 +20,12 @@ public struct ComingSoonPlaceholder: View {
             Image(systemName: symbolName)
                 .font(.system(size: IconSize.lg, weight: .medium))
                 .foregroundStyle(LinearGradient.LifePilot.accent)
+                .accessibilityHidden(true)
 
             Text(title)
                 .font(.LifePilot.titleMedium)
                 .foregroundStyle(Color.LifePilot.textPrimary)
+                .accessibilityAddTraits(.isHeader)
 
             Text(message)
                 .font(.LifePilot.body)
@@ -33,6 +35,7 @@ public struct ComingSoonPlaceholder: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.LifePilot.backgroundPrimary)
+        .accessibilityElement(children: .combine)
     }
 }
 

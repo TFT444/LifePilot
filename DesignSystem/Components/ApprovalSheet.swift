@@ -26,13 +26,18 @@ public struct ApprovalSheet: View {
                     .font(.LifePilot.body)
                     .foregroundStyle(Color.LifePilot.textSecondary)
             }
+            .accessibilityElement(children: .combine)
 
             VStack(spacing: Spacing.sm) {
                 Button("Approve", action: onApprove)
                     .buttonStyle(.lifePilotPrimary)
+                    .accessibilityHint("Approves: \(content.title)")
+                    .accessibilityIdentifier("approvalSheet.approve")
 
                 Button("Dismiss", action: onDismiss)
                     .buttonStyle(.lifePilotSecondary)
+                    .accessibilityHint("Dismisses without taking action")
+                    .accessibilityIdentifier("approvalSheet.dismiss")
             }
         }
         .padding(Spacing.lg)

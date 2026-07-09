@@ -15,8 +15,7 @@ public struct CardContainer<Content: View>: View {
     public var body: some View {
         content
             .padding(Spacing.md)
-            .background(Color.LifePilot.backgroundElevated)
-            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous))
+            .lifePilotSurface()
             .lifePilotShadow(ShadowStyle.LifePilot.card)
     }
 }
