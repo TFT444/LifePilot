@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotDesignSystem
+import SwiftUI
 
 /// The Settings screen. Placeholder rows only in this phase — see
 /// `SettingsViewModel`.

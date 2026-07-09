@@ -1,5 +1,5 @@
-import XCTest
 import Foundation
+import XCTest
 @testable import LifePilotCore
 
 final class CalendarEventTests: XCTestCase {

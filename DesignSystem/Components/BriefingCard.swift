@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotCore
+import SwiftUI
 
 /// Summarized unit of the Morning Briefing, per docs/DESIGN_SYSTEM.md's
 /// Components table. Renders a single recommendation with its source

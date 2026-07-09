@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotDesignSystem
+import SwiftUI
 
 /// The onboarding flow shown on first launch. See `OnboardingViewModel`
 /// for step progression and `OnboardingStep` for step content.

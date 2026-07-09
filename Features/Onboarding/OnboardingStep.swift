@@ -26,13 +26,15 @@ public struct OnboardingStep: Identifiable {
             id: "calendar",
             symbolName: "calendar",
             title: "Connect your calendar",
-            message: "LifePilot reads your schedule to build your Morning Briefing and catch conflicts before they happen."
+            message: "LifePilot reads your schedule to build your Morning Briefing "
+                + "and catch conflicts before they happen."
         ),
         OnboardingStep(
             id: "approvals",
             symbolName: "checkmark.shield.fill",
             title: "You're always in control",
-            message: "LifePilot prepares recommendations — nothing sends, books, or moves money without your explicit approval."
+            message: "LifePilot prepares recommendations — nothing sends, books, "
+                + "or moves money without your explicit approval."
         ),
         OnboardingStep(
             id: "ready",

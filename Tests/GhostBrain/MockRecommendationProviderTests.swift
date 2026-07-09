@@ -1,6 +1,6 @@
-import XCTest
 import Foundation
 import LifePilotCore
+import XCTest
 @testable import LifePilotGhostBrain
 
 final class MockRecommendationProviderTests: XCTestCase {

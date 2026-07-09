@@ -17,30 +17,30 @@ public enum AgentKind: String, CaseIterable, Hashable, Sendable {
     /// Phase 6 UX requirement that agent output be attributable.
     public var displayName: String {
         switch self {
-        case .calendar: return "Calendar"
-        case .email: return "Email"
-        case .travel: return "Travel"
-        case .finance: return "Finance"
-        case .memory: return "Memory"
-        case .reminder: return "Reminder"
-        case .shopping: return "Shopping"
-        case .health: return "Health"
-        case .security: return "Security"
+        case .calendar: "Calendar"
+        case .email: "Email"
+        case .travel: "Travel"
+        case .finance: "Finance"
+        case .memory: "Memory"
+        case .reminder: "Reminder"
+        case .shopping: "Shopping"
+        case .health: "Health"
+        case .security: "Security"
         }
     }
 
     /// The SF Symbol used to represent this agent throughout the UI.
     public var symbolName: String {
         switch self {
-        case .calendar: return "calendar"
-        case .email: return "envelope.fill"
-        case .travel: return "airplane"
-        case .finance: return "dollarsign.circle.fill"
-        case .memory: return "brain.head.profile"
-        case .reminder: return "bell.fill"
-        case .shopping: return "cart.fill"
-        case .health: return "heart.fill"
-        case .security: return "shield.fill"
+        case .calendar: "calendar"
+        case .email: "envelope.fill"
+        case .travel: "airplane"
+        case .finance: "dollarsign.circle.fill"
+        case .memory: "brain.head.profile"
+        case .reminder: "bell.fill"
+        case .shopping: "cart.fill"
+        case .health: "heart.fill"
+        case .security: "shield.fill"
         }
     }
 }

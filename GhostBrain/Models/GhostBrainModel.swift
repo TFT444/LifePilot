@@ -40,25 +40,29 @@ public struct GhostBrainModel: Sendable {
     /// observed.
     public struct GreetingContext: Sendable {
         public let userFirstName: String
-        public let timeOfDay: TimeOfDay
+        public let timeOfDay: GreetingTimeOfDay
 
-        public init(userFirstName: String, timeOfDay: TimeOfDay) {
+        public init(userFirstName: String, timeOfDay: GreetingTimeOfDay) {
             self.userFirstName = userFirstName
             self.timeOfDay = timeOfDay
         }
+    }
+}
 
-        public enum TimeOfDay: String, Sendable {
-            case morning
-            case afternoon
-            case evening
+/// The portion of the day a greeting is generated for. A sibling of
+/// `GhostBrainModel.GreetingContext` rather than nested inside it, to keep
+/// type nesting at docs/STYLE_GUIDE.md-friendly depth (SwiftLint's
+/// `nesting` rule caps at one level).
+public enum GreetingTimeOfDay: String, Sendable {
+    case morning
+    case afternoon
+    case evening
 
-            public var greetingWord: String {
-                switch self {
-                case .morning: return "Good morning"
-                case .afternoon: return "Good afternoon"
-                case .evening: return "Good evening"
-                }
-            }
+    public var greetingWord: String {
+        switch self {
+        case .morning: "Good morning"
+        case .afternoon: "Good afternoon"
+        case .evening: "Good evening"
         }
     }
 }

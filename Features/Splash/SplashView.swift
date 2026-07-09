@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotDesignSystem
+import SwiftUI
 
 /// The launch screen, shown briefly while the app performs its initial
 /// setup. Purely presentational — no ViewModel, since it holds no state

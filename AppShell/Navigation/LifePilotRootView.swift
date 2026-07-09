@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotFeatures
+import SwiftUI
 
 /// The top-level view controlling the Splash → Onboarding → Main app
 /// transition. This is the single entry point the thin Xcode app target

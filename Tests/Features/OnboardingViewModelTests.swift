@@ -15,7 +15,7 @@ final class OnboardingViewModelTests: XCTestCase {
     func testAdvanceDoesNotOverrunLastStep() {
         let viewModel = OnboardingViewModel()
 
-        for _ in 0..<(viewModel.steps.count + 5) {
+        for _ in 0 ..< (viewModel.steps.count + 5) {
             viewModel.advance()
         }
 
@@ -34,7 +34,7 @@ final class OnboardingViewModelTests: XCTestCase {
     func testProgressReachesOneOnLastStep() {
         let viewModel = OnboardingViewModel()
 
-        for _ in 0..<viewModel.steps.count {
+        for _ in 0 ..< viewModel.steps.count {
             viewModel.advance()
         }
 

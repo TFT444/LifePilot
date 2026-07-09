@@ -1,6 +1,6 @@
-import XCTest
 import LifePilotCore
 import LifePilotGhostBrain
+import XCTest
 @testable import LifePilotFeatures
 
 @MainActor

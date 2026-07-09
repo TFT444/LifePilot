@@ -1,6 +1,6 @@
-import SwiftUI
 import LifePilotDesignSystem
 import LifePilotFeatures
+import SwiftUI
 
 /// The root `TabView`, hosting the five tabs defined in `AppTab`. Each tab
 /// wraps its screen in its own `NavigationStack`, per SwiftUI's recommended

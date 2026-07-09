@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotAppShell
+import SwiftUI
 
 /// The application entry point. Intentionally minimal — all real logic
 /// (navigation, composition root, feature screens) lives in the

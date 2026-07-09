@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotDesignSystem
+import SwiftUI
 
 /// Placeholder for the Insights tab, per README.md's Insights feature
 /// description. Full implementation arrives in

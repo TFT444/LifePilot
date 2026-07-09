@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotDesignSystem
+import SwiftUI
 
 /// Placeholder for the Memory tab — the user-visible surface for
 /// LifePilot's long-term preferences and history, per README.md's Memory

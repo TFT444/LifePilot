@@ -1,6 +1,6 @@
-import SwiftUI
 import LifePilotDesignSystem
 import LifePilotGhostBrain
+import SwiftUI
 
 /// The Home screen — Phase 3's placeholder-driven precursor to the full
 /// Morning Briefing (docs/MASTER_ROADMAP.md Phase 4). Hero header, Ghost

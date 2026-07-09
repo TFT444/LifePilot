@@ -36,7 +36,7 @@ let package = Package(
         ),
         .testTarget(
             name: "LifePilotGhostBrainTests",
-            dependencies: ["LifePilotGhostBrain"],
+            dependencies: ["LifePilotGhostBrain", "LifePilotCore"],
             path: "Tests/GhostBrain"
         ),
 
@@ -65,6 +65,7 @@ let package = Package(
 
         .target(
             name: "LifePilotDesignSystem",
+            dependencies: ["LifePilotCore"],
             path: "DesignSystem"
         ),
         .testTarget(
@@ -85,7 +86,7 @@ let package = Package(
         ),
         .testTarget(
             name: "LifePilotFeaturesTests",
-            dependencies: ["LifePilotFeatures"],
+            dependencies: ["LifePilotFeatures", "LifePilotCore", "LifePilotGhostBrain"],
             path: "Tests/Features"
         ),
 

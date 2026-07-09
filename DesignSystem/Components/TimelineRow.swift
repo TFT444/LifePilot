@@ -55,7 +55,12 @@ public struct TimelineRow: View {
         public let subtitle: String?
         public let accentColor: Color
 
-        public init(time: String, title: String, subtitle: String? = nil, accentColor: Color = Color.LifePilot.accentStart) {
+        public init(
+            time: String,
+            title: String,
+            subtitle: String? = nil,
+            accentColor: Color = Color.LifePilot.accentStart
+        ) {
             self.time = time
             self.title = title
             self.subtitle = subtitle

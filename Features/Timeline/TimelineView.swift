@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotDesignSystem
+import SwiftUI
 
 /// The Timeline screen — a unified, chronological view of everything
 /// happening across connected apps, per README.md's Timeline feature.

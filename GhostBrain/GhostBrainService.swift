@@ -14,7 +14,8 @@ public struct GhostBrainService: GhostBrainServing {
 
     public func currentModel() async throws -> GhostBrainModel {
         throw DomainError.unavailable(
-            "GhostBrainService has no reasoning engine yet — see docs/MASTER_ROADMAP.md Phase 5. Use MockRecommendationProvider during Phase 3."
+            "GhostBrainService has no reasoning engine yet — see docs/MASTER_ROADMAP.md Phase 5. "
+                + "Use MockRecommendationProvider during Phase 3."
         )
     }
 }

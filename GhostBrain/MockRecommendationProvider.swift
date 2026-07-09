@@ -8,9 +8,9 @@ import LifePilotCore
 /// stub data," so Features never needs to change when GhostBrainService
 /// replaces this in Phase 5.
 public struct MockRecommendationProvider: GhostBrainServing {
-    private let clock: () -> Date
+    private let clock: @Sendable () -> Date
 
-    public init(clock: @escaping () -> Date = Date.init) {
+    public init(clock: @escaping @Sendable () -> Date = Date.init) {
         self.clock = clock
     }
 
@@ -27,10 +27,10 @@ public struct MockRecommendationProvider: GhostBrainServing {
 
     private func greetingContext(for date: Date) -> GhostBrainModel.GreetingContext {
         let hour = Calendar.current.component(.hour, from: date)
-        let timeOfDay: GhostBrainModel.GreetingContext.TimeOfDay
+        let timeOfDay: GreetingTimeOfDay
         switch hour {
-        case 0..<12: timeOfDay = .morning
-        case 12..<17: timeOfDay = .afternoon
+        case 0 ..< 12: timeOfDay = .morning
+        case 12 ..< 17: timeOfDay = .afternoon
         default: timeOfDay = .evening
         }
         return GhostBrainModel.GreetingContext(userFirstName: "Alex", timeOfDay: timeOfDay)
@@ -40,7 +40,8 @@ public struct MockRecommendationProvider: GhostBrainServing {
         [
             RecommendationModel(
                 title: "Leave 15 minutes early for your 10:00 AM",
-                reasoning: "Traffic on your usual route is heavier than normal — Maps estimates 22 minutes instead of the usual 12.",
+                reasoning: "Traffic on your usual route is heavier than normal — "
+                    + "Maps estimates 22 minutes instead of the usual 12.",
                 sourceAgent: .travel,
                 riskLevel: .low,
                 urgency: .high,

@@ -1,7 +1,7 @@
 import Foundation
 import LifePilotCore
-import LifePilotGhostBrain
 import LifePilotDesignSystem
+import LifePilotGhostBrain
 
 /// Owns the Home screen's state, sourcing it from `GhostBrainServing`. Per
 /// docs/ENGINEERING_GUIDE.md's MVVM pattern, the View never talks to

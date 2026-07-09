@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotCore
+import SwiftUI
 
 /// Visual identity for a given AI agent's output, per docs/DESIGN_SYSTEM.md's
 /// Components table. Used wherever a recommendation or signal needs to be
