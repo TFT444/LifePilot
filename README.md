@@ -28,12 +28,13 @@ Your calendar, inbox, weather, travel, and priorities — understood, predicted,
 
 Try the interactive LifePilot product demo in your browser (mock data, no backend):
 
-| Link | Notes |
+| Link | Status |
 |---|---|
-| [lifepilot.vercel.app](https://lifepilot.vercel.app) | Production (Vercel) — redeploys from `main` |
-| [tft444.github.io/lifepilot](https://tft444.github.io/lifepilot/) | GitHub Pages — enable once in **Settings → Pages → GitHub Actions** |
+| [**Open demo now**](https://html-preview.github.io/?url=https://raw.githubusercontent.com/TFT444/lifepilot/gh-pages/index.html) | Works today (no setup) |
+| [lifepilot.vercel.app](https://lifepilot.vercel.app) | After merging PR #22 |
+| [tft444.github.io/lifepilot](https://tft444.github.io/lifepilot/) | Enable Pages once: **Settings → Pages → GitHub Actions** |
 
-If GitHub Pages shows 404, open **Settings → Pages** and set the source to **GitHub Actions** (one-time repo setting).
+**One-time GitHub Pages setup:** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** (or branch `gh-pages` / root).
 
 ---
 
