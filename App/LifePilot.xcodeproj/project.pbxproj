@@ -1,0 +1,283 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		578B8AF92FA6A7874507FA64 /* LifePilotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7900B2EBC7193A39ABFD3D94 /* LifePilotApp.swift */; };
+		E51CB1F9027565D809C3F7C3 /* LifePilotAppShell in Frameworks */ = {isa = PBXBuildFile; productRef = 3455CB631F89B07FB8A0F5C9 /* LifePilotAppShell */; };
+		5EFF68C60CA3629B2A3EFBF6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC34045892F8751149531202 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		9BD14A8874048AE7344A39E6 /* LifePilot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LifePilot.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7900B2EBC7193A39ABFD3D94 /* LifePilotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifePilotApp.swift; sourceTree = "<group>"; };
+		FC34045892F8751149531202 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9627DD810D3AF2855D1E8ADB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E51CB1F9027565D809C3F7C3 /* LifePilotAppShell in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4FC4882A1B316896940712AB = {
+			isa = PBXGroup;
+			children = (
+				130D624F17FDB2D1C83C1DA5 /* LifePilotApp */,
+				56A653DF702D1BC1D925E85A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		56A653DF702D1BC1D925E85A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9BD14A8874048AE7344A39E6 /* LifePilot.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		130D624F17FDB2D1C83C1DA5 /* LifePilotApp */ = {
+			isa = PBXGroup;
+			children = (
+				7900B2EBC7193A39ABFD3D94 /* LifePilotApp.swift */,
+				FC34045892F8751149531202 /* Assets.xcassets */,
+			);
+			path = LifePilotApp;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AD9A50C80A07B2F3ADEFFB44 /* LifePilot */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 926855632D6536FF62F43A55 /* Build configuration list for PBXNativeTarget "LifePilot" */;
+			buildPhases = (
+				B4E2A2694032DA6E1239E0F7 /* Sources */,
+				9627DD810D3AF2855D1E8ADB /* Frameworks */,
+				9CA162CD617CD54E059684BA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LifePilot;
+			packageProductDependencies = (
+				3455CB631F89B07FB8A0F5C9 /* LifePilotAppShell */,
+			);
+			productName = LifePilot;
+			productReference = 9BD14A8874048AE7344A39E6 /* LifePilot.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D5A6C642F0862B6A2362824E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					AD9A50C80A07B2F3ADEFFB44 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = D476E5C74A3C7B2827B965B1 /* Build configuration list for PBXProject "LifePilot" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 4FC4882A1B316896940712AB;
+			packageReferences = (
+				80D5FAFF6BA8F29715998315 /* XCLocalSwiftPackageReference ".." */,
+			);
+			productRefGroup = 56A653DF702D1BC1D925E85A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AD9A50C80A07B2F3ADEFFB44 /* LifePilot */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9CA162CD617CD54E059684BA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5EFF68C60CA3629B2A3EFBF6 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B4E2A2694032DA6E1239E0F7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				578B8AF92FA6A7874507FA64 /* LifePilotApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		569DA5F81EB107D3F5B36CA8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		2EF61C3A1C72517521016565 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		0489A24BF0438B7CA0A67813 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lifepilot.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		340F541949E9B30AD72659C5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lifepilot.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D476E5C74A3C7B2827B965B1 /* Build configuration list for PBXProject "LifePilot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				569DA5F81EB107D3F5B36CA8 /* Debug */,
+				2EF61C3A1C72517521016565 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		926855632D6536FF62F43A55 /* Build configuration list for PBXNativeTarget "LifePilot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0489A24BF0438B7CA0A67813 /* Debug */,
+				340F541949E9B30AD72659C5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		80D5FAFF6BA8F29715998315 /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "..";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3455CB631F89B07FB8A0F5C9 /* LifePilotAppShell */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LifePilotAppShell;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = D5A6C642F0862B6A2362824E /* Project object */;
+}

@@ -2,8 +2,11 @@ included:
   - Core
   - Agents
   - DesignSystem
+  - GhostBrain
+  - Mocks
   - Features
   - Services
+  - AppShell
   - App
   - Tests
 
@@ -20,6 +23,9 @@ identifier_name:
     warning: 2
   excluded:
     - id
+    # Matches SwiftUI's own .shadow(x:y:) parameter names in ShadowStyle.
+    - x
+    - y
 
 opt_in_rules:
   - empty_count
@@ -28,3 +34,7 @@ opt_in_rules:
 
 disabled_rules:
   - todo
+  # SwiftFormat's --wrapcollections before-first style (see .swiftformat)
+  # deliberately produces trailing commas on wrapped collection literals
+  # for diff cleanliness. Disabled here so the two tools don't fight.
+  - trailing_comma
