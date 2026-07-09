@@ -37,7 +37,7 @@ final class TimelineViewModelTests: XCTestCase {
 private struct StubTimelineProvider: TimelineProviding {
     let entries: [TimelineEntry]
 
-    func loadEntries(relativeTo now: Date) async -> [TimelineEntry] {
+    func loadEntries(relativeTo _: Date) async -> [TimelineEntry] {
         entries
     }
 }
