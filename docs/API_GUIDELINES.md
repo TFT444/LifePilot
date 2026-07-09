@@ -1,6 +1,6 @@
 # API Guidelines
 
-This document covers two related surfaces: the **internal Swift API contracts** between LifePilot's modules (Core, Agents, Services), and the conventions for any **external-facing API** the project exposes as it grows toward the web dashboard and third-party integrations described in [Phase 8](../ROADMAP.md#phase-8--lifepilot-platform).
+This document covers two related surfaces: the **internal Swift API contracts** between LifePilot's modules (Core, Agents, Services), and the conventions for any **external-facing API** the project exposes as it grows toward the web dashboard and third-party integrations described in [Phase 10](../MASTER_ROADMAP.md#phase-10--lifepilot-platform).
 
 ## Internal Module APIs
 
@@ -45,7 +45,7 @@ All I/O-bound APIs — network, disk, system frameworks — are `async`, using S
 
 ## External API (Future)
 
-LifePilot does not yet expose a public HTTP API. Once the companion web dashboard and third-party integration surface (Phase 8) begin, the following conventions apply:
+LifePilot does not yet expose a public HTTP API. Once the companion web dashboard and third-party integration surface (Phase 10) begin, the following conventions apply:
 
 ### Design
 
@@ -81,4 +81,4 @@ Errors follow a consistent envelope:
 
 ### Stability
 
-Endpoints are considered unstable (subject to change without a major version bump) until explicitly documented as stable in a versioned API reference. This document will be expanded with a full endpoint reference once Phase 8 work begins — it intentionally stays high-level until there's a real surface to document precisely.
+Endpoints are considered unstable (subject to change without a major version bump) until explicitly documented as stable in a versioned API reference. This document will be expanded with a full endpoint reference once Phase 10 work begins — it intentionally stays high-level until there's a real surface to document precisely.

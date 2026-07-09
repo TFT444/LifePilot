@@ -35,7 +35,7 @@ Your calendar, inbox, weather, travel, and priorities — understood, predicted,
 | [docs/API_GUIDELINES.md](docs/API_GUIDELINES.md) | Internal module contracts and the future external API |
 | [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md) | Swift conventions enforced by SwiftLint and SwiftFormat |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Architecture decision records — the "why" behind hard-to-reverse choices |
-| [ROADMAP.md](ROADMAP.md) | The eight phases from repository foundation to platform |
+| [MASTER_ROADMAP.md](MASTER_ROADMAP.md) | The eleven phases from repository foundation to platform, with full technical/UX requirements per phase |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Branching, commits, PR process, and review expectations |
 | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Community standards and enforcement |
 | [SECURITY.md](SECURITY.md) | Supported versions and vulnerability disclosure |
@@ -173,6 +173,16 @@ This loop — not a chat window — is the product.
 
 LifePilot is structured as a layered system: signal collection at the edges, reasoning at the core, and execution gated behind explicit human approval.
 
+<div align="center">
+
+<img src="Assets/brand/architecture.svg" alt="LifePilot system architecture: user through Ghost Brain, nine AI agents, context intelligence, recommendation engine, human approval, and connected Apple services, looping back through a learning system" width="640" />
+
+**[View the animated walkthrough →](https://claude.ai/code/artifact/42b476cf-34a1-4408-9479-5eb42bc7da69)**
+
+</div>
+
+The Mermaid diagram below is the same architecture in a more compact, text-searchable form:
+
 ```mermaid
 flowchart TD
     U[User]
@@ -265,7 +275,7 @@ lifepilot/
 ├── CONTRIBUTING.md
 ├── CODE_OF_CONDUCT.md
 ├── SECURITY.md
-├── ROADMAP.md
+├── MASTER_ROADMAP.md
 ├── CHANGELOG.md
 ├── LICENSE
 └── README.md
@@ -293,29 +303,35 @@ Full explanation of every directory, the dependency rules between them, and the 
 
 ## Roadmap
 
-LifePilot's roadmap spans eight phases, from repository foundation to platform. Each phase has a concrete, demonstrable outcome — see [ROADMAP.md](ROADMAP.md) for the full breakdown, including scope and exit criteria per phase.
+LifePilot's roadmap spans eleven phases, from repository foundation to platform. Each phase has a concrete, demonstrable outcome, full technical and UX requirements, risks, and exit criteria — see [MASTER_ROADMAP.md](MASTER_ROADMAP.md) for the complete breakdown.
 
 ```mermaid
 flowchart LR
-    P1[Phase 1\nFoundation] --> P2[Phase 2\nDesign System]
-    P2 --> P3[Phase 3\nMVP]
-    P3 --> P4[Phase 4\nIntelligence Engine]
-    P4 --> P5[Phase 5\nAutomation]
-    P5 --> P6[Phase 6\nPublic Beta]
-    P6 --> P7[Phase 7\nApp Store Release]
-    P7 --> P8[Phase 8\nLifePilot Platform]
+    P0[Phase 0\nFoundation] --> P1[Phase 1\nProduct]
+    P1 --> P2[Phase 2\nDesign]
+    P2 --> P3[Phase 3\nSwiftUI Foundation]
+    P3 --> P4[Phase 4\nCore Product]
+    P4 --> P5[Phase 5\nGhost Brain]
+    P5 --> P6[Phase 6\nAI Agents]
+    P6 --> P7[Phase 7\nIntegrations]
+    P7 --> P8[Phase 8\nTesting]
+    P8 --> P9[Phase 9\nPublic Beta]
+    P9 --> P10[Phase 10\nPlatform]
 ```
 
 | Phase | Focus | Outcome |
 |---|---|---|
-| **1 — Repository Foundation** | Engineering foundation: CI/CD, templates, documentation. | A new engineer can contribute within an hour. |
-| **2 — Design System** | Visual and interaction language. | Every feature builds on a shared, tested component set. |
-| **3 — MVP** | Prove the core loop end-to-end with real data. | A working morning briefing from live calendar data. |
-| **4 — Intelligence Engine** | Ghost Brain and first agents. | Predictions and recommendations, not just summaries. |
-| **5 — Automation** | Smart Approvals and audited automation. | Trusted, low-risk actions execute without manual review. |
-| **6 — Public Beta** | Real users outside the core team. | External users relying on LifePilot for their actual day. |
-| **7 — App Store Release** | Public 1.0. | LifePilot ships publicly as `v1.0.0`. |
-| **8 — LifePilot Platform** | Beyond a single app. | The intelligence layer described in [Future Vision](#future-vision). |
+| **0 — Repository Foundation** | Engineering foundation: CI/CD, templates, documentation. | A new contributor can open a correct PR within an hour. |
+| **1 — Product Foundation** | Vision, principles, brand, information architecture. | Every later decision can cite a settled principle. |
+| **2 — UX/UI Design** | Design system and every core screen, before code. | Engineering executes a plan instead of improvising per screen. |
+| **3 — SwiftUI Foundation** | Navigation, MVVM, DI, theming, test infrastructure. | A new screen follows an established pattern, not a new one. |
+| **4 — Core Product** | Briefing, Timeline, Approvals, Insights, Settings. | The app is usable end-to-end on rule-based logic alone. |
+| **5 — Ghost Brain** | The reasoning engine: context, prediction, explainability. | A recommendation is produced, ranked, and explained. |
+| **6 — AI Agents** | The full nine-agent roster feeding Ghost Brain. | Each agent is independently tested and attributable in the UI. |
+| **7 — Platform Integrations** | Real Calendar, Mail, Health, CloudKit, Supabase. | Every agent runs on real data, not mocks. |
+| **8 — Testing & Quality** | Security, privacy, accessibility, performance audits. | Zero open critical findings at release. |
+| **9 — Public Beta** | TestFlight, landing page, feedback loop. | External users rely on LifePilot for their actual day. |
+| **10 — LifePilot Platform** | Watch, Mac, widgets, automation, plugins. | The intelligence layer described in [Future Vision](#future-vision). |
 
 ---
 

@@ -38,7 +38,7 @@ Format adapted from [Michael Nygard's ADR template](https://cognitect.com/blog/2
 
 **Decision:** No high-risk action executes without explicit, per-action user approval, enforced architecturally (see [Dependency Rules](ARCHITECTURE.md#dependency-rules), point 4) rather than as a UI convention that could be bypassed.
 
-**Consequences:** Slower to demonstrate "magic" automation in early demos. Substantially safer, more trustworthy, and more defensible as the product scales — see [SECURITY.md](../SECURITY.md). Automation is earned incrementally (Phase 5 onward) rather than assumed from day one — see [Product Principles](PRODUCT_VISION.md#product-principles).
+**Consequences:** Slower to demonstrate "magic" automation in early demos. Substantially safer, more trustworthy, and more defensible as the product scales — see [SECURITY.md](../SECURITY.md). Automation is earned incrementally — [Phase 5](../MASTER_ROADMAP.md#phase-5--ghost-brain) introduces gated, explained predictions; user-defined automation rules don't arrive until [Phase 10](../MASTER_ROADMAP.md#phase-10--lifepilot-platform) — rather than assumed from day one. See [Product Principles](PRODUCT_VISION.md#product-principles).
 
 ---
 
