@@ -26,15 +26,23 @@ Your calendar, inbox, weather, travel, and priorities — understood, predicted,
 
 ## Live Demo
 
-Try the interactive LifePilot product demo in your browser (mock data, no backend):
+**The demo is live now:** [**Open LifePilot Demo →**](https://html-preview.github.io/?url=https://raw.githubusercontent.com/TFT444/lifepilot/gh-pages/index.html)
 
-| Link | Status |
+Interactive product demo in your browser — mock data, no backend, no install.
+
+| URL | Status |
 |---|---|
-| [**Open demo now**](https://html-preview.github.io/?url=https://raw.githubusercontent.com/TFT444/lifepilot/gh-pages/index.html) | Works today (no setup) |
-| [lifepilot.vercel.app](https://lifepilot.vercel.app) | After merging PR #22 |
-| [tft444.github.io/lifepilot](https://tft444.github.io/lifepilot/) | Enable Pages once: **Settings → Pages → GitHub Actions** |
+| [**Live demo (now)**](https://html-preview.github.io/?url=https://raw.githubusercontent.com/TFT444/lifepilot/gh-pages/index.html) | ✅ Working |
+| [lifepilot.vercel.app](https://lifepilot.vercel.app) | ⏳ Needs PR [#22](https://github.com/TFT444/lifepilot/pull/22) merged |
+| [tft444.github.io/lifepilot](https://tft444.github.io/lifepilot/) | ⏳ Enable Pages: **Settings → Pages → `gh-pages` / root** |
 
-**One-time GitHub Pages setup:** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** (or branch `gh-pages` / root).
+To finish production URLs (one-time, ~30 seconds):
+
+```bash
+gh pr merge 22 --merge --admin && gh pr merge 23 --merge --admin
+```
+
+Then: **Settings → Pages → Source: `gh-pages` branch / root**
 
 ---
 
