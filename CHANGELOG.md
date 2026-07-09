@@ -8,6 +8,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Interactive web demo at `Website/public/` with GitHub Pages and Vercel deployment.
+- Phase 3 SwiftUI foundation: seven SPM targets, design system, mock-driven screens.
+- `TimelineProviding` protocol; `Features` no longer imports `LifePilotMocks` directly.
+
+### Changed
+
+- Removed legacy `demo/` folder and duplicate `Core/GhostBrain.swift` placeholder.
+- `release.yml` builds via `swift build` instead of a non-existent Xcode scheme.
+- Updated `MASTER_ROADMAP.md`, `docs/ARCHITECTURE.md`, and README demo links.
+
+### Added (foundation)
+
 - Full repository engineering foundation: issue templates, PR template, CI/CD workflows, branch protection documentation.
 - Core documentation set: `docs/ARCHITECTURE.md`, `MASTER_ROADMAP.md`, `docs/PRODUCT_VISION.md`, `docs/DESIGN_SYSTEM.md`, `docs/ENGINEERING_GUIDE.md`, `docs/API_GUIDELINES.md`, `docs/STYLE_GUIDE.md`, `docs/DECISIONS.md`.
 - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`.

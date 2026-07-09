@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Feature requests that align with the [roadmap](../../ROADMAP.md) and [product vision](../../docs/PRODUCT_VISION.md) are prioritized faster. For large or architectural changes, consider opening a discussion first.
+        Feature requests that align with the [roadmap](../../MASTER_ROADMAP.md) and [product vision](../../docs/PRODUCT_VISION.md) are prioritized faster. For large or architectural changes, consider opening a discussion first.
 
   - type: textarea
     id: problem

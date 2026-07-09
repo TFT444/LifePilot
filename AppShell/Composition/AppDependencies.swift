@@ -1,4 +1,6 @@
+import LifePilotCore
 import LifePilotGhostBrain
+import LifePilotMocks
 
 /// The composition root: wires concrete implementations to the protocols
 /// `Features` depend on, per docs/ENGINEERING_GUIDE.md's Dependency
@@ -10,9 +12,14 @@ import LifePilotGhostBrain
 /// 5) is a one-line change here, with no change required in `Features`.
 public struct AppDependencies: Sendable {
     public let ghostBrain: GhostBrainServing
+    public let timelineProvider: TimelineProviding
 
-    public init(ghostBrain: GhostBrainServing = MockRecommendationProvider()) {
+    public init(
+        ghostBrain: GhostBrainServing = MockRecommendationProvider(),
+        timelineProvider: TimelineProviding = MockTimelineProvider()
+    ) {
         self.ghostBrain = ghostBrain
+        self.timelineProvider = timelineProvider
     }
 
     /// The default, production-shaped set of dependencies for this phase.

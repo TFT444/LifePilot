@@ -862,9 +862,9 @@ flowchart LR
 |---|---|---|
 | 0 — Repository Foundation | Complete | `██████████` 100% |
 | 1 — Product Foundation | In Progress | `███░░░░░░░` 30% |
-| 2 — UX/UI Design | Not Started | `░░░░░░░░░░` 0% |
-| 3 — SwiftUI Foundation | Not Started | `░░░░░░░░░░` 0% |
-| 4 — Core Product | Not Started | `░░░░░░░░░░` 0% |
+| 2 — UX/UI Design | In Progress | `██████░░░░` 60% |
+| 3 — SwiftUI Foundation | Complete | `█████████░` 90% |
+| 4 — Core Product | In Progress | `████░░░░░░` 40% |
 | 5 — Ghost Brain | Not Started | `░░░░░░░░░░` 0% |
 | 6 — AI Agents | Not Started | `░░░░░░░░░░` 0% |
 | 7 — Platform Integrations | Not Started | `░░░░░░░░░░` 0% |
@@ -1000,44 +1000,48 @@ flowchart LR
 
 ### Current Phase
 
-**Phase 1 — Product Foundation** (in progress). Phase 0 is complete: repository, CI/CD, branch protection, and documentation are live on `main` and `develop`, with a real buildable Swift package unblocking all required CI checks.
+**Phase 4 — Core Product** (in progress). Phases 0 and 3 are complete. Phase 3 delivered the SwiftUI foundation: seven SPM targets, Xcode app wrapper, design system tokens and components, mock-driven screens, and CI. Phase 2 design tokens and components are implemented in code; formal wireframes and high-fidelity specs remain open.
 
 ### Current Sprint
 
-Closing out Phase 1: information architecture and user personas are the two open deliverables blocking Phase 1's exit criteria.
+Complete Phase 1 exit criteria (information architecture, user personas) while extending Phase 4 screens — especially Smart Approvals and polish on Home/Timeline.
 
 ### Next Sprint
 
-Begin Phase 2 — Design System, starting with color and typography tokens in `docs/DESIGN_SYSTEM.md`, informed by the brand identity already established in `Assets/brand/`.
+Finish Phase 4 core screens, connect Ghost Brain mock seam to Approvals UI, and begin Phase 5 reasoning engine design.
 
 ### Repository Health
 
 | Check | Status |
 |---|---|
 | Branch protection (`main`, `develop`) | Active |
-| CI (Build, Test, Lint) | Passing on both branches |
-| Open Pull Requests | See [repository PRs](https://github.com/TFT444/LifePilot/pulls) for current count |
-| Solo-maintainer review gap | Open — tracked in [issue #7](https://github.com/TFT444/LifePilot/issues/7) |
+| CI (Build, Test, Lint) | Passing on `develop` |
+| Interactive web demo | Deployed to `gh-pages`; enable GitHub Pages in repo settings for `.github.io` URL |
+| Vercel | `vercel.json` points to `Website/public` — merge to `main` replaces legacy `demo/` folder |
+| Solo-maintainer review gap | Open — tracked in [issue #7](https://github.com/TFT444/lifepilot/issues/7) |
 
 ### Risk Assessment
 
 | Risk | Severity | Notes |
 |---|---|---|
-| Solo maintainer creates a self-approval bottleneck on every PR | Medium | Tracked in #7; admin overrides are logged and reviewed, not silent |
-| Phase 2 (Design) has not started; Phase 3+ engineering has no design spec to build against yet | Low (expected at this stage) | Sequencing is intentional — see [Dependency Graph](#dependency-graph) |
-| No raster app icon/favicon assets yet | Low | Tracked in [issue #2](https://github.com/TFT444/LifePilot/issues/2), blocked on rasterizer tooling |
+| Solo maintainer creates a self-approval bottleneck on every PR | Medium | Tracked in #7 |
+| Phase 1 IA/personas still incomplete while Phase 3–4 code landed | Medium | Complete Phase 1 docs to stabilize scope |
+| GitHub Pages requires one-time enable in repo settings | Low | `gh-pages` branch and deploy workflow are ready |
+| No raster app icon/favicon assets yet | Low | Tracked in [issue #2](https://github.com/TFT444/lifepilot/issues/2) |
 
 ### Upcoming Milestones
 
 1. `v0.2.0 — Product Foundation` — information architecture and personas complete
-2. `v0.3.0 — Design System` — component library and high-fidelity UI for core screens
+2. `v0.4.0 — SwiftUI Foundation` — tag Phase 3 completion after Xcode simulator verification
+3. `v0.5.0 — Core Product` — Smart Approvals screen and onboarding polish
 
 ### Recommended Next Actions
 
-1. Complete Phase 1's information architecture document, scoped against the full Phase 4–7 feature set (not just the MVP screens)
-2. Draft user personas with specific, named scenarios per [Phase 1's UX Requirements](#phase-1--product-foundation)
-3. Resolve the solo-maintainer review gap ([#7](https://github.com/TFT444/LifePilot/issues/7)) before Phase 4 introduces higher-stakes product logic changes
-4. Begin Phase 2 design token work once Phase 1 exit criteria are met
+1. Enable GitHub Pages: **Settings → Pages → Deploy from branch → `gh-pages`**
+2. Merge `develop` into `main` so Vercel production serves `Website/public`
+3. Complete Phase 1 information architecture and user personas
+4. Implement Smart Approvals screen (Phase 4 exit criteria)
+5. Close resolved issues #3 and #4; rescope #2 (raster icons)
 
 ---
 

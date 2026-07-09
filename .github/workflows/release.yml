@@ -25,13 +25,24 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
 
-      - name: Build (Release configuration)
+      - name: Build Swift packages (Release)
+        run: swift build -c release
+
+      - name: Run unit tests
+        run: swift test
+
+      - name: Build iOS app (if Xcode project present)
         run: |
-          xcodebuild build \
-            -scheme LifePilot \
-            -configuration Release \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGNING_ALLOWED=NO
+          if [ -d "App/LifePilot.xcodeproj" ]; then
+            xcodebuild build \
+              -project App/LifePilot.xcodeproj \
+              -scheme LifePilot \
+              -configuration Release \
+              -destination 'generic/platform=iOS' \
+              CODE_SIGNING_ALLOWED=NO
+          else
+            echo "No Xcode project found — skipping app archive."
+          fi
 
       - name: Generate changelog excerpt
         id: changelog
@@ -47,5 +58,5 @@ jobs:
           draft: true
           prerelease: ${{ contains(github.ref_name, '-') }}
 
-      # TODO: Wire up App Store Connect / TestFlight upload once
-      # Phase 7 (App Store Release) begins. See ROADMAP.md.
+      # TODO: Wire up App Store Connect / TestFlight upload in Phase 9.
+      # See MASTER_ROADMAP.md Phase 9 — Public Beta.

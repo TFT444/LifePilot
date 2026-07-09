@@ -47,26 +47,29 @@ Three properties fall directly out of this diagram:
 
 ```
 lifepilot/
-├── App/                      # SwiftUI application entry point, scenes, app icon
-├── Core/                     # Ghost Brain reasoning engine and shared domain models
+├── App/                      # Thin Xcode wrapper: @main entry + asset catalog
+├── AppShell/                 # Composition root (DI) and root navigation
+├── Core/                     # Shared domain models and protocols
+├── GhostBrain/               # Reasoning seam: GhostBrainServing, models, mock provider
 ├── Agents/                   # Domain-specific AI agents (Calendar, Email, Travel, ...)
 ├── DesignSystem/             # Shared UI components, typography, tokens, theming
 ├── Features/                 # User-facing feature modules (Morning Briefing, Timeline, ...)
 ├── Services/                 # Cross-cutting infrastructure: networking, persistence, auth
+├── Mocks/                    # Mock data providers for development and tests
 ├── Resources/                # Assets, localization, configuration
-├── Assets/                   # Brand assets (logo, marks) — source of truth for all derived icons
+├── Assets/                   # Brand assets (logo, marks) — source of truth for derived icons
 ├── Tests/                    # Unit and integration tests, mirroring the module structure above
 ├── Examples/                 # Minimal, runnable examples of agent and service usage
 ├── Scripts/                  # Developer tooling: setup, codegen, release scripts
-├── packages/                 # Local Swift Packages shared across App and future targets
-├── Website/                  # Companion marketing/web dashboard (future)
+├── packages/                 # Local Swift Packages extracted from Core as it grows
+├── Website/public/           # Interactive web demo (GitHub Pages + Vercel)
 ├── docs/                     # Architecture, product, and engineering documentation
 └── .github/                  # Issue templates, PR template, CI/CD workflows
 ```
 
-Each first-class module (`Core`, `Agents`, `DesignSystem`, `Features`, `Services`) is expected to be internally organized by feature, not by file type — e.g. `Agents/CalendarAgent/CalendarAgent.swift`, `Agents/CalendarAgent/CalendarSignal.swift`, `Agents/CalendarAgent/Tests/`, rather than a flat `Models/`, `Views/`, `Controllers/` split at the top level.
+Each first-class module (`Core`, `GhostBrain`, `Agents`, `DesignSystem`, `Features`, `Services`, `AppShell`) is expected to be internally organized by feature, not by file type — e.g. `Agents/CalendarAgent/CalendarAgent.swift`, `Agents/CalendarAgent/CalendarSignal.swift`, rather than a flat `Models/`, `Views/`, `Controllers/` split at the top level.
 
-The root `Package.swift` currently builds `Core` as the `LifePilotCore` library target — the first buildable unit, giving CI a real target ahead of the full iOS app (tracked in [#4](https://github.com/TFT444/LifePilot/issues/4)). `packages/` remains reserved for domain logic *extracted* from `Core` once it outgrows a single target, per [ADR-005](DECISIONS.md#adr-005-protocol-first-module-boundaries) — the two are not redundant, just different stages of the same growth path.
+The root `Package.swift` builds seven SPM library targets (`LifePilotCore`, `LifePilotGhostBrain`, `LifePilotDesignSystem`, `LifePilotFeatures`, `LifePilotServices`, `LifePilotMocks`, `LifePilotAppShell`) plus matching test targets. The thin `App/LifePilot.xcodeproj` wraps `LifePilotAppShell` for simulator/device runs. `packages/` remains reserved for domain logic *extracted* from `Core` once it outgrows a single target, per [ADR-005](DECISIONS.md#adr-005-protocol-first-module-boundaries).
 
 ## Layered Architecture
 

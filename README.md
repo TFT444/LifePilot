@@ -157,15 +157,17 @@ This loop — not a chat window — is the product.
 
 ## Product Preview
 
-> Screenshots and product walkthroughs will be published here as the interface matures. Placeholders below reflect the planned layout.
+> **Interactive demo:** [lifepilot demo on GitHub Pages](https://tft444.github.io/lifepilot/) · [CDN mirror](https://cdn.jsdelivr.net/gh/TFT444/lifepilot@gh-pages/index.html)  
+> Splash → Onboarding → Morning Briefing → Timeline. Mock data from Phase 3.  
+> If the Pages link 404s, enable **Settings → Pages → `gh-pages` branch** once.
 
 | Morning Briefing (iPhone) | Timeline (Desktop) |
 |:---:|:---:|
-| *Screenshot coming soon* | *Screenshot coming soon* |
+| *Use the [interactive demo](https://cdn.jsdelivr.net/gh/TFT444/lifepilot@gh-pages/index.html)* | *Same demo — toggle theme in header* |
 
 | Dark Mode | Smart Approvals |
 |:---:|:---:|
-| *Screenshot coming soon* | *Screenshot coming soon* |
+| *Toggle in demo header* | *Approve/Dismiss on Home screen* |
 
 ---
 

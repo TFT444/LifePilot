@@ -38,7 +38,7 @@ public struct RootTabView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 #endif
         case .timeline:
-            TimelineView()
+            TimelineView(timelineProvider: dependencies.timelineProvider)
         case .memory:
             MemoryView()
         case .insights:

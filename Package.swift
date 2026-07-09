@@ -80,7 +80,6 @@ let package = Package(
                 "LifePilotCore",
                 "LifePilotGhostBrain",
                 "LifePilotDesignSystem",
-                "LifePilotMocks",
             ],
             path: "Features"
         ),
@@ -99,6 +98,7 @@ let package = Package(
                 "LifePilotGhostBrain",
                 "LifePilotDesignSystem",
                 "LifePilotFeatures",
+                "LifePilotMocks",
             ],
             path: "AppShell"
         ),

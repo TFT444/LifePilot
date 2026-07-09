@@ -31,6 +31,8 @@ protocol Agent {
 }
 ```
 
+Phase 3–4 screens consume **`GhostBrainServing`** (`currentModel() -> GhostBrainModel`) and other domain protocols such as **`TimelineProviding`** until individual agents are implemented in Phase 6. The `Agent` protocol above is the Phase 6 target contract; `GhostBrainServing` is the presentation-layer seam used today.
+
 - `observe()` must be side-effect-free — it reads, it never writes.
 - `predict(context:)` must be deterministic given the same context and signals, so agent behavior is testable without mocking randomness.
 - Agents never call each other directly; cross-agent context flows through the Ghost Brain (`Core`) only.

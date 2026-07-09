@@ -1,12 +1,15 @@
+import LifePilotCore
 import LifePilotDesignSystem
 import SwiftUI
 
 /// The Timeline screen — a unified, chronological view of everything
 /// happening across connected apps, per README.md's Timeline feature.
 public struct TimelineView: View {
-    @State private var viewModel = TimelineViewModel()
+    @State private var viewModel: TimelineViewModel
 
-    public init() {}
+    public init(timelineProvider: TimelineProviding) {
+        _viewModel = State(initialValue: TimelineViewModel(timelineProvider: timelineProvider))
+    }
 
     public var body: some View {
         ScrollView {
@@ -39,6 +42,12 @@ public struct TimelineView: View {
 
 #Preview {
     NavigationStack {
-        TimelineView()
+        TimelineView(timelineProvider: PreviewTimelineProvider())
+    }
+}
+
+private struct PreviewTimelineProvider: TimelineProviding {
+    func loadEntries(relativeTo now: Date) async -> [TimelineEntry] {
+        [TimelineEntry(date: now, title: "Design Review", subtitle: "Studio", kind: .event)]
     }
 }
