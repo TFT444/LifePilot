@@ -53,7 +53,7 @@ public struct HomeView: View {
             SectionHeader(title: "Prepared for you", symbolName: "sparkle")
 
             if viewModel.recommendations.isEmpty {
-                EmptyStatePlaceholder(
+                EmptyStateView(
                     symbolName: "sparkle",
                     message: "Ghost Brain is preparing your recommendations."
                 )
@@ -74,7 +74,7 @@ public struct HomeView: View {
             SectionHeader(title: "Upcoming Schedule", symbolName: "calendar")
 
             if viewModel.upcomingEvents.isEmpty {
-                EmptyStatePlaceholder(symbolName: "calendar", message: "Nothing else on your calendar today.")
+                EmptyStateView(symbolName: "calendar", message: "Nothing else on your calendar today.")
             } else {
                 CardContainer {
                     VStack(spacing: 0) {
@@ -98,9 +98,9 @@ public struct HomeView: View {
             SectionHeader(title: "Quick Actions", symbolName: "bolt.fill")
 
             HStack(spacing: Spacing.sm) {
-                QuickActionButton(symbolName: "envelope.fill", title: "Inbox")
-                QuickActionButton(symbolName: "checklist", title: "Tasks")
-                QuickActionButton(symbolName: "airplane", title: "Travel")
+                QuickActionCard(symbolName: "envelope.fill", title: "Inbox")
+                QuickActionCard(symbolName: "checklist", title: "Tasks")
+                QuickActionCard(symbolName: "airplane", title: "Travel")
             }
         }
     }
@@ -111,69 +111,11 @@ public struct HomeView: View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             SectionHeader(title: "Recent Activity", symbolName: "clock.arrow.circlepath")
 
-            EmptyStatePlaceholder(
+            EmptyStateView(
                 symbolName: "clock.arrow.circlepath",
                 message: "Approved and dismissed actions will appear here."
             )
         }
-    }
-}
-
-// MARK: - Local Components
-
-private struct SectionHeader: View {
-    let title: String
-    let symbolName: String
-
-    var body: some View {
-        Label(title, systemImage: symbolName)
-            .font(.LifePilot.titleMedium)
-            .foregroundStyle(Color.LifePilot.textPrimary)
-    }
-}
-
-private struct EmptyStatePlaceholder: View {
-    let symbolName: String
-    let message: String
-
-    var body: some View {
-        CardContainer {
-            VStack(spacing: Spacing.sm) {
-                Image(systemName: symbolName)
-                    .font(.system(size: IconSize.md))
-                    .foregroundStyle(Color.LifePilot.textSecondary)
-
-                Text(message)
-                    .font(.LifePilot.caption)
-                    .foregroundStyle(Color.LifePilot.textSecondary)
-                    .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.md)
-        }
-    }
-}
-
-private struct QuickActionButton: View {
-    let symbolName: String
-    let title: String
-
-    var body: some View {
-        VStack(spacing: Spacing.xs) {
-            Image(systemName: symbolName)
-                .font(.system(size: IconSize.sm, weight: .medium))
-                .foregroundStyle(LinearGradient.LifePilot.accent)
-
-            Text(title)
-                .font(.LifePilot.caption)
-                .foregroundStyle(Color.LifePilot.textPrimary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, Spacing.md)
-        .background(Color.LifePilot.backgroundElevated)
-        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous))
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isButton)
     }
 }
 
