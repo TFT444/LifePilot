@@ -1,0 +1,23 @@
+name: Question
+description: Ask a question about LifePilot's design, usage, or codebase
+title: "question: <short description>"
+labels: ["type: question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For open-ended discussion, consider using GitHub Discussions instead of an issue. Use this template for a specific, answerable question.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What do you want to know?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to accomplish? Have you checked the docs already?

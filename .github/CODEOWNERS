@@ -1,0 +1,32 @@
+# CODEOWNERS
+#
+# Each line is a file pattern followed by one or more owners.
+# Owners are automatically requested for review when a matching file changes.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Order matters: later patterns take precedence over earlier ones.
+
+# Default owner for everything not covered below
+*                           @TFT444
+
+# Core reasoning engine and domain models
+/Core/                      @TFT444
+
+# AI agent implementations
+/Agents/                    @TFT444
+
+# Design system and shared UI
+/DesignSystem/              @TFT444
+
+# Feature modules
+/Features/                  @TFT444
+
+# CI/CD, workflows, and repository configuration
+/.github/                   @TFT444
+
+# Documentation
+/docs/                      @TFT444
+*.md                        @TFT444
+
+# Security-sensitive files require explicit owner review
+/SECURITY.md                @TFT444

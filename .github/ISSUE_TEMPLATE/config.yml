@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability Disclosure
+    url: https://github.com/TFT444/LifePilot/security/advisories/new
+    about: Report exploitable security vulnerabilities privately — do not open a public issue.
+  - name: General Discussion
+    url: https://github.com/TFT444/LifePilot/discussions
+    about: Ask open-ended questions or propose ideas before filing a formal issue.

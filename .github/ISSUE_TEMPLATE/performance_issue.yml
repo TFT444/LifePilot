@@ -1,0 +1,48 @@
+name: Performance Issue
+description: Report slow, janky, or resource-heavy behavior
+title: "perf: <short description>"
+labels: ["type: performance", "status: triage"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is slow, and under what conditions?
+    validations:
+      required: true
+
+  - type: textarea
+    id: measurement
+    attributes:
+      label: Measurement
+      description: Frame times, launch time, memory usage, or other measured data. Use Instruments where possible.
+      placeholder: |
+        - Metric: ...
+        - Observed: ...
+        - Expected: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        - Device: ...
+        - OS: ...
+        - App version: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: profile
+    attributes:
+      label: Profiling Data
+      description: Attach an Instruments trace, flame graph, or relevant logs if available.

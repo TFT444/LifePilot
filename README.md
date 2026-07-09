@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/lifepilot-os/.github/main/assets/logo-placeholder.svg" alt="LifePilot" width="120" />
+<img src="Assets/brand/logo.svg" alt="LifePilot" width="220" />
 
 # LifePilot
 
@@ -13,14 +13,33 @@ Your calendar, inbox, weather, travel, and priorities — understood, predicted,
 [![Swift](https://img.shields.io/badge/Swift-5.10-F05138?style=flat-square&logo=swift&logoColor=white)](#technology-stack)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS-000000?style=flat-square&logo=apple&logoColor=white)](#technology-stack)
 [![Build](https://img.shields.io/badge/build-passing-2ea44f?style=flat-square)](#development-workflow)
-[![Stars](https://img.shields.io/github/stars/lifepilot-os/lifepilot?style=flat-square&color=1a1a2e)](../../stargazers)
-[![Contributors](https://img.shields.io/github/contributors/lifepilot-os/lifepilot?style=flat-square&color=1a1a2e)](#contributing)
+[![Stars](https://img.shields.io/github/stars/TFT444/LifePilot?style=flat-square&color=1a1a2e)](../../stargazers)
+[![Contributors](https://img.shields.io/github/contributors/TFT444/LifePilot?style=flat-square&color=1a1a2e)](#contributing)
 
 [Introduction](#introduction) · [Architecture](#architecture-overview) · [Roadmap](#roadmap) · [Contributing](#contributing)
 
 </div>
 
 <br />
+
+---
+
+## Documentation
+
+| Document | Purpose |
+|---|---|
+| [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md) | The belief, principles, and long-term ambition behind LifePilot |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System layers, dependency rules, and the AI agent contract |
+| [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Color, typography, spacing, and component tokens |
+| [docs/ENGINEERING_GUIDE.md](docs/ENGINEERING_GUIDE.md) | MVVM, testing, error handling, logging, accessibility, performance |
+| [docs/API_GUIDELINES.md](docs/API_GUIDELINES.md) | Internal module contracts and the future external API |
+| [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md) | Swift conventions enforced by SwiftLint and SwiftFormat |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | Architecture decision records — the "why" behind hard-to-reverse choices |
+| [ROADMAP.md](ROADMAP.md) | The eight phases from repository foundation to platform |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Branching, commits, PR process, and review expectations |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Community standards and enforcement |
+| [SECURITY.md](SECURITY.md) | Supported versions and vulnerability disclosure |
+| [CHANGELOG.md](CHANGELOG.md) | Notable changes, release by release |
 
 ---
 
@@ -142,11 +161,11 @@ This loop — not a chat window — is the product.
 
 | Morning Briefing (iPhone) | Timeline (Desktop) |
 |:---:|:---:|
-| ![Morning Briefing placeholder](https://raw.githubusercontent.com/lifepilot-os/.github/main/assets/preview-briefing.png) | ![Timeline placeholder](https://raw.githubusercontent.com/lifepilot-os/.github/main/assets/preview-timeline.png) |
+| *Screenshot coming soon* | *Screenshot coming soon* |
 
 | Dark Mode | Smart Approvals |
 |:---:|:---:|
-| ![Dark mode placeholder](https://raw.githubusercontent.com/lifepilot-os/.github/main/assets/preview-darkmode.png) | ![Approvals placeholder](https://raw.githubusercontent.com/lifepilot-os/.github/main/assets/preview-approvals.png) |
+| *Screenshot coming soon* | *Screenshot coming soon* |
 
 ---
 
@@ -214,13 +233,8 @@ Each agent is independently testable and independently replaceable — a deliber
 
 ```
 lifepilot/
-├── App/                      # SwiftUI application entry point and scenes
-│   ├── LifePilotApp.swift
-│   └── AppDelegate.swift
+├── App/                       # SwiftUI application entry point, scenes, app icon
 ├── Core/                      # Ghost Brain reasoning engine and shared domain models
-│   ├── GhostBrain/
-│   ├── Models/
-│   └── Prediction/
 ├── Agents/                    # Domain-specific AI agents
 │   ├── CalendarAgent/
 │   ├── EmailAgent/
@@ -231,27 +245,33 @@ lifepilot/
 │   ├── ShoppingAgent/
 │   ├── HealthAgent/
 │   └── SecurityAgent/
-├── Integrations/              # Adapters for connected apps and external APIs
-│   ├── CalendarKit/
-│   ├── MailKit/
-│   ├── WeatherKit/
-│   ├── MapKit/
-│   └── CloudKit/
-├── Features/                  # User-facing feature modules
-│   ├── MorningBriefing/
-│   ├── Timeline/
-│   ├── SmartApprovals/
-│   └── Insights/
-├── DesignSystem/              # Shared UI components, typography, and theming
-├── Resources/                 # Assets, localization, and configuration
-├── Tests/                     # Unit and integration tests
+├── DesignSystem/              # Shared UI components, typography, tokens, theming
+├── Features/                  # User-facing feature modules (Morning Briefing, Timeline, ...)
+├── Services/                  # Cross-cutting infrastructure: networking, persistence, auth
+├── Resources/                 # Localization and configuration
+├── Assets/
+│   └── brand/                 # LifePilot logo and mark — source of truth for all derived icons
+├── Tests/                     # Unit and integration tests, mirroring the structure above
+├── Examples/                  # Minimal, runnable examples of agent and service usage
+├── Scripts/                   # Developer tooling: setup, codegen, release scripts
+├── packages/                  # Local Swift Packages shared across targets
+├── Website/                   # Companion marketing/web dashboard (future)
+├── docs/                      # Architecture, product, and engineering documentation
 ├── .github/
-│   └── workflows/             # CI pipelines (GitHub Actions)
+│   ├── ISSUE_TEMPLATE/        # Bug, feature, task, docs, performance, security, question
+│   ├── workflows/             # CI pipelines: build, lint, test, release
+│   ├── CODEOWNERS
+│   └── PULL_REQUEST_TEMPLATE.md
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+├── SECURITY.md
+├── ROADMAP.md
+├── CHANGELOG.md
 ├── LICENSE
 └── README.md
 ```
 
-> The structure above reflects the target architecture for the SwiftUI client. As the codebase grows, this section will be kept in sync with the actual repository layout.
+Full explanation of every directory, the dependency rules between them, and the layered architecture they express lives in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
@@ -273,42 +293,41 @@ lifepilot/
 
 ## Roadmap
 
+LifePilot's roadmap spans eight phases, from repository foundation to platform. Each phase has a concrete, demonstrable outcome — see [ROADMAP.md](ROADMAP.md) for the full breakdown, including scope and exit criteria per phase.
+
 ```mermaid
-gantt
-    title LifePilot Roadmap
-    dateFormat  YYYY-MM-DD
-    axisFormat  %b %Y
-    section Phase 1
-    Hackathon MVP           :done, p1, 2026-06-01, 2026-07-15
-    section Phase 2
-    Core Intelligence       :active, p2, 2026-07-15, 2026-09-30
-    section Phase 3
-    Automation              :p3, 2026-10-01, 2026-12-15
-    section Phase 4
-    Integrations            :p4, 2026-12-15, 2027-03-01
-    section Phase 5
-    LifePilot OS            :p5, 2027-03-01, 2027-07-01
+flowchart LR
+    P1[Phase 1\nFoundation] --> P2[Phase 2\nDesign System]
+    P2 --> P3[Phase 3\nMVP]
+    P3 --> P4[Phase 4\nIntelligence Engine]
+    P4 --> P5[Phase 5\nAutomation]
+    P5 --> P6[Phase 6\nPublic Beta]
+    P6 --> P7[Phase 7\nApp Store Release]
+    P7 --> P8[Phase 8\nLifePilot Platform]
 ```
 
 | Phase | Focus | Outcome |
 |---|---|---|
-| **Phase 1 — Hackathon MVP** | Prove the core loop end-to-end with a single agent and a real calendar. | Working morning briefing generated from live calendar data. |
-| **Phase 2 — Core Intelligence** | Build the Ghost Brain reasoning engine and the first three agents. | Predictions and recommendations, not just summaries. |
-| **Phase 3 — Automation** | Introduce Smart Approvals and optional rule-based automation. | Trusted, low-risk actions execute without manual review. |
-| **Phase 4 — Integrations** | Expand the agent roster and connected-app surface. | Travel, finance, health, and shopping fully represented in the daily model. |
-| **Phase 5 — LifePilot OS** | Unify every agent, surface, and integration into one coherent system. | LifePilot becomes the default starting point for the user's day. |
+| **1 — Repository Foundation** | Engineering foundation: CI/CD, templates, documentation. | A new engineer can contribute within an hour. |
+| **2 — Design System** | Visual and interaction language. | Every feature builds on a shared, tested component set. |
+| **3 — MVP** | Prove the core loop end-to-end with real data. | A working morning briefing from live calendar data. |
+| **4 — Intelligence Engine** | Ghost Brain and first agents. | Predictions and recommendations, not just summaries. |
+| **5 — Automation** | Smart Approvals and audited automation. | Trusted, low-risk actions execute without manual review. |
+| **6 — Public Beta** | Real users outside the core team. | External users relying on LifePilot for their actual day. |
+| **7 — App Store Release** | Public 1.0. | LifePilot ships publicly as `v1.0.0`. |
+| **8 — LifePilot Platform** | Beyond a single app. | The intelligence layer described in [Future Vision](#future-vision). |
 
 ---
 
 ## Development Workflow
 
-LifePilot follows a standard trunk-based collaboration model, optimized for a small core team and open external contribution.
+LifePilot follows [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/), documented in full in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 1. Work begins on a **feature branch**, cut from `develop`.
-2. Changes are proposed via **Pull Request** into `develop`.
-3. Every PR requires **code review** and passing CI before merge.
-4. `develop` is periodically merged into `main` as part of a **release**.
-5. Releases are tagged and published from `main`.
+2. Changes are proposed via **Pull Request** into `develop`, using the [PR template](.github/PULL_REQUEST_TEMPLATE.md).
+3. Every PR requires **code review** (see [CODEOWNERS](.github/CODEOWNERS)) and passing CI (build, lint, test — see [`.github/workflows/`](.github/workflows/)) before merge.
+4. `develop` is periodically merged into `main` as part of a **release**, following [Semantic Versioning](docs/ENGINEERING_GUIDE.md#release-strategy).
+5. Releases are tagged from `main`, triggering [`release.yml`](.github/workflows/release.yml).
 
 ```mermaid
 gitGraph
@@ -326,48 +345,50 @@ gitGraph
     merge develop tag: "v0.1.0"
 ```
 
+Commit messages follow [Conventional Commits](CONTRIBUTING.md#commit-messages) (`feat(home): add morning briefing dashboard`), which power automated changelog generation — see [CHANGELOG.md](CHANGELOG.md).
+
 ---
 
 ## Branch Strategy
 
 | Branch | Purpose | Rules |
 |---|---|---|
-| `main` | Always stable, always releasable. | No direct commits. Updated only via merge from `develop`. |
-| `develop` | Active integration branch. | All feature branches merge here first. |
-| `feature/*` | Individual features or fixes. | Branched from `develop`, merged back via Pull Request. |
+| `main` | Always stable, always releasable. Protected. | No direct commits. Updated only via merge from `develop` or `hotfix/*`. |
+| `develop` | Default working branch, active development. | All feature branches start and merge here. |
+| `feature/*` | One feature, one Pull Request. | Branched from `develop`, merged back via Pull Request. |
+| `hotfix/*` | Urgent fixes to production. | Branched from `main`, merged into both `main` and `develop`. |
+| `release/*` | Release stabilization. | Branched from `develop`, merged into `main` and back into `develop`. |
 
-**Everything is merged through Pull Requests.** Direct pushes to `main` or `develop` are disabled by branch protection rules. This keeps history reviewable and every change traceable to a discussion.
+**Everything is merged through Pull Requests.** Direct pushes and force-pushes to `main` or `develop` are disabled by branch protection rules, and merges require a passing CI run and at least one approving review. This keeps history reviewable and every change traceable to a discussion. Full detail in [CONTRIBUTING.md](CONTRIBUTING.md#branch-naming).
 
 ---
 
 ## Contributing
 
-LifePilot is an early-stage project and early contributors have outsized influence on its architecture and direction.
+LifePilot is an early-stage project and early contributors have outsized influence on its architecture and direction. The full guide — branch naming, commit conventions, PR process, and review expectations — lives in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 1. **Fork** the repository and clone your fork locally.
-2. Create a feature branch from `develop`: `git checkout -b feature/short-description`.
-3. Make your changes with clear, atomic commits.
-4. Ensure the project builds and existing tests pass.
-5. Open a **Pull Request** against `develop`, describing the change and its motivation.
+2. Create a feature branch from `develop` (see [branch naming](CONTRIBUTING.md#branch-naming)).
+3. Make your changes with clear, [Conventional Commits](CONTRIBUTING.md#commit-messages).
+4. Ensure the project builds, lints, and existing tests pass.
+5. Open a **Pull Request** against `develop` using the [PR template](.github/PULL_REQUEST_TEMPLATE.md).
 6. Respond to review feedback — most PRs go through at least one round of revision.
 
-Before contributing a substantial feature, please open an issue first to discuss scope and approach. This avoids duplicated effort and keeps large changes aligned with the roadmap above.
-
-All contributions are made under the terms of the project's [MIT License](LICENSE).
+Before contributing a substantial feature, please open an issue first using one of the [issue templates](.github/ISSUE_TEMPLATE/) to discuss scope and approach. All contributors are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md). All contributions are made under the terms of the project's [MIT License](LICENSE).
 
 ---
 
 ## Security
 
-LifePilot is designed privacy-first, from data handling to execution.
+LifePilot is designed privacy-first, from data handling to execution. Full policy, supported versions, and the vulnerability disclosure process live in [SECURITY.md](SECURITY.md).
 
 - **On-device by default.** Reasoning and data processing happen on-device wherever feasible; nothing is sent off-device that doesn't need to be.
 - **Encrypted sync.** Any data synced across devices is end-to-end encrypted via CloudKit.
-- **No silent execution.** LifePilot never performs a high-risk action — sending a message, making a booking, moving money — without explicit, per-action user approval.
+- **No silent execution.** LifePilot never performs a high-risk action — sending a message, making a booking, moving money — without explicit, per-action user approval. This is enforced architecturally — see [ARCHITECTURE.md](docs/ARCHITECTURE.md#dependency-rules).
 - **Least-privilege integrations.** Each connected app is granted the minimum access required for its agent to function.
 - **Auditable actions.** Every executed action is logged with the reasoning that produced it, visible to the user at any time.
 
-If you discover a security vulnerability, please report it privately rather than opening a public issue. Details on responsible disclosure will be published as the project matures.
+If you discover a security vulnerability, do not open a public issue — follow the private disclosure process in [SECURITY.md](SECURITY.md).
 
 ---
 
@@ -389,6 +410,6 @@ LifePilot is released under the [MIT License](LICENSE).
 
 <br />
 
-**Built by [Tanvir Farhad](https://github.com/tanvirfarhad) and the LifePilot open-source community.**
+**Built by [Tanvir Farhad](https://github.com/TFT444) and the LifePilot open-source community.**
 
 </div>

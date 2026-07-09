@@ -1,0 +1,29 @@
+name: Security Report
+description: Report a non-sensitive security concern (see SECURITY.md for responsible disclosure of vulnerabilities)
+title: "security: <short description>"
+labels: ["type: security", "status: triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not use this template to report an exploitable vulnerability.** Follow the private disclosure process in [SECURITY.md](../../SECURITY.md) instead. This template is for general security hardening suggestions and non-sensitive concerns only.
+
+  - type: textarea
+    id: concern
+    attributes:
+      label: Concern
+      description: Describe the security or privacy concern.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential Impact
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Mitigation

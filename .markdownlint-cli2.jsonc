@@ -1,0 +1,43 @@
+{
+  // Markdown lint configuration for LifePilot documentation.
+  // Defaults are tuned for prose-heavy engineering docs, not terse READMEs —
+  // see docs/STYLE_GUIDE.md for the reasoning behind documentation conventions.
+  "config": {
+    "default": true,
+
+    // Prose lines wrap naturally in every Markdown renderer (GitHub included).
+    // Hard-wrapping at 80 characters fights normal writing and table formatting.
+    "MD013": false,
+
+    // The hero section and a few layout points rely on <div align="center">,
+    // <img>, and <br> for the README to read as a professional landing page.
+    "MD033": false,
+
+    // Fenced code blocks that intentionally show a bare directory tree or
+    // terminal transcript don't always warrant a language tag.
+    "MD040": false,
+
+    // Contact emails are written as plain addresses (SECURITY.md, CODE_OF_CONDUCT.md)
+    // rather than forced into mailto: links.
+    "MD034": false,
+
+    // Table formatting favors readability in source over strict single-space
+    // compact alignment.
+    "MD060": false,
+
+    // README.md opens with a centered <div> hero (logo, title, tagline,
+    // badges) before its first heading; the PR template intentionally opens
+    // with "## Summary" since GitHub renders the PR title separately.
+    "MD041": false,
+
+    // The README hero nests an H3 tagline directly under the H1 title by
+    // design — it is not a document outline, it's a landing-page hero.
+    "MD001": false,
+
+    // The product tagline is a complete sentence and reads correctly with
+    // its trailing period.
+    "MD026": false
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules/**", ".git/**"]
+}

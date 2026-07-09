@@ -1,0 +1,72 @@
+<svg width="1240" height="1240" viewBox="0 0 1240 1240" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05050f"/>
+      <stop offset="100%" stop-color="#0a0a1a"/>
+    </linearGradient>
+    <linearGradient id="lGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#5b21b6"/>
+    </linearGradient>
+    <linearGradient id="dGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <radialGradient id="sparkleGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#c7d2fe"/>
+    </radialGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1240" height="1240" fill="url(#bg)"/>
+
+  <g filter="url(#glow)">
+    <!-- Right arc: the "D" swoosh -->
+    <path d="M 620 300
+             A 260 260 0 1 1 620 940"
+          fill="none"
+          stroke="url(#dGrad)"
+          stroke-width="90"
+          stroke-linecap="round"/>
+
+    <!-- Left "L" shape -->
+    <path d="M 500 320
+             L 500 860
+             A 60 60 0 0 0 560 920
+             L 700 920"
+          fill="none"
+          stroke="url(#lGrad)"
+          stroke-width="90"
+          stroke-linecap="round"/>
+  </g>
+
+  <!-- Sparkle -->
+  <g filter="url(#glow)">
+    <path d="M 620 400
+             C 630 460 660 490 720 500
+             C 660 510 630 540 620 600
+             C 610 540 580 510 520 500
+             C 580 490 610 460 620 400 Z"
+          fill="url(#sparkleGrad)"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="620" y="1030" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="120" letter-spacing="2">
+    <tspan fill="#ffffff">Life</tspan><tspan fill="#7c9cf0">P</tspan><tspan fill="#7c9cf0">ilot</tspan>
+  </text>
+
+  <!-- Tagline -->
+  <text x="620" y="1100" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="500" font-size="30" letter-spacing="4" fill="#9ca3c4">
+    THE AI OPERATING SYSTEM
+  </text>
+  <text x="620" y="1140" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="500" font-size="30" letter-spacing="4" fill="#9ca3c4">
+    THAT PREPARES YOUR DAY BEFORE YOU ASK.
+  </text>
+</svg>

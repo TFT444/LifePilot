@@ -1,0 +1,78 @@
+name: Bug Report
+description: Report a defect in LifePilot's behavior
+title: "fix: <short description>"
+labels: ["type: bug", "status: triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please search existing issues before opening a new one.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A clear, concise description of the bug.
+      placeholder: What happened, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Minimal steps that reliably reproduce the issue.
+      placeholder: |
+        1. Go to '...'
+        2. Tap on '...'
+        3. Observe '...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Device, OS version, and app version.
+      placeholder: |
+        - Device: iPhone 16 Pro
+        - OS: iOS 18.4
+        - App version: 0.3.0 (build 42)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Low — cosmetic or minor inconvenience
+        - Medium — degrades a feature but has a workaround
+        - High — blocks a core workflow
+        - Critical — data loss, crash, or security impact
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Screenshots
+      description: Attach any relevant logs, stack traces, or screenshots.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this hasn't been reported.
+          required: true
+        - label: I can reliably reproduce this issue.
+          required: false

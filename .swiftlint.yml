@@ -1,0 +1,30 @@
+included:
+  - Core
+  - Agents
+  - DesignSystem
+  - Features
+  - Services
+  - App
+  - Tests
+
+excluded:
+  - .build
+  - packages
+
+line_length:
+  warning: 120
+  error: 160
+
+identifier_name:
+  min_length:
+    warning: 2
+  excluded:
+    - id
+
+opt_in_rules:
+  - empty_count
+  - force_unwrapping
+  - redundant_type_annotation
+
+disabled_rules:
+  - todo

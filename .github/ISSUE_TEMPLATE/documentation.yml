@@ -1,0 +1,26 @@
+name: Documentation
+description: Report missing, unclear, or incorrect documentation
+title: "docs: <short description>"
+labels: ["type: documentation", "status: triage"]
+body:
+  - type: textarea
+    id: location
+    attributes:
+      label: Location
+      description: Which file or page is affected?
+      placeholder: e.g. docs/ARCHITECTURE.md, README.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What's wrong or missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Improvement
+      description: If you have a proposed rewrite or addition, include it here.

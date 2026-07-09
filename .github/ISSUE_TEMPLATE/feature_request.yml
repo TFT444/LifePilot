@@ -1,0 +1,55 @@
+name: Feature Request
+description: Propose a new capability or enhancement for LifePilot
+title: "feat: <short description>"
+labels: ["type: feature", "status: triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature requests that align with the [roadmap](../../ROADMAP.md) and [product vision](../../docs/PRODUCT_VISION.md) are prioritized faster. For large or architectural changes, consider opening a discussion first.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem does this solve? Who experiences it?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature you'd like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Other approaches you considered and why they fall short.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      options:
+        - Morning Briefing
+        - Timeline
+        - Memory
+        - Smart Approvals
+        - AI Agents
+        - Design System
+        - Integrations
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this hasn't been requested.
+          required: true
