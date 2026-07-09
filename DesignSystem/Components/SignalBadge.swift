@@ -35,7 +35,7 @@ public struct SignalBadge: View {
             case .risk: Color.LifePilot.signalRisk
             case .success: Color.LifePilot.signalSuccess
             case .info: Color.LifePilot.textSecondary
-            case .priority(let level): level.color
+            case let .priority(level): level.color
             }
         }
 
@@ -44,7 +44,7 @@ public struct SignalBadge: View {
             case .risk: "exclamationmark.triangle.fill"
             case .success: "checkmark.circle.fill"
             case .info: "info.circle.fill"
-            case .priority(let level): level.symbolName
+            case let .priority(level): level.symbolName
             }
         }
 

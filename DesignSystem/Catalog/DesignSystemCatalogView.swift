@@ -1,5 +1,5 @@
-import SwiftUI
 import LifePilotCore
+import SwiftUI
 
 /// The internal design-system showcase — every reusable component in
 /// `DesignSystem/Components/`, rendered together for visual review. Not
@@ -201,11 +201,10 @@ public struct DesignSystemCatalogView: View {
 
     // MARK: - Shared Section Layout
 
-    @ViewBuilder
-    private func catalogSection<Content: View>(
+    private func catalogSection(
         title: String,
         symbolName: String,
-        @ViewBuilder content: () -> Content
+        @ViewBuilder content: () -> some View
     ) -> some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             SectionHeader(title: title, symbolName: symbolName)

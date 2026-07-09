@@ -42,10 +42,10 @@ extension View {
     /// animation (as opposed to a state-change transition the user
     /// directly initiated) should route through this rather than applying
     /// `Animation` unconditionally.
-    public func lifePilotAnimation<V: Equatable>(
+    public func lifePilotAnimation(
         _ animation: Animation,
         reduceMotion: Bool,
-        value: V
+        value: some Equatable
     ) -> some View {
         self.animation(reduceMotion ? nil : animation, value: value)
     }
