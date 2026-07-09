@@ -31,12 +31,12 @@ Color tokens are defined once in `DesignSystem/Tokens/Color.swift` and reference
 
 | Style | Weight | Size (pt) | Usage |
 |---|---|---|---|
-| `title.large` | Bold | 34 | Screen titles |
-| `title.medium` | Semibold | 22 | Section headers |
-| `body` | Regular | 17 | Primary content |
-| `caption` | Medium | 13 | Metadata, timestamps |
+| `title.large` | Bold | 34 (at default content size) | Screen titles |
+| `title.medium` | Semibold | 22 (at default content size) | Section headers |
+| `body` | Regular | 17 (at default content size) | Primary content |
+| `caption` | Medium | 13 (at default content size) | Metadata, timestamps |
 
-Typography uses the system font (SF Pro) and scales with Dynamic Type by default, via `.relativeTo(_:)` against the nearest matching system text style — see [Accessibility](ENGINEERING_GUIDE.md#accessibility).
+Typography uses the system font (SF Pro) and scales with Dynamic Type by default: each token is built on `Font.system(_:design:weight:)`'s `TextStyle` factory (e.g. `.largeTitle`, `.body`) rather than a fixed point size, so scaling is native to the API rather than bolted on — see [Accessibility](ENGINEERING_GUIDE.md#accessibility). The point sizes above are Apple's standard sizes for each text style at the default content size, not arbitrary custom values.
 
 ## Spacing
 

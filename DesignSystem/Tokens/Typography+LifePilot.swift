@@ -1,31 +1,29 @@
 import SwiftUI
 
-/// Typography tokens matching docs/DESIGN_SYSTEM.md's Typography table
-/// exactly. Uses the system font (SF Pro) and scales with Dynamic Type by
-/// default via `.font(...)`'s relative text styles, per
-/// docs/ENGINEERING_GUIDE.md's Accessibility standard.
+/// Typography tokens matching docs/DESIGN_SYSTEM.md's Typography table.
+/// Built on `Font.system(_:)`'s `TextStyle` factory rather than a fixed
+/// point size, so every token is Dynamic-Type-native by construction —
+/// see docs/ENGINEERING_GUIDE.md's Accessibility standard.
+/// Point sizes at the default content size match Apple's standard sizes
+/// for the corresponding text style (e.g. `.largeTitle` is 34pt), which
+/// is why each token maps to the closest system text style rather than
+/// specifying an arbitrary custom size.
 extension Font {
     public enum LifePilot {
-        /// Screen titles. 34pt Bold at the default content size, scaling
-        /// with Dynamic Type relative to `.largeTitle`.
-        public static let titleLarge = Font.system(
-            size: 34, weight: .bold, design: .default, relativeTo: .largeTitle
-        )
+        /// Screen titles. Bold, `.largeTitle` scale (34pt at the default
+        /// content size).
+        public static let titleLarge = Font.system(.largeTitle, design: .default, weight: .bold)
 
-        /// Section headers. 22pt Semibold, scaling relative to `.title2`.
-        public static let titleMedium = Font.system(
-            size: 22, weight: .semibold, design: .default, relativeTo: .title2
-        )
+        /// Section headers. Semibold, `.title2` scale (22pt at the
+        /// default content size).
+        public static let titleMedium = Font.system(.title2, design: .default, weight: .semibold)
 
-        /// Primary content. 17pt Regular, scaling relative to `.body`.
-        public static let body = Font.system(
-            size: 17, weight: .regular, design: .default, relativeTo: .body
-        )
+        /// Primary content. Regular, `.body` scale (17pt at the default
+        /// content size).
+        public static let body = Font.system(.body, design: .default, weight: .regular)
 
-        /// Metadata, timestamps. 13pt Medium, scaling relative to
-        /// `.footnote`.
-        public static let caption = Font.system(
-            size: 13, weight: .medium, design: .default, relativeTo: .footnote
-        )
+        /// Metadata, timestamps. Medium, `.footnote` scale (13pt at the
+        /// default content size).
+        public static let caption = Font.system(.footnote, design: .default, weight: .medium)
     }
 }
