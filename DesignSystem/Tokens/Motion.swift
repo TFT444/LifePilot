@@ -16,4 +16,37 @@ public enum Motion {
     /// changes (onboarding steps, tab switches) where the extra duration
     /// communicates a bigger context shift.
     public static let deliberate = Animation.easeInOut(duration: 0.35)
+
+    /// A springy transition for content that should feel alive when it
+    /// appears — new cards, approved actions. Used more sparingly than
+    /// `standard`, since spring motion carries more visual weight.
+    public static let spring = Animation.spring(response: 0.4, dampingFraction: 0.75)
+
+    /// The press-down feedback used by `PrimaryButtonStyle` and
+    /// `SecondaryButtonStyle` — quick enough to feel responsive to touch.
+    public static let press = Animation.easeOut(duration: 0.12)
+
+    /// A continuous, repeating animation for loading states
+    /// (`LoadingSkeleton`). Reduce Motion turns the shimmer into a static
+    /// state instead of looping indefinitely — see
+    /// `View.lifePilotAnimation(_:reduceMotion:value:)`.
+    public static let loading = Animation.easeInOut(duration: 1.1).repeatForever(autoreverses: true)
+}
+
+extension View {
+    /// Applies `animation` unless Reduce Motion is enabled, in which case
+    /// the state change happens instantly. Read
+    /// `@Environment(\.accessibilityReduceMotion)` in the calling view and
+    /// pass it through, per docs/ENGINEERING_GUIDE.md's Accessibility
+    /// standard. Every component that plays a decorative or continuous
+    /// animation (as opposed to a state-change transition the user
+    /// directly initiated) should route through this rather than applying
+    /// `Animation` unconditionally.
+    public func lifePilotAnimation<V: Equatable>(
+        _ animation: Animation,
+        reduceMotion: Bool,
+        value: V
+    ) -> some View {
+        self.animation(reduceMotion ? nil : animation, value: value)
+    }
 }
