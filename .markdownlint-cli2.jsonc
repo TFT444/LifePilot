@@ -36,7 +36,13 @@
 
     // The product tagline is a complete sentence and reads correctly with
     // its trailing period.
-    "MD026": false
+    "MD026": false,
+
+    // MASTER_ROADMAP.md repeats the same subheadings (Objective, Deliverables,
+    // Risks, ...) under every phase by design — it's a template applied 11
+    // times. siblings_only still catches genuine accidental duplicates within
+    // one section.
+    "MD024": { "siblings_only": true }
   },
   "globs": ["**/*.md"],
   "ignores": ["node_modules/**", ".git/**"]

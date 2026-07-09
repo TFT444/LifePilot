@@ -34,7 +34,7 @@ Not by engagement metrics in the traditional sense — a successful morning brie
 2. **Explain everything.** Every prediction and recommendation carries the reasoning behind it. A recommendation without an explanation is a black box, and black boxes don't earn trust.
 3. **Orchestrate, don't replace.** We integrate with the tools people already trust rather than asking them to migrate their data into a new silo.
 4. **Privacy is a default, not a setting.** On-device processing and least-privilege integrations are architectural commitments — see [ARCHITECTURE.md](ARCHITECTURE.md) and [SECURITY.md](../SECURITY.md).
-5. **Earn autonomy incrementally.** The system's ability to act without approval expands only as its predictions prove reliable — trust is built, not assumed. This is the throughline of the [Roadmap](../ROADMAP.md) from Phase 3 (predictions only) through Phase 5 (automation).
+5. **Earn autonomy incrementally.** The system's ability to act without approval expands only as its predictions prove reliable — trust is built, not assumed. This is the throughline of the [Master Roadmap](../MASTER_ROADMAP.md) from [Phase 5](../MASTER_ROADMAP.md#phase-5--ghost-brain) (predictions, always gated by approval) through [Phase 10](../MASTER_ROADMAP.md#phase-10--lifepilot-platform) (user-defined automation rules, scoped and opt-in).
 
 ## Where This Goes
 

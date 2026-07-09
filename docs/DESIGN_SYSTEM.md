@@ -64,4 +64,4 @@ Motion communicates causality — a card animating in should suggest *why* it ap
 
 ## Status
 
-The design system is being built out in **Phase 2** of the [Roadmap](../ROADMAP.md#phase-2--design-system). This document will grow alongside `DesignSystem/` as components are implemented — treat the tables above as the current source of truth, updated in the same PR as any token or component change.
+The design system is being built out in **Phase 2 — UX/UI Design** of the [Master Roadmap](../MASTER_ROADMAP.md#phase-2--uxui-design). This document will grow alongside `DesignSystem/` as components are implemented — treat the tables above as the current source of truth, updated in the same PR as any token or component change.

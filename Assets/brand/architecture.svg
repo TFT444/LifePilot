@@ -1,0 +1,200 @@
+<svg width="900" height="1500" viewBox="0 0 900 1500" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'SF Pro Text', 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="flow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+    <marker id="dot" markerWidth="8" markerHeight="8" refX="4" refY="4">
+      <circle cx="4" cy="4" r="3" fill="#38bdf8"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="1500" fill="#07060d"/>
+
+  <!-- Eyebrow -->
+  <circle cx="76" cy="46" r="3" fill="url(#flow)"/>
+  <text x="90" y="50" font-size="11" letter-spacing="2" fill="#6d6890">SYSTEM ARCHITECTURE</text>
+
+  <!-- Title -->
+  <text x="70" y="92" font-size="27" font-weight="700" fill="#f2f0fa">How LifePilot prepares your day</text>
+  <text x="70" y="122" font-size="14" fill="#a6a1c2">Nine agents observe. Ghost Brain reasons. You approve. Nothing runs silently.</text>
+
+  <!-- 01 You -->
+  <rect x="270" y="160" width="360" height="56" rx="12" fill="#100e1c" stroke="#23203a"/>
+  <text x="450" y="182" text-anchor="middle" font-size="10" letter-spacing="1.5" fill="#6d6890">01 · YOU</text>
+  <text x="450" y="202" text-anchor="middle" font-size="15" font-weight="600" fill="#f2f0fa">iPhone, iPad, or Mac</text>
+
+  <line x1="450" y1="216" x2="450" y2="248" stroke="url(#flow)" stroke-width="2" marker-end="url(#dot)"/>
+
+  <!-- 02 App -->
+  <rect x="270" y="250" width="360" height="56" rx="12" fill="#100e1c" stroke="#23203a"/>
+  <text x="450" y="272" text-anchor="middle" font-size="10" letter-spacing="1.5" fill="#6d6890">02 · SURFACE</text>
+  <text x="450" y="292" text-anchor="middle" font-size="15" font-weight="600" fill="#f2f0fa">LifePilot — SwiftUI</text>
+
+  <line x1="450" y1="306" x2="450" y2="336" stroke="#2c2846" stroke-width="2"/>
+
+  <!-- Triad -->
+  <path d="M450,336 C450,352 240,352 240,368" fill="none" stroke="#2c2846" stroke-width="1.4"/>
+  <path d="M450,336 L450,368" fill="none" stroke="#2c2846" stroke-width="1.4"/>
+  <path d="M450,336 C450,352 660,352 660,368" fill="none" stroke="#2c2846" stroke-width="1.4"/>
+
+  <g>
+    <rect x="130" y="368" width="220" height="50" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <text x="240" y="398" text-anchor="middle" font-size="13" font-weight="600" fill="#f2f0fa">Morning Briefing</text>
+
+    <rect x="340" y="368" width="220" height="50" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <text x="450" y="398" text-anchor="middle" font-size="13" font-weight="600" fill="#f2f0fa">Unified Timeline</text>
+
+    <rect x="550" y="368" width="220" height="50" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <text x="660" y="398" text-anchor="middle" font-size="13" font-weight="600" fill="#f2f0fa">Smart Approvals</text>
+  </g>
+
+  <line x1="450" y1="418" x2="450" y2="452" stroke="url(#flow)" stroke-width="2" marker-end="url(#dot)"/>
+
+  <!-- Ghost Brain core -->
+  <circle cx="450" cy="560" r="140" fill="url(#coreGlow)"/>
+  <rect x="300" y="454" width="300" height="128" rx="20" fill="#150f28" stroke="#45406b"/>
+  <g transform="translate(450,492)">
+    <path d="M0,-16 L6,-6 L16,0 L6,6 L0,16 L-6,6 L-16,0 L-6,-6 Z" fill="url(#flow)"/>
+  </g>
+  <text x="450" y="528" text-anchor="middle" font-size="18" font-weight="700" fill="#f2f0fa">Ghost Brain</text>
+  <text x="450" y="548" text-anchor="middle" font-size="12" fill="#a6a1c2">The only component that reasons across domains</text>
+  <g font-size="9" letter-spacing="0.5" fill="#a6a1c2">
+    <rect x="320" y="560" width="66" height="18" rx="9" fill="#100e1c" stroke="#23203a"/>
+    <text x="353" y="572" text-anchor="middle">OBSERVE</text>
+    <rect x="392" y="560" width="86" height="18" rx="9" fill="#100e1c" stroke="#23203a"/>
+    <text x="435" y="572" text-anchor="middle">UNDERSTAND</text>
+    <rect x="484" y="560" width="70" height="18" rx="9" fill="#100e1c" stroke="#23203a"/>
+    <text x="519" y="572" text-anchor="middle">PREDICT</text>
+  </g>
+
+  <text x="450" y="612" text-anchor="middle" font-size="10" letter-spacing="1.5" fill="#6d6890">FUSES OUTPUT OF ↓</text>
+
+  <!-- Agent grid connectors -->
+  <path d="M450,622 C450,640 190,640 190,658" fill="none" stroke="#2c2846" stroke-width="1.2"/>
+  <path d="M450,622 C450,640 450,640 450,658" fill="none" stroke="#2c2846" stroke-width="1.2"/>
+  <path d="M450,622 C450,640 710,640 710,658" fill="none" stroke="#2c2846" stroke-width="1.2"/>
+
+  <!-- Agents 3x3 -->
+  <g font-size="12">
+    <!-- row 1 -->
+    <rect x="90" y="658" width="200" height="58" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <circle cx="112" cy="676" r="3" fill="url(#flow)"/>
+    <text x="122" y="680" font-weight="600" fill="#f2f0fa">Calendar</text>
+    <text x="122" y="696" font-size="10" fill="#6d6890">Conflicts &amp; free time</text>
+
+    <rect x="350" y="658" width="200" height="58" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <circle cx="372" cy="676" r="3" fill="url(#flow)"/>
+    <text x="382" y="680" font-weight="600" fill="#f2f0fa">Email</text>
+    <text x="382" y="696" font-size="10" fill="#6d6890">Triage &amp; drafts</text>
+
+    <rect x="610" y="658" width="200" height="58" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <circle cx="632" cy="676" r="3" fill="url(#flow)"/>
+    <text x="642" y="680" font-weight="600" fill="#f2f0fa">Travel</text>
+    <text x="642" y="696" font-size="10" fill="#6d6890">Delays &amp; rebooking</text>
+
+    <!-- row 2 -->
+    <rect x="90" y="726" width="200" height="58" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <circle cx="112" cy="744" r="3" fill="url(#flow)"/>
+    <text x="122" y="748" font-weight="600" fill="#f2f0fa">Reminder</text>
+    <text x="122" y="764" font-size="10" fill="#6d6890">Time-aware intent</text>
+
+    <rect x="350" y="726" width="200" height="58" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <circle cx="372" cy="744" r="3" fill="url(#flow)"/>
+    <text x="382" y="748" font-weight="600" fill="#f2f0fa">Memory</text>
+    <text x="382" y="764" font-size="10" fill="#6d6890">Preferences over time</text>
+
+    <rect x="610" y="726" width="200" height="58" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <circle cx="632" cy="744" r="3" fill="url(#flow)"/>
+    <text x="642" y="748" font-weight="600" fill="#f2f0fa">Finance</text>
+    <text x="642" y="764" font-size="10" fill="#6d6890">Spend anomalies</text>
+
+    <!-- row 3 -->
+    <rect x="90" y="794" width="200" height="58" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <circle cx="112" cy="812" r="3" fill="url(#flow)"/>
+    <text x="122" y="816" font-weight="600" fill="#f2f0fa">Health</text>
+    <text x="122" y="832" font-size="10" fill="#6d6890">Sleep &amp; load</text>
+
+    <rect x="350" y="794" width="200" height="58" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <circle cx="372" cy="812" r="3" fill="url(#flow)"/>
+    <text x="382" y="816" font-weight="600" fill="#f2f0fa">Shopping</text>
+    <text x="382" y="832" font-size="10" fill="#6d6890">Recurring needs</text>
+
+    <rect x="610" y="794" width="200" height="58" rx="10" fill="#100e1c" stroke="#23203a"/>
+    <circle cx="632" cy="812" r="3" fill="url(#flow)"/>
+    <text x="642" y="816" font-weight="600" fill="#f2f0fa">Security</text>
+    <text x="642" y="832" font-size="10" fill="#6d6890">Audits every action</text>
+  </g>
+
+  <line x1="450" y1="852" x2="450" y2="886" stroke="url(#flow)" stroke-width="2" marker-end="url(#dot)"/>
+
+  <!-- Context Intelligence -->
+  <rect x="230" y="888" width="440" height="60" rx="12" fill="#100e1c" stroke="#23203a"/>
+  <text x="450" y="908" text-anchor="middle" font-size="10" letter-spacing="1.5" fill="#6d6890">CONTEXT INTELLIGENCE</text>
+  <text x="450" y="928" text-anchor="middle" font-size="13" font-weight="600" fill="#f2f0fa">Calendar · Weather · Maps · Mail</text>
+  <text x="450" y="942" text-anchor="middle" font-size="10" fill="#6d6890">Notes · Reminders · Health · Finance</text>
+
+  <line x1="450" y1="948" x2="450" y2="980" stroke="url(#flow)" stroke-width="2" marker-end="url(#dot)"/>
+
+  <!-- Recommendation Engine -->
+  <rect x="230" y="982" width="440" height="56" rx="12" fill="#100e1c" stroke="#23203a"/>
+  <text x="450" y="1004" text-anchor="middle" font-size="10" letter-spacing="1.5" fill="#6d6890">RECOMMENDATION ENGINE</text>
+  <text x="450" y="1024" text-anchor="middle" font-size="13" font-weight="600" fill="#f2f0fa">Prioritize · Explain · Score risk</text>
+
+  <line x1="450" y1="1038" x2="450" y2="1070" stroke="url(#flow)" stroke-width="2" marker-end="url(#dot)"/>
+
+  <!-- Approval -->
+  <rect x="230" y="1072" width="440" height="62" rx="12" fill="#1c0f18" stroke="#5c2436"/>
+  <text x="450" y="1094" text-anchor="middle" font-size="10" letter-spacing="1.5" fill="#f2557a">HUMAN APPROVAL</text>
+  <text x="450" y="1114" text-anchor="middle" font-size="13" font-weight="600" fill="#f2f0fa">You review every consequential action</text>
+  <text x="450" y="1128" text-anchor="middle" font-size="10" fill="#a6a1c2">No silent execution — ever</text>
+
+  <line x1="450" y1="1134" x2="450" y2="1166" stroke="url(#flow)" stroke-width="2" marker-end="url(#dot)"/>
+
+  <!-- Services -->
+  <g font-size="11" fill="#a6a1c2">
+    <rect x="150" y="1168" width="140" height="42" rx="9" fill="none" stroke="#45406b" stroke-dasharray="3 3"/>
+    <text x="220" y="1193" text-anchor="middle">Calendar &amp; Mail</text>
+
+    <rect x="310" y="1168" width="140" height="42" rx="9" fill="none" stroke="#45406b" stroke-dasharray="3 3"/>
+    <text x="380" y="1193" text-anchor="middle">Maps &amp; WeatherKit</text>
+
+    <rect x="470" y="1168" width="140" height="42" rx="9" fill="none" stroke="#45406b" stroke-dasharray="3 3"/>
+    <text x="540" y="1193" text-anchor="middle">Reminders &amp; Notify</text>
+
+    <rect x="630" y="1168" width="140" height="42" rx="9" fill="none" stroke="#45406b" stroke-dasharray="3 3"/>
+    <text x="700" y="1193" text-anchor="middle">HealthKit &amp; CloudKit</text>
+  </g>
+
+  <!-- Feedback loop -->
+  <path d="M450,1234 C450,1280 190,1250 190,1290 C190,1320 400,1320 440,1300"
+        fill="none" stroke="#45406b" stroke-width="1.6" stroke-dasharray="4 5"/>
+  <line x1="450" y1="1210" x2="450" y2="1234" stroke="#2c2846" stroke-width="2"/>
+
+  <rect x="270" y="1236" width="360" height="60" rx="12" fill="#100e1c" stroke="#23203a"/>
+  <text x="450" y="1258" text-anchor="middle" font-size="10" letter-spacing="1.5" fill="#6d6890">LEARNING LOOP</text>
+  <text x="450" y="1278" text-anchor="middle" font-size="13" font-weight="600" fill="#f2f0fa">Feedback &amp; Learning</text>
+  <text x="450" y="1292" text-anchor="middle" font-size="10" fill="#6d6890">Outcomes sharpen the next prediction</text>
+
+  <text x="190" y="1338" text-anchor="middle" font-size="10" fill="#6d6890">feeds back into Ghost Brain</text>
+
+  <!-- Legend -->
+  <line x1="70" y1="1380" x2="830" y2="1380" stroke="#23203a" stroke-width="1"/>
+  <g font-size="11" fill="#a6a1c2">
+    <rect x="70" y="1404" width="10" height="10" rx="3" fill="url(#flow)"/>
+    <text x="88" y="1413">Continuous reasoning</text>
+
+    <rect x="270" y="1404" width="10" height="10" rx="3" fill="#f2557a"/>
+    <text x="288" y="1413">Requires your approval</text>
+
+    <rect x="480" y="1404" width="10" height="10" rx="3" fill="none" stroke="#45406b" stroke-dasharray="2 2"/>
+    <text x="498" y="1413">Apple system frameworks</text>
+  </g>
+
+  <text x="70" y="1450" font-size="11" fill="#6d6890">Full architecture, dependency rules, and the agent contract:</text>
+  <text x="70" y="1468" font-size="11" fill="#8b87a0">docs/ARCHITECTURE.md</text>
+</svg>

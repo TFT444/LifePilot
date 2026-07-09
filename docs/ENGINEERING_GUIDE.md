@@ -94,7 +94,7 @@ Accessibility is a requirement, not a follow-up pass:
 
 - All user-facing strings live in `Resources/Localizable.xcstrings` — no string literals in `Features` or `DesignSystem` view code.
 - Dates, times, and numbers are formatted with `Foundation`'s locale-aware formatters, never hand-built strings.
-- English is the source language during Phase 1–5; additional locales are prioritized starting in **Phase 6 — Public Beta** (see [Roadmap](../ROADMAP.md#phase-6--public-beta)) based on beta cohort composition.
+- English is the source language through Phase 8; additional locales are prioritized starting in **Phase 9 — Public Beta** (see [Master Roadmap](../MASTER_ROADMAP.md#phase-9--public-beta)) based on beta cohort composition.
 
 ## Performance
 
@@ -104,17 +104,21 @@ Accessibility is a requirement, not a follow-up pass:
 
 ## Release Strategy
 
-LifePilot uses [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`), mapped to the [Roadmap](../ROADMAP.md) as follows:
+LifePilot uses [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`), mapped to the [Master Roadmap](../MASTER_ROADMAP.md#milestone-table) as follows:
 
 | Version | Milestone |
 |---|---|
 | `v0.1.0` | Repository Foundation |
-| `v0.2.0` | Design System |
-| `v0.3.0` | Core Components |
-| `v0.4.0` | Morning Briefing |
-| `v0.5.0` | Timeline |
-| `v0.6.0` | Memory |
-| `v1.0.0` | Hackathon MVP |
+| `v0.2.0` | Product Foundation |
+| `v0.3.0` | Design System |
+| `v0.4.0` | SwiftUI Foundation |
+| `v0.5.0` | Core Product |
+| `v0.6.0` | Ghost Brain |
+| `v0.7.0` | AI Agents |
+| `v0.8.0` | Platform Integrations |
+| `v0.9.0` | Testing & Quality |
+| `v0.10.0` | Public Beta |
+| `v1.0.0`+ | LifePilot Platform |
 
 - **MAJOR** — breaking changes to public APIs or data models.
 - **MINOR** — new functionality, backward compatible.
