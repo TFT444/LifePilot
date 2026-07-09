@@ -5,10 +5,10 @@ let package = Package(
     name: "LifePilot",
     platforms: [
         .iOS(.v17),
-        .macOS(.v14)
+        .macOS(.v14),
     ],
     products: [
-        .library(name: "LifePilotCore", targets: ["LifePilotCore"])
+        .library(name: "LifePilotCore", targets: ["LifePilotCore"]),
     ],
     targets: [
         .target(
@@ -19,6 +19,6 @@ let package = Package(
             name: "LifePilotCoreTests",
             dependencies: ["LifePilotCore"],
             path: "Tests/Core"
-        )
+        ),
     ]
 )
