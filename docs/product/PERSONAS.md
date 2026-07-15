@@ -25,7 +25,7 @@ MVP never requires HealthKit, Mail, banking, or shopping permissions.
 
 **Archetype:** Busy professional balancing meetings and personal obligations  
 **Age / context:** 34, product manager, hybrid office 3 days/week, partnered, no kids yet  
-**Devices:** iPhone primary; MacBook for long planning; Apple Watch notifications 
+**Devices:** iPhone primary; MacBook for long planning; Apple Watch notifications
 
 ### Goals
 
@@ -87,7 +87,7 @@ MVP never requires HealthKit, Mail, banking, or shopping permissions.
 
 **Archetype:** Shift or flexible worker with changing schedules  
 **Age / context:** 29, hospital tech, rotating days/nights, shares apartment  
-**Devices:** iPhone only; uses Mac rarely at library 
+**Devices:** iPhone only; uses Mac rarely at library
 
 ### Goals
 
@@ -149,7 +149,7 @@ Weekly: Insights show overload on triple night stretches — evidence from shift
 
 **Archetype:** Parent or caregiver coordinating family events  
 **Age / context:** 41, two kids (7 and 11), dual-income household, elder parent nearby  
-**Devices:** iPhone + iPad on fridge stand; partner has separate Apple ID 
+**Devices:** iPhone + iPad on fridge stand; partner has separate Apple ID
 
 ### Goals
 
@@ -212,7 +212,7 @@ Weekly: Insights show overload on triple night stretches — evidence from shift
 
 **Archetype:** Founder or student managing high context switching  
 **Age / context:** 23, CS senior + weekend startup; irregular sleep; many half-finished tasks  
-**Devices:** iPhone + aging MacBook; uses Quick Capture constantly 
+**Devices:** iPhone + aging MacBook; uses Quick Capture constantly
 
 ### Goals
 
@@ -275,7 +275,7 @@ Approves creating a Calendar hold for exam week.
 
 **Archetype:** Privacy-sensitive user who connects only selected sources  
 **Age / context:** 38, freelance designer, prior workplace surveillance anxiety  
-**Devices:** iPhone; Mac with firewall; no always-on location 
+**Devices:** iPhone; Mac with firewall; no always-on location
 
 ### Goals
 

@@ -69,7 +69,7 @@ These are **documented intents** for #27 completion; they require human/bot appr
 | A | Land or supersede deploy/architecture unify PR into `develop` (see §3 PR #23) | develop has one demo+architecture baseline |
 | B | Close duplicate PRs that are fully contained or obsolete (§3) | No duplicate open work |
 | C | Open `release/*` or sync PR: merge `develop` → `main` with release notes | main ⊆ develop for app code |
-| D | If `demo/index.html` still needed on Pages, either (i) generate from `Website/public` in workflow, or (ii) one-time commit on release branch with explicit note — avoid two demos |
+| D | If `demo/index.html` still needed on Pages, either (i) generate from `Website/public` in workflow, or (ii) one-time commit on release branch with explicit note — avoid two demos | Single demo source of truth |
 | E | Re-confirm CI green on both branch heads | Acceptance for #27 |
 
 **CI note:** Cloud Linux agents cannot run Xcode; trust GitHub Actions macOS checks on PR heads.

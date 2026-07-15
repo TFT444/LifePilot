@@ -66,7 +66,7 @@ Large text (≥ 18pt regular / 14pt bold) may use 3:1 where AA Large applies; Dy
 | `body` | `.body` | Regular | 17pt | Primary content |
 | `caption` | `.footnote` | Medium | 13pt | Metadata, timestamps |
 
-**Rules**
+### Rules
 
 - Layouts support at least through **accessibility3** without truncation/overlap of critical actions ([ENGINEERING_GUIDE.md](../ENGINEERING_GUIDE.md#accessibility)).
 - Prefer wrapping and vertical reflow over shrinking below readable minimums.
@@ -164,7 +164,7 @@ Light and dark are validated together in Catalog and tests.
 | Settings | Inset grouped list | Wider form width (~600–720pt max measure) |
 | Capture | Bottom field or sheet | Sheet / command-width popover |
 
-**Breakpoints (guidance)**
+### Breakpoints (guidance)
 
 - Compact width &lt; ~700pt: single column.
 - Regular ≥ ~700pt: allow split; keep primary actions reachable without chase.

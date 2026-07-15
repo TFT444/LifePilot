@@ -16,7 +16,7 @@ Progressive permission education for the daily-life MVP. No blanket dump. No sys
 | **Weather** (WeatherKit) | Forecast tied to outdoor / travel plans | Briefing weather strip, reschedule suggestions |
 | **Cloud Sync** (CloudKit, optional) | Additive multi-device | Same local data on another Apple device |
 
-**Not requested in MVP**
+### Not requested in MVP
 
 - **Health / HealthKit** — deferred future opt-in only. Do not show in primary onboarding. May appear later under Settings → Advanced as “Coming later — optional health context,” never as a required step.
 - **Apple Mail** — no ingestion, no auto-send. Do not request Mail access in onboarding.

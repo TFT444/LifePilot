@@ -1,8 +1,9 @@
 # Prototype Validation
 
 **Issue:** [#32](https://github.com/TFT444/LifePilot/issues/32)  
-**Surfaces treated as interactive prototype:**  
-1. `Website/public/` (+ `demo/index.html` where mirrored) — public / web demo  
+**Surfaces treated as interactive prototype:**
+
+1. `Website/public/` (+ `demo/index.html` where mirrored) — public / web demo
 2. SwiftUI app shell (`Features/*`, `AppShell`, DesignSystem Catalog) — native interactive shell  
 
 **Related:** [WIREFRAMES.md](WIREFRAMES.md), [USER_JOURNEYS.md](USER_JOURNEYS.md), [TOKENS_AND_LAYOUT.md](TOKENS_AND_LAYOUT.md)

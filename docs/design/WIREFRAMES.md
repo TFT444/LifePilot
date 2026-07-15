@@ -28,7 +28,7 @@ Low-fidelity layouts for every MVP screen and system state. Fidelity goal: struc
 
 | Phone (compact) | Desktop / iPad (regular) |
 |---|---|
-| Single column; tab bar | Split where noted: list | detail |
+| Single column; tab bar | Split where noted: list + detail |
 | Sheets for capture and approvals | Popover / trailing inspector |
 | Full-bleed navigation titles | Max readable measure ~720pt for settings forms |
 
@@ -351,13 +351,13 @@ flowchart TB
 
 ## Phone vs desktop — Approvals example
 
-**Phone**
+### Phone
 
 ```
 List full width → tap row → sheet with Approve/Reject
 ```
 
-**Desktop**
+### Desktop
 
 ```
 ┌──────────────┬──────────────────┐
