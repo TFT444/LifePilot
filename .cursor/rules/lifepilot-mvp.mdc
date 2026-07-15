@@ -37,6 +37,8 @@ LifePilot is a privacy-first daily-life assistant: tasks, reminders, personal/wo
 
 ## Workflow
 
+- **Before any work:** `git fetch origin develop` and start from **latest `develop`**. Diff open PRs targeting `develop` and existing paths for the same issue/feature — **do not duplicate**. Prefer extending or superseding an open branch/PR over opening a parallel one.
+- If another open PR already contains the change, update that branch (or clearly mark it superseded) instead of re-implementing.
 - Work on `feature/*` or `cursor/*` branches — never commit directly to `main` or `develop`.
 - Small conventional commits after verified slices.
 - Update `docs/IMPLEMENTATION_STATUS.md` with real evidence after each stage.
