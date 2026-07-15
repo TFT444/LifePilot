@@ -4,7 +4,7 @@ import XCTest
 @testable import LifePilotServices
 
 final class LaunchPersistenceTests: XCTestCase {
-    func testReturningUserSkipsOnboarding() async throws {
+    func testReturningUserSkipsOnboarding() async {
         let preferences = InMemoryPreferenceStore(
             preferences: UserPreferences(onboardingCompleted: true)
         )

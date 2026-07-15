@@ -37,25 +37,11 @@ public enum AppRoute: Hashable, Sendable, Codable {
         case "timeline":
             return .timeline
         case "tasks":
-            if pathComponents.count > 1,
-               let filter = TasksFilter(rawValue: pathComponents[1].lowercased())
-            {
-                return .tasks(filter: filter)
-            }
-            if pathComponents.count > 1, let id = UUID(uuidString: pathComponents[1]) {
-                return .task(id)
-            }
-            return .tasks(filter: nil)
+            return resolveTasks(pathComponents)
         case "events":
-            guard pathComponents.count > 1, let id = UUID(uuidString: pathComponents[1]) else {
-                return nil
-            }
-            return .event(id)
+            return resolveEvent(pathComponents)
         case "approvals":
-            if pathComponents.count > 1, let id = UUID(uuidString: pathComponents[1]) {
-                return .approval(id)
-            }
-            return .approvals
+            return resolveApprovals(pathComponents)
         case "memory":
             return .memory
         case "insights":
@@ -65,13 +51,43 @@ public enum AppRoute: Hashable, Sendable, Codable {
         case "briefing":
             return .briefing
         case "capture":
-            let kind = pathComponents.count > 1
-                ? QuickCaptureKind(rawValue: pathComponents[1].lowercased()) ?? .task
-                : .task
-            return .quickCapture(kind)
+            return resolveCapture(pathComponents)
         default:
             return nil
         }
+    }
+
+    private static func resolveTasks(_ pathComponents: [String]) -> AppRoute {
+        guard pathComponents.count > 1 else { return .tasks(filter: nil) }
+        let token = pathComponents[1].lowercased()
+        if let filter = TasksFilter(rawValue: token) {
+            return .tasks(filter: filter)
+        }
+        if let id = UUID(uuidString: pathComponents[1]) {
+            return .task(id)
+        }
+        return .tasks(filter: nil)
+    }
+
+    private static func resolveEvent(_ pathComponents: [String]) -> AppRoute? {
+        guard pathComponents.count > 1, let id = UUID(uuidString: pathComponents[1]) else {
+            return nil
+        }
+        return .event(id)
+    }
+
+    private static func resolveApprovals(_ pathComponents: [String]) -> AppRoute {
+        if pathComponents.count > 1, let id = UUID(uuidString: pathComponents[1]) {
+            return .approval(id)
+        }
+        return .approvals
+    }
+
+    private static func resolveCapture(_ pathComponents: [String]) -> AppRoute {
+        let kind = pathComponents.count > 1
+            ? QuickCaptureKind(rawValue: pathComponents[1].lowercased()) ?? .task
+            : .task
+        return .quickCapture(kind)
     }
 }
 

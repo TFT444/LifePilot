@@ -13,7 +13,7 @@ final class QuickCaptureAndLoadableReferenceTests: XCTestCase {
         XCTAssertFalse(viewModel.isLoading)
     }
 
-    func testTasksViewModelLoadedFromDenseFixture() async throws {
+    func testTasksViewModelLoadedFromDenseFixture() async {
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         let store = FakeTasks(seed: PreviewFixturesProxy.dense(relativeTo: now))
         let viewModel = TasksViewModel(taskStore: store, clock: FixedClock(now))

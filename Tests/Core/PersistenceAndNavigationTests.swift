@@ -83,6 +83,7 @@ final class IntegrationProtocolTests: XCTestCase {
 
     func testCloudSyncDisabledByDefault() async {
         let sync = DisabledCloudSyncIntegration()
-        await XCTAssertFalse(sync.isSyncEnabled())
+        let enabled = await sync.isSyncEnabled()
+        XCTAssertFalse(enabled)
     }
 }
