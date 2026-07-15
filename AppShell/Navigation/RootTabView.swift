@@ -1,11 +1,16 @@
+import LifePilotCore
 import LifePilotDesignSystem
 import LifePilotFeatures
+import LifePilotServices
 import SwiftUI
 
-/// Root tabs. Each tab owns an independent `NavigationStack`.
+/// Root tabs with universal quick capture (#36).
 public struct RootTabView: View {
     private let dependencies: AppDependencies
     @State private var selectedTab: AppTab = .home
+    @State private var isCapturing = false
+    @State private var captureKind: AppRoute.QuickCaptureKind = .task
+    @State private var captureTitle = ""
 
     public init(dependencies: AppDependencies) {
         self.dependencies = dependencies
@@ -24,6 +29,33 @@ public struct RootTabView: View {
             }
         }
         .tint(Color.LifePilot.accentEnd)
+        .overlay(alignment: .bottomTrailing) {
+            Button {
+                captureKind = .task
+                isCapturing = true
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 44))
+                    .symbolRenderingMode(.hierarchical)
+                    .padding(.trailing, Spacing.lg)
+                    .padding(.bottom, Spacing.xl)
+            }
+            .accessibilityLabel("Quick capture")
+        }
+        .sheet(isPresented: $isCapturing) {
+            QuickCaptureView(
+                title: $captureTitle,
+                kind: captureKind,
+                onSubmit: {
+                    Task { await submitCapture() }
+                },
+                onCancel: {
+                    isCapturing = false
+                    captureTitle = ""
+                }
+            )
+            .presentationDetents([.medium])
+        }
     }
 
     @ViewBuilder
@@ -46,6 +78,32 @@ public struct RootTabView: View {
                 preferenceStore: dependencies.preferenceStore,
                 actionExecutor: dependencies.actionExecutor
             )
+        }
+    }
+
+    private func submitCapture() async {
+        let title = captureTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { return }
+        do {
+            switch captureKind {
+            case .task, .reminder:
+                try await dependencies.taskStore.save(
+                    TaskItem(title: title, dueDate: Date().addingTimeInterval(3600))
+                )
+            case .event:
+                let start = Date().addingTimeInterval(3600)
+                try await dependencies.eventStore.save(
+                    CalendarEvent(
+                        title: title,
+                        startDate: start,
+                        endDate: start.addingTimeInterval(1800)
+                    )
+                )
+            }
+            isCapturing = false
+            captureTitle = ""
+        } catch {
+            // Keep sheet open so the user can retry; toast lands in a later polish pass.
         }
     }
 }

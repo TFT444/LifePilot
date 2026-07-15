@@ -1,7 +1,7 @@
 # LifePilot Implementation Status
 
-**Branch:** `cursor/daily-life-mvp-4d5a`  
-**Base:** `origin/develop` + merged `cursor/sync-main-develop-4d5a` (architecture fixes)  
+**Branch:** `cursor/issues-today-4d5a`  
+**Base:** `origin/develop` + daily-life MVP + issues #24–#38 delivery  
 **Last updated:** 2026-07-15  
 **Environment:** Cloud agent (Linux). `swift` / Xcode not available locally — verification via GitHub Actions (macOS).
 
@@ -57,8 +57,12 @@
 - [x] Expand Core models: Task (subtasks/tags/recurrence), Event/Shift, Timeline, Evidence, Recommendation/Approval, Preference/Memory, Permission state
 - [x] Store / Clock / ID / Executor protocols
 - [x] In-memory persistence for LifePilot-owned state (SwiftData adapter pending)
-- [ ] App launch / onboarding persistence wired end-to-end
+- [x] App launch / onboarding persistence wired end-to-end
 - [x] Unit tests for planning, approvals, stores
+- [x] Schema migration harness + docs (`docs/data/SWIFTDATA_PERSISTENCE.md`) — #34
+- [x] Integration capability protocols + denied doubles — #37
+- [x] Typed `AppRoute` + quick capture — #36
+- [x] Loadable state + fixtures/reference tests — #38
 
 ### Stage 4 — Tasks / reminders / notifications
 

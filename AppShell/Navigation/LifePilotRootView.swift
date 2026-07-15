@@ -1,17 +1,28 @@
+import LifePilotCore
 import LifePilotFeatures
+import LifePilotServices
 import SwiftUI
 
-/// The top-level view controlling the Splash → Onboarding → Main app
-/// transition. This is the single entry point the thin Xcode app target
-/// (`App/`) is expected to instantiate — see `docs/ARCHITECTURE.md`'s note
-/// that `Package.swift` builds the first buildable units ahead of the full
-/// iOS app wrapper.
+/// Top-level Splash → Onboarding → Main with persisted launch state (#35).
 public struct LifePilotRootView: View {
     @State private var phase: LaunchPhase = .splash
+    @State private var launchError: String?
     private let dependencies: AppDependencies
+    private let launchStore: any LaunchStateStoring
 
     public init(dependencies: AppDependencies = .live) {
         self.dependencies = dependencies
+        launchStore = PreferenceBackedLaunchStore(
+            preferenceStore: dependencies.preferenceStore
+        )
+    }
+
+    public init(
+        dependencies: AppDependencies,
+        launchStore: any LaunchStateStoring
+    ) {
+        self.dependencies = dependencies
+        self.launchStore = launchStore
     }
 
     public var body: some View {
@@ -21,21 +32,49 @@ public struct LifePilotRootView: View {
                 SplashView()
             case .onboarding:
                 OnboardingView(onFinish: {
-                    withAnimation(.easeInOut(duration: 0.35)) {
-                        phase = .main
-                    }
+                    Task { await completeOnboarding() }
                 })
             case .main:
                 RootTabView(dependencies: dependencies)
             }
         }
+        .overlay(alignment: .bottom) {
+            if let launchError {
+                Text(launchError)
+                    .font(.caption)
+                    .padding()
+                    .background(.ultraThinMaterial)
+            }
+        }
         .task {
-            // A brief, deliberate splash duration — long enough to read as
-            // intentional, short enough not to feel like a delay. See
-            // docs/DESIGN_SYSTEM.md's Motion principle.
-            try? await Task.sleep(for: .seconds(1.2))
+            await boot()
+        }
+    }
+
+    private func boot() async {
+        try? await Task.sleep(for: .seconds(1.2))
+        let state = await launchStore.load()
+        withAnimation(.easeInOut(duration: 0.35)) {
+            phase = state.shouldShowOnboarding ? .onboarding : .main
+        }
+    }
+
+    private func completeOnboarding() async {
+        do {
+            try await launchStore.save(
+                LaunchState(
+                    hasCompletedOnboarding: true,
+                    onboardingVersion: LaunchState.currentOnboardingVersion,
+                    isLocalOnlyMode: true
+                )
+            )
             withAnimation(.easeInOut(duration: 0.35)) {
-                phase = .onboarding
+                phase = .main
+            }
+        } catch {
+            launchError = "Could not save onboarding progress. Continuing locally."
+            withAnimation(.easeInOut(duration: 0.35)) {
+                phase = .main
             }
         }
     }
