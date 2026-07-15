@@ -12,7 +12,6 @@ For the product philosophy behind these phases, see [docs/PRODUCT_VISION.md](doc
 
 > **Scope correction (2026-07-15):** Finance, shopping/commerce, and HealthKit medical intelligence are **removed** from the shipping MVP. Email content ingestion and automatic sending are not MVP dependencies. See `docs/IMPLEMENTATION_STATUS.md` and `.cursor/rules/lifepilot-mvp.mdc`. Historical Phase 6 agent roster language below is superseded for daily-life MVP delivery.
 
-
 ## How to read this document
 
 Each phase follows the same template:

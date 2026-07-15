@@ -103,8 +103,11 @@ public struct TaskList: Identifiable, Hashable, Sendable, Codable {
         self.sortOrder = sortOrder
     }
 
+    public static let inboxID =
+        UUID(uuidString: "00000000-0000-0000-0000-000000000001") ?? UUID()
+
     public static let inbox = TaskList(
-        id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+        id: inboxID,
         name: "Inbox",
         symbolName: "tray.fill",
         isSystem: true,

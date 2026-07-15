@@ -42,7 +42,10 @@ public struct RootTabView: View {
         case .insights:
             InsightsView()
         case .settings:
-            SettingsView()
+            SettingsView(
+                preferenceStore: dependencies.preferenceStore,
+                actionExecutor: dependencies.actionExecutor
+            )
         }
     }
 }

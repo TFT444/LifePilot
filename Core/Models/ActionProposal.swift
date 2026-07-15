@@ -34,7 +34,7 @@ public struct ActionProposal: Identifiable, Hashable, Sendable, Codable {
         self.riskLevel = riskLevel
         self.createdAt = createdAt
         self.expiresAt = expiresAt
-        self.parameterFingerprint = Self.fingerprint(parameters)
+        parameterFingerprint = ActionProposal.fingerprint(parameters)
     }
 
     public static func fingerprint(_ parameters: [String: String]) -> String {
@@ -98,7 +98,7 @@ public struct ApprovalRecord: Identifiable, Hashable, Sendable, Codable {
     }
 }
 
-/// Append-only audit entry. Must never store secrets or raw private content payloads.
+/// Append-only audit entry. Never store secrets or raw private payloads.
 public struct AuditEvent: Identifiable, Hashable, Sendable, Codable {
     public let id: UUID
     public var timestamp: Date

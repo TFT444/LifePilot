@@ -1,6 +1,6 @@
 /// Identifies which capability produced a signal, prediction, or
 /// recommendation. Daily-life MVP scope only — no finance, shopping, or health.
-public enum AgentKind: String, CaseIterable, Hashable, Sendable {
+public enum AgentKind: String, CaseIterable, Hashable, Sendable, Codable {
     case calendar
     case reminder
     case task

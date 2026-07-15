@@ -1,48 +1,68 @@
 import Foundation
+import LifePilotCore
+import Observation
 
-/// Owns the Settings screen's state. Architecture only in this phase —
-/// no settings actually persist yet; see docs/MASTER_ROADMAP.md Phase 4
-/// for the full Settings deliverable.
+/// Persisted settings and privacy controls for LifePilot-owned data.
 @Observable
 @MainActor
 public final class SettingsViewModel {
-    public var sections: [SettingsSection] = SettingsSection.placeholderSections
+    public private(set) var preferences: UserPreferences
+    public private(set) var memoryCount: Int = 0
+    public private(set) var exportMessage: String?
+    public private(set) var connections: [ConnectionCapability]
 
-    public init() {}
-}
+    private let preferenceStore: any PreferenceStore
 
-/// A grouped section of settings rows, e.g. "Account" or "Privacy."
-public struct SettingsSection: Identifiable {
-    public let id: String
-    public let title: String
-    public let rows: [SettingsRow]
+    public init(preferenceStore: any PreferenceStore) {
+        self.preferenceStore = preferenceStore
+        preferences = UserPreferences()
+        connections = [
+            ConnectionCapability(id: "calendar", displayName: "Calendar", state: .notRequested),
+            ConnectionCapability(id: "reminders", displayName: "Reminders", state: .notRequested),
+            ConnectionCapability(id: "notifications", displayName: "Notifications", state: .notRequested),
+            ConnectionCapability(id: "location", displayName: "Location", state: .notRequested),
+            ConnectionCapability(id: "weather", displayName: "Weather", state: .notRequested),
+            ConnectionCapability(id: "cloudSync", displayName: "Cloud Sync", state: .notRequested),
+        ]
+    }
 
-    public static let placeholderSections: [SettingsSection] = [
-        SettingsSection(id: "account", title: "Account", rows: [
-            SettingsRow(id: "profile", symbolName: "person.crop.circle.fill", title: "Profile"),
-            SettingsRow(id: "connected", symbolName: "link", title: "Connected Apps"),
-        ]),
-        SettingsSection(id: "privacy", title: "Privacy & Security", rows: [
-            SettingsRow(id: "approvals", symbolName: "checkmark.shield.fill", title: "Approval Preferences"),
-            SettingsRow(id: "data", symbolName: "lock.fill", title: "Data & Privacy"),
-        ]),
-        SettingsSection(id: "about", title: "About", rows: [
-            SettingsRow(id: "version", symbolName: "info.circle.fill", title: "Version", detail: "0.1.0"),
-        ]),
-    ]
-}
+    public func load() async {
+        preferences = await preferenceStore.loadPreferences()
+        memoryCount = await preferenceStore.allMemory().count
+    }
 
-/// A single row within a `SettingsSection`.
-public struct SettingsRow: Identifiable {
-    public let id: String
-    public let symbolName: String
-    public let title: String
-    public let detail: String?
+    public func setOnboardingCompleted(_ value: Bool) async throws {
+        preferences.onboardingCompleted = value
+        try await preferenceStore.savePreferences(preferences)
+    }
 
-    public init(id: String, symbolName: String, title: String, detail: String? = nil) {
-        self.id = id
-        self.symbolName = symbolName
-        self.title = title
-        self.detail = detail
+    public func setSensitivePreviews(_ enabled: Bool) async throws {
+        preferences.sensitiveNotificationPreviews = enabled
+        try await preferenceStore.savePreferences(preferences)
+    }
+
+    public func setBriefingHour(_ hour: Int) async throws {
+        preferences.briefingHour = min(23, max(0, hour))
+        try await preferenceStore.savePreferences(preferences)
+    }
+
+    public func exportData() async {
+        do {
+            let data = try await preferenceStore.exportAll()
+            exportMessage = "Exported \(data.count) bytes of LifePilot-owned data."
+        } catch {
+            exportMessage = "Export failed."
+        }
+    }
+
+    public func deleteAllData() async {
+        do {
+            try await preferenceStore.deleteAllLifePilotData()
+            preferences = await preferenceStore.loadPreferences()
+            memoryCount = 0
+            exportMessage = "All LifePilot-owned local data deleted."
+        } catch {
+            exportMessage = "Delete failed."
+        }
     }
 }

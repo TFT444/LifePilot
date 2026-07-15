@@ -35,7 +35,7 @@ public struct TasksView: View {
             .padding(.horizontal, Spacing.lg)
             .padding(.bottom, Spacing.sm)
 
-            if viewModel.tasks.isEmpty && !viewModel.isLoading {
+            if viewModel.tasks.isEmpty, !viewModel.isLoading {
                 EmptyStateView(
                     symbolName: "checkmark.circle",
                     message: "No tasks here — capture something you need to do today."
@@ -48,7 +48,9 @@ public struct TasksView: View {
                     } label: {
                         HStack(alignment: .top, spacing: Spacing.sm) {
                             Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(task.isCompleted ? Color.LifePilot.signalSuccess : Color.LifePilot.textSecondary)
+                                .foregroundStyle(task.isCompleted ? Color.LifePilot.signalSuccess : Color.LifePilot
+                                    .textSecondary
+                                )
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(task.title)
                                     .font(.body)

@@ -1,6 +1,6 @@
+import LifePilotCore
 import XCTest
 @testable import LifePilotServices
-import LifePilotCore
 
 final class InMemoryStoreTests: XCTestCase {
     func testTaskStoreRoundTrip() async throws {

@@ -44,7 +44,7 @@ public struct DaySignal: Identifiable, Hashable, Sendable {
 }
 
 /// How fresh the underlying observation is — surfaced on every card.
-public enum DataFreshness: String, Sendable, CaseIterable {
+public enum DataFreshness: String, Sendable, CaseIterable, Codable {
     case live
     case cached
     case stale

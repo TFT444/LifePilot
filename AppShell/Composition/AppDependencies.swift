@@ -1,3 +1,4 @@
+import Foundation
 import LifePilotCore
 import LifePilotGhostBrain
 import LifePilotMocks
@@ -12,6 +13,7 @@ public struct AppDependencies: Sendable {
     public let eventStore: any EventStore
     public let preferenceStore: any PreferenceStore
     public let planningEngine: any PlanningEngine
+    public let actionExecutor: any ActionExecuting
 
     public init(
         ghostBrain: GhostBrainServing,
@@ -19,7 +21,8 @@ public struct AppDependencies: Sendable {
         taskStore: any TaskStore,
         eventStore: any EventStore,
         preferenceStore: any PreferenceStore,
-        planningEngine: any PlanningEngine = DeterministicPlanningEngine()
+        planningEngine: any PlanningEngine = DeterministicPlanningEngine(),
+        actionExecutor: any ActionExecuting
     ) {
         self.ghostBrain = ghostBrain
         self.timelineProvider = timelineProvider
@@ -27,6 +30,7 @@ public struct AppDependencies: Sendable {
         self.eventStore = eventStore
         self.preferenceStore = preferenceStore
         self.planningEngine = planningEngine
+        self.actionExecutor = actionExecutor
     }
 
     /// Offline-capable default for the daily-life MVP: seeded in-memory stores
@@ -36,13 +40,18 @@ public struct AppDependencies: Sendable {
         let events = MockCalendar.events()
         let taskStore = InMemoryTaskStore(seed: tasks)
         let eventStore = InMemoryEventStore(seed: events)
+        let executor = LocalActionExecutor(taskStore: taskStore, eventStore: eventStore)
         return AppDependencies(
             ghostBrain: MockRecommendationProvider(),
-            timelineProvider: StoreBackedTimelineProvider(taskStore: taskStore, eventStore: eventStore),
+            timelineProvider: StoreBackedTimelineProvider(
+                taskStore: taskStore,
+                eventStore: eventStore
+            ),
             taskStore: taskStore,
             eventStore: eventStore,
             preferenceStore: InMemoryPreferenceStore(),
-            planningEngine: DeterministicPlanningEngine()
+            planningEngine: DeterministicPlanningEngine(),
+            actionExecutor: executor
         )
     }
 }
