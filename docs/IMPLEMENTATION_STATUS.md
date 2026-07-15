@@ -50,7 +50,7 @@
 - [x] Strip finance/shopping/health from enums, signals, mocks, demos
 - [x] Rewrite README / architecture / roadmap / security language
 - [x] Finance-removal regression scan test
-- [ ] Verify package still builds on CI (in progress)
+- [x] Verify package still builds on CI
 
 ### Stage 3 — Domain contracts + offline persistence
 
@@ -82,12 +82,12 @@
 
 - [x] ActionProposal / Approval / AuditEvent models
 - [x] Revalidation + idempotent executor + security policy tests
-- [ ] Approvals UI wired into navigation
+- [x] Approvals UI wired into Settings navigation
 - [ ] No bypass paths remain (review AppShell)
 
 ### Stage 8 — Memory, insights, search, settings, privacy
 
-- [x] Preference store + Settings export/delete (basic)
+- [x] Preference store + Settings export/delete + Approvals entry
 - [ ] Memory & Insights evidence UI
 - [ ] Offline search
 
@@ -119,7 +119,8 @@
 | When | What ran | Result |
 |---|---|---|
 | 2026-07-15 | Local `swift` / `xcodebuild` | **Unavailable** on agent host |
-| 2026-07-15 | GHA on PR #39 (first push) | Build failed (Codable EvidenceItem); lint MD022/MD032 |
+| 2026-07-15 | GHA PR #39 early pushes | Build/lint failures fixed iteratively |
+| 2026-07-15 | GHA after `9dacae4` | **All green** (Build, Lint, Format, Unit Tests, CI Status) |
 
 ---
 
