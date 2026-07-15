@@ -45,7 +45,8 @@ public struct MockRecommendationProvider: GhostBrainServing {
             ),
             RecommendationModel(
                 title: "Block 45 minutes for the board deck",
-                reasoning: "High-priority task is due this afternoon and you still have an open focus window after lunch.",
+                reasoning: "High-priority task is due this afternoon and you still have "
+                    + "an open focus window after lunch.",
                 sourceAgent: .task,
                 riskLevel: .low,
                 urgency: .normal,
