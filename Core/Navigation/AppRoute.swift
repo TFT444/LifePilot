@@ -28,28 +28,29 @@ public enum AppRoute: Hashable, Sendable, Codable {
         case event
     }
 
+    private static let simpleRoutes: [String: AppRoute] = [
+        "home": .home,
+        "": .home,
+        "timeline": .timeline,
+        "memory": .memory,
+        "insights": .insights,
+        "settings": .settings,
+        "briefing": .briefing,
+    ]
+
     /// Parses a limited deep-link path such as `lifepilot://tasks/today`.
     public static func resolve(pathComponents: [String]) -> AppRoute? {
         guard let first = pathComponents.first?.lowercased() else { return nil }
+        if let simple = simpleRoutes[first] {
+            return simple
+        }
         switch first {
-        case "home", "":
-            return .home
-        case "timeline":
-            return .timeline
         case "tasks":
             return resolveTasks(pathComponents)
         case "events":
             return resolveEvent(pathComponents)
         case "approvals":
             return resolveApprovals(pathComponents)
-        case "memory":
-            return .memory
-        case "insights":
-            return .insights
-        case "settings":
-            return .settings
-        case "briefing":
-            return .briefing
         case "capture":
             return resolveCapture(pathComponents)
         default:
