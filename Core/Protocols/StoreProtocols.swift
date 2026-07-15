@@ -7,13 +7,22 @@ public protocol ClockProviding: Sendable {
 
 public struct SystemClock: ClockProviding {
     public init() {}
-    public func now() -> Date { Date() }
+
+    public func now() -> Date {
+        Date()
+    }
 }
 
 public struct FixedClock: ClockProviding {
     private let instant: Date
-    public init(_ instant: Date) { self.instant = instant }
-    public func now() -> Date { instant }
+
+    public init(_ instant: Date) {
+        self.instant = instant
+    }
+
+    public func now() -> Date {
+        instant
+    }
 }
 
 /// Identifier factory for deterministic tests.
@@ -23,7 +32,10 @@ public protocol IdentifierProviding: Sendable {
 
 public struct SystemIdentifierProvider: IdentifierProviding {
     public init() {}
-    public func next() -> UUID { UUID() }
+
+    public func next() -> UUID {
+        UUID()
+    }
 }
 
 /// Offline-first task store.

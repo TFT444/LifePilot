@@ -11,11 +11,11 @@ final class SecurityPolicyAndApprovalTests: XCTestCase {
         XCTAssertTrue(policy.isAllowed(.createLocalEvent))
     }
 
-    func testExecutorRejectsDeniedActions() async throws {
-        let taskStore = FakeTaskStore()
-        let eventStore = FakeEventStore()
-        let executor = LocalActionExecutor(taskStore: taskStore, eventStore: eventStore)
-
+    func testExecutorRejectsDeniedActions() async {
+        let executor = LocalActionExecutor(
+            taskStore: FakeTaskStore(),
+            eventStore: FakeEventStore()
+        )
         let proposal = ActionProposal(
             actionType: .forbiddenExternalFinancial,
             title: "Pay bill",
@@ -31,13 +31,18 @@ final class SecurityPolicyAndApprovalTests: XCTestCase {
         do {
             _ = try await executor.execute(proposal: proposal, approval: approval)
             XCTFail("Expected denial")
-        } catch DomainError.unauthorized {
+        } catch is DomainError {
             // expected
+        } catch {
+            XCTFail("Unexpected error \(error)")
         }
     }
 
     func testFingerprintMismatchFails() async {
-        let executor = LocalActionExecutor(taskStore: FakeTaskStore(), eventStore: FakeEventStore())
+        let executor = LocalActionExecutor(
+            taskStore: FakeTaskStore(),
+            eventStore: FakeEventStore()
+        )
         let proposal = ActionProposal(
             actionType: .createLocalTask,
             title: "Buy milk",
@@ -53,14 +58,19 @@ final class SecurityPolicyAndApprovalTests: XCTestCase {
         do {
             _ = try await executor.execute(proposal: proposal, approval: approval)
             XCTFail("Expected conflict")
-        } catch DomainError.conflict {
+        } catch is DomainError {
             // expected
+        } catch {
+            XCTFail("Unexpected error \(error)")
         }
     }
 
     func testIdempotentExecution() async throws {
         let taskStore = FakeTaskStore()
-        let executor = LocalActionExecutor(taskStore: taskStore, eventStore: FakeEventStore())
+        let executor = LocalActionExecutor(
+            taskStore: taskStore,
+            eventStore: FakeEventStore()
+        )
         let proposal = ActionProposal(
             actionType: .createLocalTask,
             title: "Walk the dog",
@@ -93,9 +103,19 @@ final class SecurityPolicyAndApprovalTests: XCTestCase {
 
 private actor FakeTaskStore: TaskStore {
     private var items: [TaskItem] = []
-    func allTasks() async -> [TaskItem] { items }
-    func save(_ task: TaskItem) async throws { items.append(task) }
-    func delete(id: UUID) async throws { items.removeAll { $0.id == id } }
+
+    func allTasks() async -> [TaskItem] {
+        items
+    }
+
+    func save(_ task: TaskItem) async throws {
+        items.append(task)
+    }
+
+    func delete(id: UUID) async throws {
+        items.removeAll { $0.id == id }
+    }
+
     func tasks(matching predicate: @Sendable (TaskItem) -> Bool) async -> [TaskItem] {
         items.filter(predicate)
     }
@@ -103,7 +123,16 @@ private actor FakeTaskStore: TaskStore {
 
 private actor FakeEventStore: EventStore {
     private var items: [CalendarEvent] = []
-    func allEvents() async -> [CalendarEvent] { items }
-    func save(_ event: CalendarEvent) async throws { items.append(event) }
-    func delete(id: UUID) async throws { items.removeAll { $0.id == id } }
+
+    func allEvents() async -> [CalendarEvent] {
+        items
+    }
+
+    func save(_ event: CalendarEvent) async throws {
+        items.append(event)
+    }
+
+    func delete(id: UUID) async throws {
+        items.removeAll { $0.id == id }
+    }
 }

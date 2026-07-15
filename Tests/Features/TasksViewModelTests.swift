@@ -6,7 +6,10 @@ import XCTest
 final class TasksViewModelTests: XCTestCase {
     func testQuickCaptureAddsTask() async throws {
         let store = FakeTasks()
-        let viewModel = TasksViewModel(taskStore: store, clock: FixedClock(Date(timeIntervalSince1970: 1_700_000_000)))
+        let viewModel = TasksViewModel(
+            taskStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_700_000_000))
+        )
         viewModel.draftTitle = "Buy oat milk"
         try await viewModel.quickCapture()
         await viewModel.setFilter(.inbox)
@@ -32,7 +35,10 @@ private actor FakeTasks: TaskStore {
         items = seed
     }
 
-    func allTasks() async -> [TaskItem] { items }
+    func allTasks() async -> [TaskItem] {
+        items
+    }
+
     func save(_ task: TaskItem) async throws {
         if let index = items.firstIndex(where: { $0.id == task.id }) {
             items[index] = task

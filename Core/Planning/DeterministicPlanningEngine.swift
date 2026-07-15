@@ -105,29 +105,43 @@ public struct DeterministicPlanningEngine: PlanningEngine {
         for task in tasks where !task.isCompleted {
             guard let due = task.dueDate else { continue }
             if due < now {
-                results.append(taskFinding(
-                    kind: .overdueTask,
-                    title: "Overdue: \(task.title)",
-                    detail: "Was due \(due.formatted()).",
-                    summary: "Task past due",
-                    task: task,
-                    now: now,
-                    confidence: 1.0,
-                    risk: .high,
-                    suggestion: "Complete, snooze, or reschedule"
-                ))
+                results.append(
+                    PlanningFinding(
+                        kind: .overdueTask,
+                        title: "Overdue: \(task.title)",
+                        detail: "Was due \(due.formatted()).",
+                        evidence: [
+                            EvidenceItem(
+                                summary: "Task past due",
+                                sourceAgent: .task,
+                                observedAt: now,
+                                relatedRecordIDs: [task.id]
+                            ),
+                        ],
+                        confidence: 1.0,
+                        riskLevel: .high,
+                        suggestedActionSummary: "Complete, snooze, or reschedule"
+                    )
+                )
             } else if due.timeIntervalSince(now) < 3 * 3600 {
-                results.append(taskFinding(
-                    kind: .atRiskTask,
-                    title: "Due soon: \(task.title)",
-                    detail: "Due within three hours.",
-                    summary: "Due within 3 hours",
-                    task: task,
-                    now: now,
-                    confidence: 0.8,
-                    risk: .medium,
-                    suggestion: "Block focus time"
-                ))
+                results.append(
+                    PlanningFinding(
+                        kind: .atRiskTask,
+                        title: "Due soon: \(task.title)",
+                        detail: "Due within three hours.",
+                        evidence: [
+                            EvidenceItem(
+                                summary: "Due within 3 hours",
+                                sourceAgent: .task,
+                                observedAt: now,
+                                relatedRecordIDs: [task.id]
+                            ),
+                        ],
+                        confidence: 0.8,
+                        riskLevel: .medium,
+                        suggestedActionSummary: "Block focus time"
+                    )
+                )
             }
         }
         return results
@@ -211,7 +225,7 @@ public struct DeterministicPlanningEngine: PlanningEngine {
             PlanningFinding(
                 kind: .impossibleWorkload,
                 title: "Day looks overloaded",
-                detail: "Estimated \(openTaskMinutes + remainingEventMinutes) minutes of work "
+                detail: "Estimated \(openTaskMinutes + remainingEventMinutes) minutes "
                     + "against ~\(availableMinutes) available.",
                 evidence: [
                     EvidenceItem(
@@ -225,34 +239,5 @@ public struct DeterministicPlanningEngine: PlanningEngine {
                 suggestedActionSummary: "Defer low-priority tasks"
             ),
         ]
-    }
-
-    private static func taskFinding(
-        kind: PlanningFinding.Kind,
-        title: String,
-        detail: String,
-        summary: String,
-        task: TaskItem,
-        now: Date,
-        confidence: Double,
-        risk: RiskLevel,
-        suggestion: String
-    ) -> PlanningFinding {
-        PlanningFinding(
-            kind: kind,
-            title: title,
-            detail: detail,
-            evidence: [
-                EvidenceItem(
-                    summary: summary,
-                    sourceAgent: .task,
-                    observedAt: now,
-                    relatedRecordIDs: [task.id]
-                ),
-            ],
-            confidence: confidence,
-            riskLevel: risk,
-            suggestedActionSummary: suggestion
-        )
     }
 }

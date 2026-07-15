@@ -27,13 +27,17 @@ final class InMemoryStoreTests: XCTestCase {
         XCTAssertTrue(memory.isEmpty)
     }
 
-    func testStoreBackedTimelineMergesEventsAndTasks() async throws {
+    func testStoreBackedTimelineMergesEventsAndTasks() async {
         let now = Date()
         let tasks = InMemoryTaskStore(seed: [
             TaskItem(title: "Due soon", dueDate: now.addingTimeInterval(600)),
         ])
         let events = InMemoryEventStore(seed: [
-            CalendarEvent(title: "Meeting", startDate: now, endDate: now.addingTimeInterval(1800)),
+            CalendarEvent(
+                title: "Meeting",
+                startDate: now,
+                endDate: now.addingTimeInterval(1800)
+            ),
         ])
         let provider = StoreBackedTimelineProvider(taskStore: tasks, eventStore: events)
         let entries = await provider.loadEntries(relativeTo: now)

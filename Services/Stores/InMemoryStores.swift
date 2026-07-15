@@ -68,7 +68,9 @@ public actor InMemoryPreferenceStore: PreferenceStore {
         self.preferences = preferences
     }
 
-    public func loadPreferences() async -> UserPreferences { preferences }
+    public func loadPreferences() async -> UserPreferences {
+        preferences
+    }
 
     public func savePreferences(_ preferences: UserPreferences) async throws {
         self.preferences = preferences
@@ -111,8 +113,18 @@ public actor InMemoryPreferenceStore: PreferenceStore {
 public struct NoOpNotificationScheduler: NotificationScheduling {
     public init() {}
 
-    public func schedule(id _: String, title _: String, body _: String, fireDate _: Date) async throws {}
-    public func cancel(id _: String) async throws {}
+    public func schedule(
+        id _: String,
+        title _: String,
+        body _: String,
+        fireDate _: Date
+    ) async throws {
+        // No-op for unit tests and entitlement-free builds.
+    }
+
+    public func cancel(id _: String) async throws {
+        // No-op
+    }
 }
 
 /// Builds a unified timeline from task and event stores.
