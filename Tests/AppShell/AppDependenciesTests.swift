@@ -1,3 +1,4 @@
+import LifePilotCore
 import XCTest
 @testable import LifePilotAppShell
 @testable import LifePilotServices
