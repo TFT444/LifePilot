@@ -1,6 +1,7 @@
 import Foundation
 
-/// Supplies unified timeline entries for the Timeline feature.
+/// Supplies unified timeline entries for the Timeline feature. Implementations
+/// live in `Services` (store-backed / integrations) or `Mocks` (previews/tests).
 public protocol TimelineProviding: Sendable {
     func loadEntries(relativeTo now: Date) async -> [TimelineEntry]
 }
