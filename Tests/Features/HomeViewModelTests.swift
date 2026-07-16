@@ -15,15 +15,15 @@ final class HomeViewModelTests: XCTestCase {
                 title: "Standup",
                 startDate: now.addingTimeInterval(3600),
                 endDate: now.addingTimeInterval(5400),
-                eventKind: .meeting,
-                context: .work
+                context: .work,
+                eventKind: .meeting
             ),
             CalendarEvent(
                 title: "Overlap",
                 startDate: now.addingTimeInterval(4000),
                 endDate: now.addingTimeInterval(7200),
-                eventKind: .meeting,
-                context: .work
+                context: .work,
+                eventKind: .meeting
             ),
         ])
         let preferences = InMemoryPreferenceStore()

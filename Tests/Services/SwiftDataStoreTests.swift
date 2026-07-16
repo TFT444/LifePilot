@@ -17,7 +17,7 @@ final class SwiftDataStoreTests: XCTestCase {
     func testPreferencesAndOnboardingPersist() async throws {
         let controller = try PersistenceController(inMemory: true)
         let store = SwiftDataPreferenceStore(container: controller.container)
-        var preferences = UserPreferences(onboardingCompleted: true, briefingHour: 6)
+        let preferences = UserPreferences(onboardingCompleted: true, briefingHour: 6)
         try await store.savePreferences(preferences)
         let reloaded = await store.loadPreferences()
         XCTAssertTrue(reloaded.onboardingCompleted)
