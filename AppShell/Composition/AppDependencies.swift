@@ -50,7 +50,7 @@ public struct AppDependencies: Sendable {
     /// Under XCTest / SPM test host, uses in-memory SwiftData and no-op system
     /// adapters because `UNUserNotificationCenter` / EventKit require an app bundle.
     public static var live: AppDependencies {
-        let testing = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+        let testing = Self.isRunningUnitTests
         let controller: PersistenceController
         if testing, let memory = try? PersistenceController(inMemory: true) {
             controller = memory
@@ -84,6 +84,14 @@ public struct AppDependencies: Sendable {
                 ? UnavailableRemindersIntegration()
                 : EventKitRemindersIntegration()
         )
+    }
+
+    private static var isRunningUnitTests: Bool {
+        let process = ProcessInfo.processInfo
+        if process.processName == "xctest" { return true }
+        if process.environment["XCTestConfigurationFilePath"] != nil { return true }
+        if process.environment["XCTestBundlePath"] != nil { return true }
+        return NSClassFromString("XCTestCase") != nil
     }
 
     /// Preview / demo wiring with seeded in-memory stores.
