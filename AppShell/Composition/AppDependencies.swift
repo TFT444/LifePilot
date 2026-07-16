@@ -88,9 +88,15 @@ public struct AppDependencies: Sendable {
 
     private static var isRunningUnitTests: Bool {
         let process = ProcessInfo.processInfo
-        if process.processName == "xctest" { return true }
-        if process.environment["XCTestConfigurationFilePath"] != nil { return true }
-        if process.environment["XCTestBundlePath"] != nil { return true }
+        if process.processName == "xctest" {
+            return true
+        }
+        if process.environment["XCTestConfigurationFilePath"] != nil {
+            return true
+        }
+        if process.environment["XCTestBundlePath"] != nil {
+            return true
+        }
         return NSClassFromString("XCTestCase") != nil
     }
 

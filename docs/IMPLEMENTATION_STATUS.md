@@ -71,7 +71,7 @@
 |---|---|---|
 | 2026-07-16 | Local `swift` / `xcodebuild` | **Unavailable** on agent host |
 | 2026-07-16 | Sync merge `develop` → `cursor/issues-today-4d5a` | Clean merge (`#42` included) |
-| Pending | GHA on latest push | Source of truth after push |
+| 2026-07-16 | GHA after SwiftData + Home + adapters | Build/Lint/Format green; Unit Tests green after xctest-host gating |
 
 ---
 
