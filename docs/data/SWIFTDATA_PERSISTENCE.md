@@ -51,13 +51,15 @@ Closes design acceptance for issue [#34](https://github.com/TFT444/lifepilot/iss
 |---|---|---|
 | Domain models | `Core/Models/*` | Done |
 | Protocols | `Core/Protocols/StoreProtocols.swift` | Done |
-| In-memory stores | `Services/Stores/InMemoryStores.swift` | Done |
-| Schema version + migration harness | `Core/Persistence/*` | Done (this issue) |
-| SwiftData `@Model` adapters | Planned behind `#if canImport(SwiftData)` | Scaffolded; full CloudKit sync later |
+| In-memory stores | `Services/Stores/InMemoryStores.swift` | Done (tests/previews) |
+| Schema version + migration harness | `Core/Persistence/*` | Done |
+| SwiftData `@Model` adapters | `Services/Persistence/*`, `Services/Stores/SwiftDataStores.swift` | Done for tasks/events/preferences/memory/approvals/audit |
+| CloudKit sync | Optional later | Not started |
 
 ## Acceptance
 
 - [x] Model supports MVP offline workflows via protocols + in-memory stores
+- [x] SwiftData production stores wired through `AppDependencies.live`
 - [x] Migration tests cover at least one schema upgrade harness step
 - [x] External identifiers are not unstable primary keys
 - [x] Sensitive fields and retention documented here

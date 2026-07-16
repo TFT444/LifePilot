@@ -62,17 +62,27 @@ public struct RootTabView: View {
     private func destination(for tab: AppTab) -> some View {
         switch tab {
         case .home:
-            HomeView(ghostBrain: dependencies.ghostBrain)
-                .navigationTitle("")
-                #if os(iOS)
-                .navigationBarTitleDisplayMode(.inline)
-                #endif
+            HomeView(
+                taskStore: dependencies.taskStore,
+                eventStore: dependencies.eventStore,
+                preferenceStore: dependencies.preferenceStore,
+                planningEngine: dependencies.planningEngine,
+                calendarIntegration: dependencies.calendarIntegration
+            )
+            .navigationTitle("")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
         case .timeline:
             TimelineView(timelineProvider: dependencies.timelineProvider)
         case .tasks:
             TasksView(taskStore: dependencies.taskStore)
         case .insights:
-            InsightsView()
+            InsightsView(
+                taskStore: dependencies.taskStore,
+                eventStore: dependencies.eventStore,
+                preferenceStore: dependencies.preferenceStore
+            )
         case .settings:
             SettingsView(
                 preferenceStore: dependencies.preferenceStore,
@@ -87,16 +97,18 @@ public struct RootTabView: View {
         do {
             switch captureKind {
             case .task, .reminder:
+                // Inbox capture — no arbitrary deadline unless the user sets one later.
                 try await dependencies.taskStore.save(
-                    TaskItem(title: title, dueDate: Date().addingTimeInterval(3600))
+                    TaskItem(title: title, listID: TaskList.inbox.id)
                 )
             case .event:
-                let start = Date().addingTimeInterval(3600)
+                // Default: starts in 30 minutes for 30 minutes — editable later.
+                let start = Date().addingTimeInterval(30 * 60)
                 try await dependencies.eventStore.save(
                     CalendarEvent(
                         title: title,
                         startDate: start,
-                        endDate: start.addingTimeInterval(1800)
+                        endDate: start.addingTimeInterval(30 * 60)
                     )
                 )
             }
@@ -109,5 +121,5 @@ public struct RootTabView: View {
 }
 
 #Preview {
-    RootTabView(dependencies: .live)
+    RootTabView(dependencies: .preview)
 }

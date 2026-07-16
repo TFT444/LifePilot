@@ -12,8 +12,12 @@ public struct AppDependencies: Sendable {
     public let taskStore: any TaskStore
     public let eventStore: any EventStore
     public let preferenceStore: any PreferenceStore
+    public let approvalStore: any ApprovalStore
     public let planningEngine: any PlanningEngine
     public let actionExecutor: any ActionExecuting
+    public let notificationScheduler: any NotificationScheduling
+    public let calendarIntegration: any CalendarIntegrating
+    public let remindersIntegration: any RemindersIntegrating
 
     public init(
         ghostBrain: GhostBrainServing,
@@ -21,25 +25,57 @@ public struct AppDependencies: Sendable {
         taskStore: any TaskStore,
         eventStore: any EventStore,
         preferenceStore: any PreferenceStore,
+        approvalStore: any ApprovalStore = InMemoryApprovalStore(),
         planningEngine: any PlanningEngine = DeterministicPlanningEngine(),
-        actionExecutor: any ActionExecuting
+        actionExecutor: any ActionExecuting,
+        notificationScheduler: any NotificationScheduling = NoOpNotificationScheduler(),
+        calendarIntegration: any CalendarIntegrating = UnavailableCalendarIntegration(),
+        remindersIntegration: any RemindersIntegrating = UnavailableRemindersIntegration()
     ) {
         self.ghostBrain = ghostBrain
         self.timelineProvider = timelineProvider
         self.taskStore = taskStore
         self.eventStore = eventStore
         self.preferenceStore = preferenceStore
+        self.approvalStore = approvalStore
         self.planningEngine = planningEngine
         self.actionExecutor = actionExecutor
+        self.notificationScheduler = notificationScheduler
+        self.calendarIntegration = calendarIntegration
+        self.remindersIntegration = remindersIntegration
     }
 
-    /// Offline-capable default for the daily-life MVP: seeded in-memory stores
-    /// plus deterministic mock briefing content.
+    /// Production wiring: SwiftData-backed stores, real notification scheduler,
+    /// EventKit adapters (graceful when denied), deterministic planning.
     public static var live: AppDependencies {
-        let tasks = MockTasks.items()
-        let events = MockCalendar.events()
-        let taskStore = InMemoryTaskStore(seed: tasks)
-        let eventStore = InMemoryEventStore(seed: events)
+        let controller = PersistenceController.shared
+        let taskStore = SwiftDataTaskStore(container: controller.container)
+        let eventStore = SwiftDataEventStore(container: controller.container)
+        let preferenceStore = SwiftDataPreferenceStore(container: controller.container)
+        let approvalStore = SwiftDataApprovalStore(container: controller.container)
+        let executor = LocalActionExecutor(taskStore: taskStore, eventStore: eventStore)
+        return AppDependencies(
+            ghostBrain: GhostBrainService(),
+            timelineProvider: StoreBackedTimelineProvider(
+                taskStore: taskStore,
+                eventStore: eventStore
+            ),
+            taskStore: taskStore,
+            eventStore: eventStore,
+            preferenceStore: preferenceStore,
+            approvalStore: approvalStore,
+            planningEngine: DeterministicPlanningEngine(),
+            actionExecutor: executor,
+            notificationScheduler: UserNotificationsScheduler(),
+            calendarIntegration: EventKitCalendarIntegration(),
+            remindersIntegration: EventKitRemindersIntegration()
+        )
+    }
+
+    /// Preview / demo wiring with seeded in-memory stores.
+    public static var preview: AppDependencies {
+        let taskStore = InMemoryTaskStore(seed: MockTasks.items())
+        let eventStore = InMemoryEventStore(seed: MockCalendar.events())
         let executor = LocalActionExecutor(taskStore: taskStore, eventStore: eventStore)
         return AppDependencies(
             ghostBrain: MockRecommendationProvider(),
@@ -50,8 +86,12 @@ public struct AppDependencies: Sendable {
             taskStore: taskStore,
             eventStore: eventStore,
             preferenceStore: InMemoryPreferenceStore(),
+            approvalStore: InMemoryApprovalStore(),
             planningEngine: DeterministicPlanningEngine(),
-            actionExecutor: executor
+            actionExecutor: executor,
+            notificationScheduler: NoOpNotificationScheduler(),
+            calendarIntegration: UnavailableCalendarIntegration(),
+            remindersIntegration: UnavailableRemindersIntegration()
         )
     }
 }

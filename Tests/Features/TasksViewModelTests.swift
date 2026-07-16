@@ -15,6 +15,7 @@ final class TasksViewModelTests: XCTestCase {
         await viewModel.setFilter(.inbox)
         XCTAssertEqual(viewModel.draftTitle, "")
         XCTAssertTrue(viewModel.tasks.contains { $0.title == "Buy oat milk" })
+        XCTAssertTrue(viewModel.tasks.contains { $0.title == "Buy oat milk" && $0.dueDate == nil })
     }
 
     func testToggleCompletion() async throws {

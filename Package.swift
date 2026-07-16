@@ -90,7 +90,12 @@ let package = Package(
         ),
         .testTarget(
             name: "LifePilotFeaturesTests",
-            dependencies: ["LifePilotFeatures", "LifePilotCore", "LifePilotGhostBrain"],
+            dependencies: [
+                "LifePilotFeatures",
+                "LifePilotCore",
+                "LifePilotGhostBrain",
+                "LifePilotServices",
+            ],
             path: "Tests/Features"
         ),
 

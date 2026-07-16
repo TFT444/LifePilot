@@ -5,10 +5,12 @@ import SwiftUI
 /// Privacy, connections, briefing time, export, deletion, and approvals.
 public struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
+    private let preferenceStore: any PreferenceStore
     private let actionExecutor: any ActionExecuting
 
     public init(preferenceStore: any PreferenceStore, actionExecutor: any ActionExecuting) {
         _viewModel = State(initialValue: SettingsViewModel(preferenceStore: preferenceStore))
+        self.preferenceStore = preferenceStore
         self.actionExecutor = actionExecutor
     }
 
@@ -84,9 +86,13 @@ public struct SettingsView: View {
 
             Section("About") {
                 LabeledContent("Version", value: "0.2.0-daily-life-mvp")
-                Text("Finance, shopping, and HealthKit medical features are out of scope.")
+                Text("Daily-life assistant — tasks, schedules, briefing, and approvals. "
+                    + "No banking, shopping, or medical features.")
                     .font(.LifePilot.caption)
                     .foregroundStyle(Color.LifePilot.textSecondary)
+                NavigationLink("Memory") {
+                    MemoryView(preferenceStore: preferenceStore)
+                }
             }
         }
         .navigationTitle("Settings")

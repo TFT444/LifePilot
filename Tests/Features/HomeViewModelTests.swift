@@ -1,33 +1,59 @@
 import LifePilotCore
-import LifePilotGhostBrain
 import XCTest
 @testable import LifePilotFeatures
+@testable import LifePilotServices
 
 @MainActor
 final class HomeViewModelTests: XCTestCase {
-    func testLoadPopulatesGreetingAndRecommendations() async {
-        let viewModel = HomeViewModel(ghostBrain: MockRecommendationProvider())
+    func testLoadUsesStoresAndPlanningFindings() async throws {
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let taskStore = InMemoryTaskStore(seed: [
+            TaskItem(title: "Ship brief", dueDate: now.addingTimeInterval(-600)),
+        ])
+        let eventStore = InMemoryEventStore(seed: [
+            CalendarEvent(
+                title: "Standup",
+                startDate: now.addingTimeInterval(3600),
+                endDate: now.addingTimeInterval(5400),
+                eventKind: .meeting,
+                context: .work
+            ),
+            CalendarEvent(
+                title: "Overlap",
+                startDate: now.addingTimeInterval(4000),
+                endDate: now.addingTimeInterval(7200),
+                eventKind: .meeting,
+                context: .work
+            ),
+        ])
+        let preferences = InMemoryPreferenceStore()
+        let viewModel = HomeViewModel(
+            taskStore: taskStore,
+            eventStore: eventStore,
+            preferenceStore: preferences,
+            clock: FixedClock(now)
+        )
 
         await viewModel.load()
 
         XCTAssertFalse(viewModel.greeting.isEmpty)
-        XCTAssertFalse(viewModel.recommendations.isEmpty)
+        XCTAssertFalse(viewModel.topTasks.isEmpty)
         XCTAssertFalse(viewModel.upcomingEvents.isEmpty)
+        XCTAssertFalse(viewModel.recommendations.isEmpty)
         XCTAssertFalse(viewModel.isLoading)
     }
 
-    func testLoadHandlesFailingProviderGracefully() async {
-        struct FailingProvider: GhostBrainServing {
-            func currentModel() async throws -> GhostBrainModel {
-                throw DomainError.unavailableNamed("test failure")
-            }
-        }
-
-        let viewModel = HomeViewModel(ghostBrain: FailingProvider())
+    func testLoadSurvivesDeniedCalendar() async {
+        let viewModel = HomeViewModel(
+            taskStore: InMemoryTaskStore(),
+            eventStore: InMemoryEventStore(),
+            preferenceStore: InMemoryPreferenceStore(),
+            calendarIntegration: UnavailableCalendarIntegration()
+        )
 
         await viewModel.load()
 
-        XCTAssertTrue(viewModel.recommendations.isEmpty)
+        XCTAssertTrue(viewModel.freshnessSummary.contains("Calendar") || viewModel.freshnessSummary.contains("Local"))
         XCTAssertFalse(viewModel.isLoading)
     }
 }

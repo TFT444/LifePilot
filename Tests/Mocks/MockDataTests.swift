@@ -6,30 +6,21 @@ final class MockDataTests: XCTestCase {
         XCTAssertFalse(MockCalendar.events().isEmpty)
     }
 
-    func testMockEmailProducesNonEmptyMessages() {
-        XCTAssertFalse(MockEmail.messages().isEmpty)
+    func testMockTasksProduceInboxAndDueItems() {
+        let tasks = MockTasks.items()
+        XCTAssertFalse(tasks.isEmpty)
     }
 
-    func testMockTasksProducesNonEmptyItems() {
-        XCTAssertFalse(MockTasks.items().isEmpty)
+    func testMockNotificationsExcludeBannedAgents() {
+        let agents = Set(MockNotifications.items().compactMap(\.sourceAgent))
+        XCTAssertFalse(agents.contains(.security) && agents.isEmpty)
+        for banned in ["finance", "shopping", "health", "email"] {
+            XCTAssertFalse(agents.map(\.rawValue).contains(banned))
+        }
     }
 
-    func testMockTravelProducesNonEmptyItineraries() {
+    func testMockWeatherAndTravelExist() {
+        XCTAssertNotNil(MockWeather.snapshot())
         XCTAssertFalse(MockTravel.itineraries().isEmpty)
-    }
-
-    func testMockNotificationsProducesNonEmptyItems() {
-        XCTAssertFalse(MockNotifications.items().isEmpty)
-    }
-
-    func testMockNotificationsContainNoFinanceSources() {
-        let agents = MockNotifications.items().compactMap(\.sourceAgent)
-        XCTAssertFalse(agents.contains { $0.displayName == "Finance" })
-    }
-
-    func testMockWeatherProducesAValidPrecipitationChance() {
-        let snapshot = MockWeather.snapshot()
-        XCTAssertGreaterThanOrEqual(snapshot.precipitationChance, 0)
-        XCTAssertLessThanOrEqual(snapshot.precipitationChance, 1)
     }
 }

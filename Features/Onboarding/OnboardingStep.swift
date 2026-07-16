@@ -33,8 +33,8 @@ public struct OnboardingStep: Identifiable {
             id: "approvals",
             symbolName: "checkmark.shield.fill",
             title: "You're always in control",
-            message: "LifePilot prepares recommendations — nothing sends, books, "
-                + "or moves money without your explicit approval."
+            message: "LifePilot prepares recommendations — nothing changes your "
+                + "calendar, reminders, or external apps without your explicit approval."
         ),
         OnboardingStep(
             id: "ready",

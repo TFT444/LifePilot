@@ -82,6 +82,43 @@ public protocol ActionExecuting: Sendable {
 
 /// Local notification scheduling (fakes in tests; UserNotifications in app).
 public protocol NotificationScheduling: Sendable {
+    func authorizationState() async -> PermissionState
+    func requestAuthorization() async throws -> Bool
     func schedule(id: String, title: String, body: String, fireDate: Date) async throws
     func cancel(id: String) async throws
+    func cancelAll() async throws
+}
+
+/// Persisted proposals, decisions, and audit trail.
+public protocol ApprovalStore: Sendable {
+    func save(proposal: ActionProposal, record: ApprovalRecord) async throws
+    func all() async -> [(ActionProposal, ApprovalRecord)]
+    func appendAudit(_ event: AuditEvent) async throws
+    func auditTrail() async -> [AuditEvent]
+}
+
+/// In-memory approval store for tests and previews.
+public actor InMemoryApprovalStore: ApprovalStore {
+    private var items: [UUID: (ActionProposal, ApprovalRecord)] = [:]
+    private var audit: [AuditEvent] = []
+
+    public init() {}
+
+    public func save(proposal: ActionProposal, record: ApprovalRecord) async throws {
+        items[record.id] = (proposal, record)
+    }
+
+    public func all() async -> [(ActionProposal, ApprovalRecord)] {
+        Array(items.values).sorted { lhs, rhs in
+            (lhs.1.decidedAt ?? lhs.0.createdAt) > (rhs.1.decidedAt ?? rhs.0.createdAt)
+        }
+    }
+
+    public func appendAudit(_ event: AuditEvent) async throws {
+        audit.append(event)
+    }
+
+    public func auditTrail() async -> [AuditEvent] {
+        audit.sorted { $0.timestamp > $1.timestamp }
+    }
 }

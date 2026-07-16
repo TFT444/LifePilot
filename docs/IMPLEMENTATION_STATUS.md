@@ -1,120 +1,67 @@
 # LifePilot Implementation Status
 
-**Branch:** `cursor/issues-today-4d5a`  
-**Base:** `origin/develop` + daily-life MVP + issues #24–#38 delivery  
-**Last updated:** 2026-07-15  
+**Branch:** `cursor/issues-today-4d5a` (PR #41)  
+**Base:** latest `origin/develop` (includes #42 solo-admin merge tooling)  
+**Last updated:** 2026-07-16  
 **Environment:** Cloud agent (Linux). `swift` / Xcode not available locally — verification via GitHub Actions (macOS).
 
 ---
 
-## Audit summary (2026-07-15)
+## Audit summary (2026-07-16)
 
 ### What is actually implemented
 
 | Area | Reality |
 |---|---|
-| SwiftUI app shell | Splash, Onboarding, Home, Timeline, Tasks, Settings; Insights still placeholder |
-| Design system | Real tokens + components (largest code surface) |
-| Ghost Brain | `GhostBrainServing` + **mock** provider; production service intentionally unavailable |
-| Timeline | Protocol + store-backed / mock providers |
-| Persistence | In-memory stores (SwiftData adapter pending) |
-| EventKit / Reminders / Notifications | **Not yet** — protocols + no-op scheduler ready |
-| Approvals | Core executor + Approvals UI in progress |
-| Web demos | Updated to remove finance/shopping/health |
-
-### Scope violations found (must remove)
-
-- ~~FinanceTransaction / MockFinance / finance enums~~ removed
-- Docs/demos scrubbed for banking/commerce/HealthKit-MVP claims
+| SwiftUI app shell | Splash, Onboarding, Home, Timeline, Tasks, Insights, Settings; Memory via Settings/Insights |
+| Design system | Real tokens + components |
+| Persistence | **SwiftData** production stores (`PersistenceController` + `SwiftData*Store`); in-memory for tests/previews |
+| Home / Briefing | Store + `DeterministicPlanningEngine` backed (not mock GhostBrain) |
+| Tasks | Inbox / Today / Upcoming / Scheduled / Completed; search; swipe delete/duplicate/snooze; capture **without** arbitrary deadline |
+| Timeline | Store-backed merge of events + due tasks |
+| Planning | Overlap, buffers, overdue/at-risk, work hours, overload, missing break, focus window |
+| Approvals | Executor + UI; SwiftData approval/audit store wired in composition |
+| Notifications | `UserNotificationsScheduler` (real adapter) + no-op for tests |
+| EventKit | `EventKitCalendarIntegration` + `EventKitRemindersIntegration` (graceful when denied) |
+| Weather / MapKit / CloudKit | Protocols + unavailable doubles (real adapters still pending) |
+| Insights / Memory | Functional local evidence UI (not ComingSoon placeholders) |
+| Ghost Brain | Production service stays unavailable; planning engine is the source of truth |
+| Scope scrub | Finance/shopping/HealthKit diagram labels removed; EmailMessage/MockEmail deleted |
 
 ### Tooling blockers
 
 - No local `swift` / Xcode → cannot claim simulator/UI results from this environment
-- Cannot merge to `main`/`develop` (branch protection)
-- Cannot enable GitHub Pages without owner approval
+- Agent cannot close/merge PRs or change branch protection (use `scripts/enable-solo-admin-merge.sh` as admin)
+- PR #39 is fully contained in #41 (agent cannot close #39 — owner should)
 
 ---
 
-## Checkbox plan (execution order)
+## Checkbox plan
 
-### Stage 1 — Audit, rules, status
+### Done this cycle
 
-- [x] Full code/docs/git audit
-- [x] `docs/IMPLEMENTATION_STATUS.md` (this file)
-- [x] `.cursor/rules/` for corrected scope
-- [x] Conventional commit after slice
+- [x] Sync PR #41 with latest `develop`
+- [x] Confirm #39 is ancestor of #41
+- [x] Repository audit + this status file
+- [x] SwiftData repositories for tasks/events/preferences/memory/approvals/audit
+- [x] Wire `AppDependencies.live` to SwiftData + EventKit + UserNotifications
+- [x] Store-backed Home briefing + freshness/refresh
+- [x] Tasks capture without +1h deadline; scheduled filter; search; swipe actions
+- [x] Memory + Insights screens (evidence-based, no finance/medical)
+- [x] Planning: missing break + focus window rules
+- [x] Remove EmailMessage / MockEmail; scrub architecture.svg + roadmap agent roster
+- [x] SwiftData + Home ViewModel tests
 
-### Stage 2 — Scope correction (finance/commerce/health-MVP out)
+### Still open for production DoD
 
-- [x] Delete finance model + mock + tests
-- [x] Strip finance/shopping/health from enums, signals, mocks, demos
-- [x] Rewrite README / architecture / roadmap / security language
-- [x] Finance-removal regression scan test
-- [x] Verify package still builds on CI
-
-### Stage 3 — Domain contracts + offline persistence
-
-- [x] Expand Core models: Task (subtasks/tags/recurrence), Event/Shift, Timeline, Evidence, Recommendation/Approval, Preference/Memory, Permission state
-- [x] Store / Clock / ID / Executor protocols
-- [x] In-memory persistence for LifePilot-owned state (SwiftData adapter pending)
-- [x] App launch / onboarding persistence wired end-to-end
-- [x] Unit tests for planning, approvals, stores
-- [x] Schema migration harness + docs (`docs/data/SWIFTDATA_PERSISTENCE.md`) — #34
-- [x] Integration capability protocols + denied doubles — #37
-- [x] Typed `AppRoute` + quick capture — #36
-- [x] Loadable state + fixtures/reference tests — #38
-
-### Stage 4 — Tasks / reminders / notifications
-
-- [x] Task CRUD + lists (Inbox/Today/Upcoming/Completed) — Tasks tab
-- [x] Recurrence model types
-- [x] Notification scheduler protocol + no-op
-- [x] Quick capture on Tasks
-
-### Stage 5 — Events, schedules, conflict rules, Timeline
-
-- [x] Personal/work event models + overlap/buffer rules
-- [x] Deterministic conflict / buffer / overdue / overload / work-hours rules
-- [x] Unified Timeline from stores
-
-### Stage 6 — Today / Morning Briefing / Upcoming
-
-- [ ] Replace Home mock-driven briefing with planning+store-backed briefing
-- [ ] Freshness / partial / offline states in UI
-
-### Stage 7 — Recommendations + approval-gated execution
-
-- [x] ActionProposal / Approval / AuditEvent models
-- [x] Revalidation + idempotent executor + security policy tests
-- [x] Approvals UI wired into Settings navigation
-- [ ] No bypass paths remain (review AppShell)
-
-### Stage 8 — Memory, insights, search, settings, privacy
-
-- [x] Preference store + Settings export/delete + Approvals entry
-- [ ] Memory & Insights evidence UI
-- [ ] Offline search
-
-### Stage 9 — System adapters (graceful degradation)
-
-- [ ] EventKit Calendar + Reminders adapters
-- [ ] WeatherKit / MapKit optional adapters
-- [ ] Background refresh hooks
-- [ ] CloudKit optional additive sync
-
-### Stage 10 — Optional AI boundary
-
-- [ ] Protocol for enhancement; deterministic planning remains primary
-- [x] No secrets in client; disabled by default (documented)
-
-### Stage 11 — App Intents + widgets
-
-- [ ] After core flows pass
-
-### Stage 12 — Accessibility, security, docs, CI stabilization
-
-- [ ] Docs match reality; screenshots only from running app
-- [ ] Green macOS Actions for final commit
+- [ ] Full recurrence edit/skip/series UX
+- [ ] WeatherKit + MapKit real adapters + travel leave-by
+- [ ] CloudKit optional sync + BackgroundTasks
+- [ ] App Intents + widgets
+- [ ] UI tests / VoiceOver device passes (needs Xcode)
+- [ ] Approval queue without sample seeds in production Settings
+- [ ] Close stale GitHub issues/PRs (#3/#4/#7/#16/#20/#22/#23/#39) as owner
+- [ ] Demo web HTML finance/email copy cleanup
 
 ---
 
@@ -122,9 +69,9 @@
 
 | When | What ran | Result |
 |---|---|---|
-| 2026-07-15 | Local `swift` / `xcodebuild` | **Unavailable** on agent host |
-| 2026-07-15 | GHA PR #39 early pushes | Build/lint failures fixed iteratively |
-| 2026-07-15 | GHA after `9dacae4` | **All green** (Build, Lint, Format, Unit Tests, CI Status) |
+| 2026-07-16 | Local `swift` / `xcodebuild` | **Unavailable** on agent host |
+| 2026-07-16 | Sync merge `develop` → `cursor/issues-today-4d5a` | Clean merge (`#42` included) |
+| Pending | GHA on latest push | Source of truth after push |
 
 ---
 
@@ -132,6 +79,7 @@
 
 1. **No finance/banking/commerce** — permanent.
 2. **No HealthKit / medical MVP** — deferred only.
-3. **No Apple Mail ingestion / automatic sending** — follow-ups may be manual/share-sheet only.
+3. **No Apple Mail ingestion / automatic sending** — removed models/mocks.
 4. **Offline-first** without account; AI optional and never holds execution credentials.
-5. **Composition:** `App → AppShell → Features → Core protocols` ← `Services` / adapters; GhostBrain → Core only.
+5. **Composition:** `App → AppShell → Features → Core protocols` ← `Services` / adapters.
+6. **In-memory stores** remain for tests/previews only; production uses SwiftData.

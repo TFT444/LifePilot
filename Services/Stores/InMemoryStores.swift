@@ -113,6 +113,14 @@ public actor InMemoryPreferenceStore: PreferenceStore {
 public struct NoOpNotificationScheduler: NotificationScheduling {
     public init() {}
 
+    public func authorizationState() async -> PermissionState {
+        .notRequested
+    }
+
+    public func requestAuthorization() async throws -> Bool {
+        false
+    }
+
     public func schedule(
         id _: String,
         title _: String,
@@ -123,6 +131,10 @@ public struct NoOpNotificationScheduler: NotificationScheduling {
     }
 
     public func cancel(id _: String) async throws {
+        // No-op
+    }
+
+    public func cancelAll() async throws {
         // No-op
     }
 }
