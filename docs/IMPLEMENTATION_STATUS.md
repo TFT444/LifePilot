@@ -70,7 +70,7 @@
 |---|---|---|
 | 2026-07-17 | Local `swift` / `xcodebuild` | **Unavailable** on agent host |
 | 2026-07-17 | `cairosvg` + Pillow icon export | App icon 1024 + web favicons written |
-| 2026-07-17 | GHA after this PR | Pending push |
+| 2026-07-17 | GHA on PR #43 (`4fc8465`) | Build / Lint / Format / Unit Tests **green** |
 
 ---
 
