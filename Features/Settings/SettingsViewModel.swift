@@ -9,12 +9,19 @@ public final class SettingsViewModel {
     public private(set) var preferences: UserPreferences
     public private(set) var memoryCount: Int = 0
     public private(set) var exportMessage: String?
+    public private(set) var syncMessage: String?
+    public private(set) var cloudSyncEnabled = false
     public private(set) var connections: [ConnectionCapability]
 
     private let preferenceStore: any PreferenceStore
+    private let cloudSync: any CloudSyncIntegrating
 
-    public init(preferenceStore: any PreferenceStore) {
+    public init(
+        preferenceStore: any PreferenceStore,
+        cloudSync: any CloudSyncIntegrating = DisabledCloudSyncIntegration()
+    ) {
         self.preferenceStore = preferenceStore
+        self.cloudSync = cloudSync
         preferences = UserPreferences()
         connections = [
             ConnectionCapability(id: "calendar", displayName: "Calendar", state: .notRequested),
@@ -29,6 +36,11 @@ public final class SettingsViewModel {
     public func load() async {
         preferences = await preferenceStore.loadPreferences()
         memoryCount = await preferenceStore.allMemory().count
+        cloudSyncEnabled = await cloudSync.isSyncEnabled()
+        let syncState = await cloudSync.authorizationState()
+        if let index = connections.firstIndex(where: { $0.id == "cloudSync" }) {
+            connections[index].state = Self.permission(from: syncState)
+        }
     }
 
     public func setOnboardingCompleted(_ value: Bool) async throws {
@@ -44,6 +56,20 @@ public final class SettingsViewModel {
     public func setBriefingHour(_ hour: Int) async throws {
         preferences.briefingHour = min(23, max(0, hour))
         try await preferenceStore.savePreferences(preferences)
+    }
+
+    public func setCloudSyncEnabled(_ enabled: Bool) async {
+        do {
+            try await cloudSync.setSyncEnabled(enabled)
+            cloudSyncEnabled = await cloudSync.isSyncEnabled()
+            syncMessage = enabled
+                ? "iCloud sync enabled. Restart the app to attach CloudKit to the store."
+                : "iCloud sync off — data stays on this device."
+            await load()
+        } catch {
+            syncMessage = "Could not change iCloud sync: \(error.localizedDescription)"
+            cloudSyncEnabled = await cloudSync.isSyncEnabled()
+        }
     }
 
     public func exportData() async {
@@ -63,6 +89,16 @@ public final class SettingsViewModel {
             exportMessage = "All LifePilot-owned local data deleted."
         } catch {
             exportMessage = "Delete failed."
+        }
+    }
+
+    private static func permission(from state: CapabilityState) -> PermissionState {
+        switch state {
+        case .authorized: .authorized
+        case .limited: .limited
+        case .denied: .denied
+        case .unavailable: .unavailable
+        case .notDetermined: .notRequested
         }
     }
 }

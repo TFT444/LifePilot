@@ -85,5 +85,22 @@ final class IntegrationProtocolTests: XCTestCase {
         let sync = DisabledCloudSyncIntegration()
         let enabled = await sync.isSyncEnabled()
         XCTAssertFalse(enabled)
+        do {
+            try await sync.setSyncEnabled(true)
+            XCTFail("Disabled sync should reject enable")
+        } catch {
+            // expected
+        }
+    }
+
+    func testOptionalCloudKitToggleRoundTrip() async throws {
+        let defaults = UserDefaults(suiteName: "lifepilot.tests.cloudkit")!
+        defaults.removePersistentDomain(forName: "lifepilot.tests.cloudkit")
+        let sync = OptionalCloudKitSyncIntegration(defaults: defaults)
+        XCTAssertFalse(await sync.isSyncEnabled())
+        try await sync.setSyncEnabled(true)
+        XCTAssertTrue(await sync.isSyncEnabled())
+        try await sync.setSyncEnabled(false)
+        XCTAssertFalse(await sync.isSyncEnabled())
     }
 }

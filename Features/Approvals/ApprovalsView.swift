@@ -44,7 +44,7 @@ public struct ApprovalsView: View {
                                 }
                                 .buttonStyle(.borderedProminent)
                                 Button("Reject") {
-                                    viewModel.reject(proposal)
+                                    Task { await viewModel.reject(proposal) }
                                 }
                                 .buttonStyle(.bordered)
                             }
@@ -70,5 +70,6 @@ public struct ApprovalsView: View {
             }
         }
         .navigationTitle("Approvals")
+        .task { await viewModel.load() }
     }
 }

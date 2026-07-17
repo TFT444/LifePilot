@@ -11,7 +11,9 @@ public struct HomeView: View {
         eventStore: any EventStore,
         preferenceStore: any PreferenceStore,
         planningEngine: any PlanningEngine = DeterministicPlanningEngine(),
-        calendarIntegration: any CalendarIntegrating = UnavailableCalendarIntegration()
+        calendarIntegration: any CalendarIntegrating = UnavailableCalendarIntegration(),
+        weatherIntegration: any WeatherIntegrating = UnavailableWeatherIntegration(),
+        travelIntegration: any TravelTimeIntegrating = UnavailableTravelTimeIntegration()
     ) {
         _viewModel = State(
             initialValue: HomeViewModel(
@@ -19,7 +21,9 @@ public struct HomeView: View {
                 eventStore: eventStore,
                 preferenceStore: preferenceStore,
                 planningEngine: planningEngine,
-                calendarIntegration: calendarIntegration
+                calendarIntegration: calendarIntegration,
+                weatherIntegration: weatherIntegration,
+                travelIntegration: travelIntegration
             )
         )
     }
@@ -51,6 +55,17 @@ public struct HomeView: View {
             Text(viewModel.greeting.isEmpty ? "Good morning" : viewModel.greeting)
                 .font(.LifePilot.titleLarge)
                 .foregroundStyle(Color.LifePilot.textPrimary)
+
+            if let weather = viewModel.weatherSummary {
+                Text(weather)
+                    .font(.LifePilot.caption)
+                    .foregroundStyle(Color.LifePilot.textSecondary)
+            }
+            if let leaveBy = viewModel.leaveBySummary {
+                Text(leaveBy)
+                    .font(.LifePilot.body)
+                    .foregroundStyle(Color.LifePilot.accentEnd)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)

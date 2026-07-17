@@ -7,11 +7,23 @@ public struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
     private let preferenceStore: any PreferenceStore
     private let actionExecutor: any ActionExecuting
+    private let approvalStore: any ApprovalStore
 
-    public init(preferenceStore: any PreferenceStore, actionExecutor: any ActionExecuting) {
-        _viewModel = State(initialValue: SettingsViewModel(preferenceStore: preferenceStore))
+    public init(
+        preferenceStore: any PreferenceStore,
+        actionExecutor: any ActionExecuting,
+        approvalStore: any ApprovalStore,
+        cloudSync: any CloudSyncIntegrating = DisabledCloudSyncIntegration()
+    ) {
+        _viewModel = State(
+            initialValue: SettingsViewModel(
+                preferenceStore: preferenceStore,
+                cloudSync: cloudSync
+            )
+        )
         self.preferenceStore = preferenceStore
         self.actionExecutor = actionExecutor
+        self.approvalStore = approvalStore
     }
 
     public var body: some View {
@@ -49,9 +61,30 @@ public struct SettingsView: View {
                     ApprovalsView(
                         viewModel: ApprovalsViewModel(
                             executor: actionExecutor,
-                            seed: ApprovalsViewModel.sampleProposals()
+                            approvalStore: approvalStore
                         )
                     )
+                }
+            }
+
+            Section("Sync") {
+                Toggle(
+                    "iCloud sync (optional)",
+                    isOn: Binding(
+                        get: { viewModel.cloudSyncEnabled },
+                        set: { newValue in
+                            Task { await viewModel.setCloudSyncEnabled(newValue) }
+                        }
+                    )
+                )
+                Text("Local-first. Enabling prepares CloudKit for LifePilot-owned data; "
+                    + "Calendar and Reminders stay on-device sources of truth.")
+                    .font(.LifePilot.caption)
+                    .foregroundStyle(Color.LifePilot.textSecondary)
+                if let syncMessage = viewModel.syncMessage {
+                    Text(syncMessage)
+                        .font(.LifePilot.caption)
+                        .foregroundStyle(Color.LifePilot.textSecondary)
                 }
             }
 

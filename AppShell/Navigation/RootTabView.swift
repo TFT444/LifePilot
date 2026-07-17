@@ -67,7 +67,9 @@ public struct RootTabView: View {
                 eventStore: dependencies.eventStore,
                 preferenceStore: dependencies.preferenceStore,
                 planningEngine: dependencies.planningEngine,
-                calendarIntegration: dependencies.calendarIntegration
+                calendarIntegration: dependencies.calendarIntegration,
+                weatherIntegration: dependencies.weatherIntegration,
+                travelIntegration: dependencies.travelIntegration
             )
             .navigationTitle("")
             #if os(iOS)
@@ -86,7 +88,9 @@ public struct RootTabView: View {
         case .settings:
             SettingsView(
                 preferenceStore: dependencies.preferenceStore,
-                actionExecutor: dependencies.actionExecutor
+                actionExecutor: dependencies.actionExecutor,
+                approvalStore: dependencies.approvalStore,
+                cloudSync: dependencies.cloudSync
             )
         }
     }

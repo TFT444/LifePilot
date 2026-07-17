@@ -73,6 +73,41 @@ public struct TasksView: View {
                                     Label("1h", systemImage: "clock.arrow.circlepath")
                                 }
                                 .tint(Color.LifePilot.accentEnd)
+                                if task.recurrence != nil {
+                                    Button {
+                                        Task { try? await viewModel.skipOccurrence(task) }
+                                    } label: {
+                                        Label("Skip", systemImage: "forward.end")
+                                    }
+                                    .tint(Color.LifePilot.textSecondary)
+                                }
+                            }
+                            .contextMenu {
+                                if task.recurrence != nil {
+                                    Button("Skip this occurrence") {
+                                        Task { try? await viewModel.skipOccurrence(task) }
+                                    }
+                                    Button("Reschedule this only (+1 day)") {
+                                        let next = (task.dueDate ?? Date()).addingTimeInterval(86_400)
+                                        Task {
+                                            try? await viewModel.reschedule(
+                                                task,
+                                                to: next,
+                                                scope: .thisOccurrenceOnly
+                                            )
+                                        }
+                                    }
+                                    Button("Reschedule series (+1 day)") {
+                                        let next = (task.dueDate ?? Date()).addingTimeInterval(86_400)
+                                        Task {
+                                            try? await viewModel.reschedule(
+                                                task,
+                                                to: next,
+                                                scope: .entireSeries
+                                            )
+                                        }
+                                    }
+                                }
                             }
                     }
                 }
@@ -111,9 +146,15 @@ public struct TasksView: View {
                         .strikethrough(task.isCompleted)
                         .foregroundStyle(Color.LifePilot.textPrimary)
                     if let due = task.dueDate {
-                        Text(due.formatted(date: .abbreviated, time: .shortened))
-                            .font(.caption)
-                            .foregroundStyle(Color.LifePilot.textSecondary)
+                        HStack(spacing: 4) {
+                            Text(due.formatted(date: .abbreviated, time: .shortened))
+                            if task.recurrence != nil {
+                                Image(systemName: "repeat")
+                                Text(task.recurrence?.frequency.rawValue ?? "")
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundStyle(Color.LifePilot.textSecondary)
                     } else {
                         Text("Inbox · unscheduled")
                             .font(.caption)
@@ -127,6 +168,14 @@ public struct TasksView: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(task.title), \(task.isCompleted ? "completed" : "incomplete")")
+        .accessibilityLabel(accessibilityLabel(for: task))
+    }
+
+    private func accessibilityLabel(for task: TaskItem) -> String {
+        var parts = [task.title, task.isCompleted ? "completed" : "incomplete"]
+        if task.recurrence != nil {
+            parts.append("repeating")
+        }
+        return parts.joined(separator: ", ")
     }
 }

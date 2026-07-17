@@ -7,8 +7,14 @@ import WeatherKit
 #endif
 
 /// Optional WeatherKit adapter. Graceful when unavailable; never blocks briefing.
+/// Production needs a resolved CLLocation (Settings → Location); until then
+/// callers fall back to leave-by without weather context.
 public struct WeatherKitIntegration: WeatherIntegrating {
-    public init() {}
+    private let fallback: WeatherSnapshot?
+
+    public init(fallback: WeatherSnapshot? = nil) {
+        self.fallback = fallback
+    }
 
     public func authorizationState() async -> CapabilityState {
         #if canImport(WeatherKit)
@@ -19,6 +25,9 @@ public struct WeatherKitIntegration: WeatherIntegrating {
     }
 
     public func currentWeather() async throws -> WeatherSnapshot {
+        if let fallback {
+            return fallback
+        }
         throw DomainError.unavailableNamed(
             "WeatherKit needs an explicit location; briefing continues without weather"
         )

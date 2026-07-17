@@ -27,6 +27,41 @@ final class TasksViewModelTests: XCTestCase {
         await viewModel.setFilter(.completed)
         XCTAssertTrue(viewModel.tasks.contains { $0.id == task.id && $0.isCompleted })
     }
+
+    func testSkipOccurrenceAdvancesRecurringTask() async throws {
+        let due = Date(timeIntervalSince1970: 1_700_000_000)
+        let task = TaskItem(
+            title: "Water plants",
+            dueDate: due,
+            recurrence: RecurrenceRule(frequency: .daily)
+        )
+        let store = FakeTasks(seed: [task])
+        let viewModel = TasksViewModel(
+            taskStore: store,
+            clock: FixedClock(due)
+        )
+        await viewModel.setFilter(.scheduled)
+        try await viewModel.skipOccurrence(task)
+        let saved = await store.allTasks()
+        XCTAssertEqual(saved.first?.dueDate?.timeIntervalSince(due), 86_400)
+        XCTAssertNotNil(saved.first?.recurrence)
+    }
+
+    func testRescheduleThisOccurrenceDetaches() async throws {
+        let due = Date(timeIntervalSince1970: 1_700_000_000)
+        let task = TaskItem(
+            title: "Weekly review",
+            dueDate: due,
+            recurrence: RecurrenceRule(frequency: .weekly)
+        )
+        let store = FakeTasks(seed: [task])
+        let viewModel = TasksViewModel(taskStore: store, clock: FixedClock(due))
+        let newDue = due.addingTimeInterval(86_400)
+        try await viewModel.reschedule(task, to: newDue, scope: .thisOccurrenceOnly)
+        let saved = await store.allTasks()
+        XCTAssertNil(saved.first?.recurrence)
+        XCTAssertEqual(saved.first?.dueDate, newDue)
+    }
 }
 
 private actor FakeTasks: TaskStore {

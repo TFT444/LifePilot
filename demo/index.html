@@ -433,8 +433,8 @@
         detail: { meta: [['📋','3 open action items from last meeting'], ['⏱️','Starts 09:00, 30 min']],
           benefits: ['Walk in prepared', 'No forgotten follow-ups'] }, approved: false },
       { id: 'r4', icon: '✅', title: 'Board deck due today', why: 'High-priority task still open with limited afternoon focus time.', badge: 'high',
-        detail: { meta: [['💳','$52.99 renewal expected today'], ['📊','3rd price increase this year']],
-          benefits: ['No surprise charge', 'Chance to cancel first'] }, approved: false },
+        detail: { meta: [['⏱️','90 minutes of focus still needed'], ['📅','Client presentation at 15:30']],
+          benefits: ['Ship before the meeting', 'Protect afternoon focus'] }, approved: false },
     ],
     timeline: [
       { time: '08:30', title: 'Leave Home', sub: null, done: false, tag: null },
@@ -466,17 +466,17 @@
     liveTiles: {
       weather: { big: '17°', small: 'Light Rain' },
       travel: { big: 'Leave in 15 min', small: 'Heavy traffic today' },
-      email: { big: '2 Important', small: 'Requires your reply' },
+      focus: { big: '45 min free', small: 'Before team meeting' },
       meeting: { big: 'Meeting in 2h', small: '10:00 – 11:00 AM' },
       tasks: { big: '3 Due', small: '1 high priority' },
-      tasks: { big: `${5} tasks`, small: 'See all tasks' },
+      agenda: { big: `${5} events`, small: 'See full timeline' },
     },
   };
 
   const STATUS_MESSAGES = [
-    'Checking traffic...', 'Checking calendar...', 'Weather updated', 'Email analysed',
+    'Checking traffic...', 'Checking calendar...', 'Weather updated', 'Tasks refreshed',
     'Travel recalculated', 'Meeting confirmed', 'Everything looks good', 'New recommendation found',
-    'Schedule optimised', 'Briefing refreshed', 'Scanning inbox...', 'Syncing timeline...',
+    'Schedule optimised', 'Briefing refreshed', 'Updating reminders...', 'Syncing timeline...',
   ];
 
   const CTA_LABELS = ['Review Recommendations', 'Travel Updated', 'Weather Alert', 'Meeting Changed', '1 New Insight', 'Everything Looks Good'];
@@ -557,8 +557,6 @@
     const approvedCount = state.recommendations.length - pending.length;
     const confidence = 98;
 
-    const unreadEmails = 2;
-
     document.getElementById('briefing-content').innerHTML = `
       <div class="app-header fade-item in">
         <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
@@ -600,10 +598,10 @@
           <div class="big accent">${state.liveTiles.travel.big}</div>
           <div class="small">${state.liveTiles.travel.small}</div>
         </div>
-        <div class="stat-tile" id="tile-email" onclick="goTab('home')">
-          <div class="top-row"><div class="icon-badge" style="background:rgba(56,189,248,0.14)">✉️</div><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div></div>
-          <div class="big">${state.liveTiles.email.big}</div>
-          <div class="small">${state.liveTiles.email.small}</div>
+        <div class="stat-tile" id="tile-focus" onclick="goTab('home')">
+          <div class="top-row"><div class="icon-badge" style="background:rgba(56,189,248,0.14)">🎯</div><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div></div>
+          <div class="big">${state.liveTiles.focus.big}</div>
+          <div class="small">${state.liveTiles.focus.small}</div>
         </div>
         <div class="stat-tile" id="tile-meeting" onclick="showToast('📅 Team Meeting · Project Phoenix · 09:00')">
           <div class="top-row"><div class="icon-badge" style="background:rgba(52,211,153,0.14)">📅</div><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div></div>
@@ -611,14 +609,14 @@
           <div class="small">${state.liveTiles.meeting.small}</div>
         </div>
         <div class="stat-tile" id="tile-tasks" onclick="goTab('home')">
-          <div class="top-row"><div class="icon-badge" style="background:rgba(242,85,122,0.14)">💳</div><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div></div>
+          <div class="top-row"><div class="icon-badge" style="background:rgba(242,85,122,0.14)">✅</div><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div></div>
           <div class="big">${state.liveTiles.tasks.big}</div>
           <div class="small">${state.liveTiles.tasks.small}</div>
         </div>
-        <div class="stat-tile" id="tile-tasks" onclick="goTab('timeline')">
-          <div class="top-row"><div class="icon-badge" style="background:rgba(168,85,247,0.14)">✅</div><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div></div>
-          <div class="big">${state.liveTiles.tasks.big}</div>
-          <div class="small">${state.liveTiles.tasks.small}</div>
+        <div class="stat-tile" id="tile-agenda" onclick="goTab('timeline')">
+          <div class="top-row"><div class="icon-badge" style="background:rgba(168,85,247,0.14)">🗓️</div><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div></div>
+          <div class="big">${state.liveTiles.agenda.big}</div>
+          <div class="small">${state.liveTiles.agenda.small}</div>
         </div>
       </div>
 
@@ -973,10 +971,10 @@
   const TILE_VARIANTS = {
     weather: [{ big: '17°', small: 'Light Rain' }, { big: '16°', small: 'Rain starts in 12 min' }, { big: '15°', small: 'Heavy rain' }],
     travel: [{ big: 'Leave in 15 min', small: 'Heavy traffic today' }, { big: 'Leave in 18 min', small: 'Traffic increased' }, { big: 'Leave now', small: 'Route recalculated' }],
-    email: [{ big: '2 Important', small: 'Requires your reply' }, { big: '3 Important', small: 'One requires reply' }, { big: '3 Important', small: 'Reply before 11 AM' }],
+    focus: [{ big: '45 min free', small: 'Before team meeting' }, { big: '30 min free', small: 'Protect for deck work' }, { big: 'Focus block', small: '13:00 – 14:00 open' }],
     meeting: [{ big: 'Meeting in 2h', small: '10:00 – 11:00 AM' }, { big: 'Starts in 1h 52m', small: '10:00 – 11:00 AM' }, { big: 'Meeting confirmed', small: 'Room 4B · 10:00 AM' }],
     tasks: [{ big: '3 Due', small: '1 high priority' }, { big: '2 Due', small: 'Deck due soon' }],
-    tasks: [{ big: `${state.timeline.length} tasks`, small: 'See all tasks' }, { big: `${Math.max(state.timeline.length - 1, 1)} tasks`, small: 'One completed' }],
+    agenda: [{ big: `${state.timeline.length} events`, small: 'See full timeline' }, { big: `${Math.max(state.timeline.length - 1, 1)} left`, small: 'One completed' }],
   };
 
   function tickLiveTile() {

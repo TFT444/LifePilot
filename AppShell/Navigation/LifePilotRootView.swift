@@ -47,6 +47,8 @@ public struct LifePilotRootView: View {
             }
         }
         .task {
+            BriefingBackgroundScheduler.register()
+            BriefingBackgroundScheduler.scheduleNext()
             await boot()
         }
     }
