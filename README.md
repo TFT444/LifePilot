@@ -16,11 +16,33 @@ Your calendar, inbox, weather, travel, and priorities — understood, predicted,
 [![Stars](https://img.shields.io/github/stars/TFT444/LifePilot?style=flat-square&color=1a1a2e)](../../stargazers)
 [![Contributors](https://img.shields.io/github/contributors/TFT444/LifePilot?style=flat-square&color=1a1a2e)](#contributing)
 
-[Introduction](#introduction) · [Architecture](#architecture-overview) · [Roadmap](#roadmap) · [Contributing](#contributing)
+[Introduction](#introduction) · [Architecture](#architecture-overview) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Live Demo](#live-demo)
 
 </div>
 
 <br />
+
+---
+
+## Live Demo
+
+**The demo is live now:** [**Open LifePilot Demo →**](https://html-preview.github.io/?url=https://raw.githubusercontent.com/TFT444/lifepilot/gh-pages/index.html)
+
+Interactive product demo in your browser — mock data, no backend, no install.
+
+| URL | Status |
+|---|---|
+| [**Live demo (now)**](https://html-preview.github.io/?url=https://raw.githubusercontent.com/TFT444/lifepilot/gh-pages/index.html) | ✅ Working |
+| [lifepilot.vercel.app](https://lifepilot.vercel.app) | ⏳ Needs PR [#22](https://github.com/TFT444/lifepilot/pull/22) merged |
+| [tft444.github.io/lifepilot](https://tft444.github.io/lifepilot/) | ⏳ Enable Pages: **Settings → Pages → `gh-pages` / root** |
+
+To finish production URLs (one-time, ~30 seconds):
+
+```bash
+gh pr merge 22 --merge --admin && gh pr merge 23 --merge --admin
+```
+
+Then: **Settings → Pages → Source: `gh-pages` branch / root**
 
 ---
 

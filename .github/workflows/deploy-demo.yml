@@ -1,0 +1,103 @@
+name: Deploy Demo
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "demo/**"
+      - "index.html"
+      - "Website/public/**"
+      - ".github/workflows/deploy-demo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy-demo-pages
+  cancel-in-progress: true
+
+jobs:
+  resolve-demo-dir:
+    name: Resolve demo source directory
+    runs-on: ubuntu-latest
+    outputs:
+      publish_dir: ${{ steps.pick.outputs.publish_dir }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: pick
+        run: |
+          if [ -f index.html ] && grep -q "LifePilot" index.html; then
+            # Self-contained root demo (main) — publish repo root static files only
+            mkdir -p /tmp/demo-publish
+            cp index.html /tmp/demo-publish/
+            cp demo/.nojekyll /tmp/demo-publish/ 2>/dev/null || touch /tmp/demo-publish/.nojekyll
+            echo "publish_dir=/tmp/demo-publish" >> "$GITHUB_OUTPUT"
+          elif [ -d Website/public ] && [ -f Website/public/index.html ]; then
+            echo "publish_dir=Website/public" >> "$GITHUB_OUTPUT"
+          elif [ -d demo ] && [ -f demo/index.html ]; then
+            echo "publish_dir=demo" >> "$GITHUB_OUTPUT"
+          else
+            echo "No demo directory found" >&2
+            exit 1
+          fi
+
+  publish-gh-pages-branch:
+    name: Publish to gh-pages branch
+    needs: resolve-demo-dir
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage publish directory
+        id: stage
+        run: |
+          SRC="${{ needs.resolve-demo-dir.outputs.publish_dir }}"
+          mkdir -p /tmp/gh-pages-out
+          cp -r "$SRC"/. /tmp/gh-pages-out/
+          cp /tmp/gh-pages-out/index.html /tmp/gh-pages-out/404.html
+          touch /tmp/gh-pages-out/.nojekyll
+          echo "dir=/tmp/gh-pages-out" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ steps.stage.outputs.dir }}
+          publish_branch: gh-pages
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          commit_message: "deploy: update interactive demo"
+
+  deploy-github-pages:
+    name: Deploy GitHub Pages (official)
+    needs: [resolve-demo-dir, publish-gh-pages-branch]
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage artifact
+        run: |
+          SRC="${{ needs.resolve-demo-dir.outputs.publish_dir }}"
+          mkdir -p /tmp/pages-artifact
+          cp -r "$SRC"/. /tmp/pages-artifact/
+          cp /tmp/pages-artifact/index.html /tmp/pages-artifact/404.html
+          touch /tmp/pages-artifact/.nojekyll
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: /tmp/pages-artifact
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
