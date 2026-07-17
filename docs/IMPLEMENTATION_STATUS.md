@@ -57,6 +57,7 @@
 
 ### Still open for production DoD
 
+- [ ] **UI visual pass** against [Phase 2 showcase](design/PHASE2_VISUAL_TARGET.md) (dark glass Home / Timeline / Approvals polish)
 - [ ] Widget Extension Xcode target (`@main` WidgetBundle) — see `Widgets/README.md`
 - [ ] WeatherKit live location (needs CLLocation permission UX)
 - [ ] UI tests / VoiceOver device passes (needs Xcode)
