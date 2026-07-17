@@ -23,7 +23,7 @@ const ONBOARDING_STEPS = [
     icon: "🛡️",
     title: "You're always in control",
     message:
-      "LifePilot prepares recommendations — nothing sends, books, or moves money without your explicit approval.",
+      "LifePilot prepares recommendations — nothing changes your calendar or reminders without your explicit approval.",
   },
   {
     id: "ready",
@@ -35,25 +35,23 @@ const ONBOARDING_STEPS = [
 
 const AGENT_ICONS = {
   calendar: "📅",
-  email: "✉️",
+  task: "✅",
   travel: "✈️",
-  finance: "💰",
+  weather: "🌤️",
   memory: "🧠",
   reminder: "🔔",
-  shopping: "🛒",
-  health: "❤️",
+  planning: "💡",
   security: "🛡️",
 };
 
 const AGENT_LABELS = {
   calendar: "Calendar",
-  email: "Email",
+  task: "Tasks",
   travel: "Travel",
-  finance: "Finance",
+  weather: "Weather",
   memory: "Memory",
   reminder: "Reminder",
-  shopping: "Shopping",
-  health: "Health",
+  planning: "Planning",
   security: "Security",
 };
 
@@ -109,10 +107,10 @@ function mockModel(now = new Date()) {
       },
       {
         id: "rec-2",
-        title: "Reply to Priya about the Q3 roadmap",
+        title: "Block 45 minutes for the board deck",
         reasoning:
-          "This email has been waiting three days and mentions a deadline of this Friday.",
-        sourceAgent: "email",
+          "High-priority task is due this afternoon and you still have an open focus window after lunch.",
+        sourceAgent: "task",
         riskLevel: "low",
       },
       {
@@ -148,20 +146,20 @@ function mockModel(now = new Date()) {
       {
         title: "Rain expected this afternoon",
         subtitle: "60% chance starting around 3:00 PM",
-        agent: "calendar",
+        agent: "weather",
       },
       {
-        title: "Unusual charge detected",
-        subtitle: "$340 at an unfamiliar merchant",
-        agent: "finance",
+        title: "Pickup overlaps 2:00 PM sync",
+        subtitle: "Calendar conflict detected",
+        agent: "planning",
       },
     ],
     timeline: [
-      { kind: "email", time: new Date(now.getTime() - 45 * 60 * 1000), title: "[LifePilot] New pull request opened", subtitle: "GitHub" },
-      { kind: "email", time: new Date(now.getTime() - 2 * 3600 * 1000), title: "Your flight UA 1472 has been updated", subtitle: "United Airlines" },
+      { kind: "reminder", time: new Date(now.getTime() - 45 * 60 * 1000), title: "Prep notes for Design Review", subtitle: "Reminder" },
+      { kind: "task", time: new Date(now.getTime() - 2 * 3600 * 1000), title: "Confirm school pickup plan", subtitle: "Personal" },
       { kind: "event", time: atTime(now, 10, 0), title: "Design Review", subtitle: "Studio — Room 2B" },
       { kind: "event", time: atTime(now, 13, 30), title: "1:1 with Priya", subtitle: "Calendar" },
-      { kind: "task", time: atTime(now, 16, 0), title: "Submit expense report", subtitle: "Due today" },
+      { kind: "task", time: atTime(now, 16, 0), title: "Send updated deck", subtitle: "Due today" },
     ],
   };
 }
