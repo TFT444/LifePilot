@@ -6,7 +6,8 @@ import SwiftUI
 import WidgetKit
 
 /// Shared timeline entry for Today / Upcoming home-screen widgets.
-public struct LifePilotWidgetEntry: TimelineEntry {
+/// Named to avoid clashing with Core's `TimelineEntry` agenda model.
+public struct LifePilotWidgetEntry: WidgetKit.TimelineEntry {
     public let date: Date
     public let greeting: String
     public let headline: String
@@ -22,6 +23,8 @@ public struct LifePilotWidgetEntry: TimelineEntry {
 
 /// Builds widget snapshots from Core stores (read-only).
 public struct LifePilotWidgetTimelineProvider: TimelineProvider {
+    public typealias Entry = LifePilotWidgetEntry
+
     public init() {}
 
     public func placeholder(in _: Context) -> LifePilotWidgetEntry {
@@ -33,7 +36,10 @@ public struct LifePilotWidgetTimelineProvider: TimelineProvider {
         )
     }
 
-    public func getSnapshot(in _: Context, completion: @escaping (LifePilotWidgetEntry) -> Void) {
+    public func getSnapshot(
+        in _: Context,
+        completion: @escaping (LifePilotWidgetEntry) -> Void
+    ) {
         Task {
             completion(await makeEntry())
         }
