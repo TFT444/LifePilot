@@ -50,24 +50,22 @@ public struct RefreshBriefingIntent: AppIntent {
 
 public struct LifePilotAppShortcuts: AppShortcutsProvider {
     public static var appShortcuts: [AppShortcut] {
-        [
-            AppShortcut(
-                intent: CaptureInboxTaskIntent(),
-                phrases: [
-                    "Capture a task in \(.applicationName)",
-                    "Add an inbox task in \(.applicationName)",
-                ],
-                shortTitle: "Capture Task",
-                systemImageName: "plus.circle"
-            ),
-            AppShortcut(
-                intent: RefreshBriefingIntent(),
-                phrases: [
-                    "Refresh my \(.applicationName) briefing",
-                ],
-                shortTitle: "Refresh Briefing",
-                systemImageName: "sun.horizon"
-            ),
-        ]
+        AppShortcut(
+            intent: CaptureInboxTaskIntent(),
+            phrases: [
+                "Capture a task in \(.applicationName)",
+                "Add an inbox task in \(.applicationName)",
+            ],
+            shortTitle: "Capture Task",
+            systemImageName: "plus.circle"
+        )
+        AppShortcut(
+            intent: RefreshBriefingIntent(),
+            phrases: [
+                "Refresh my \(.applicationName) briefing",
+            ],
+            shortTitle: "Refresh Briefing",
+            systemImageName: "sun.horizon"
+        )
     }
 }

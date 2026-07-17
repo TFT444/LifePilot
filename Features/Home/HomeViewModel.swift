@@ -158,26 +158,35 @@ public final class HomeViewModel {
                     findings.append(finding)
                     summary = finding.suggestedActionSummary
                 }
-            } else if next.travelBufferMinutes > 0
-                || preferences.defaultTravelBufferMinutes > 0
-            {
-                let minutes = max(next.travelBufferMinutes, preferences.defaultTravelBufferMinutes)
-                if let finding = LeaveByPlanner.finding(
-                    for: next,
-                    travelMinutes: minutes,
-                    weather: weather,
-                    now: now
-                ) {
-                    findings.append(finding)
-                    summary = finding.suggestedActionSummary
+            } else {
+                let hasBuffer = next.travelBufferMinutes > 0
+                    || preferences.defaultTravelBufferMinutes > 0
+                if hasBuffer {
+                    let minutes = max(
+                        next.travelBufferMinutes,
+                        preferences.defaultTravelBufferMinutes
+                    )
+                    if let finding = LeaveByPlanner.finding(
+                        for: next,
+                        travelMinutes: minutes,
+                        weather: weather,
+                        now: now
+                    ) {
+                        findings.append(finding)
+                        summary = finding.suggestedActionSummary
+                    }
                 }
             }
         }
 
-        if let weather,
-           let weatherFinding = LeaveByPlanner.weatherFinding(for: next, weather: weather, now: now)
-        {
-            findings.append(weatherFinding)
+        if let weather {
+            if let weatherFinding = LeaveByPlanner.weatherFinding(
+                for: next,
+                weather: weather,
+                now: now
+            ) {
+                findings.append(weatherFinding)
+            }
         }
 
         return (findings, summary)
