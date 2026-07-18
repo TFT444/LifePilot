@@ -12,76 +12,135 @@ public struct TasksView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            Picker("Filter", selection: Binding(
-                get: { viewModel.filter },
-                set: { newValue in Task { await viewModel.setFilter(newValue) } }
-            )) {
-                ForEach(TasksViewModel.TaskFilter.allCases, id: \.self) { filter in
-                    Text(filter.rawValue.capitalized).tag(filter)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, Spacing.lg)
-            .padding(.vertical, Spacing.sm)
-
-            TextField("Search", text: $viewModel.searchText)
-                .textFieldStyle(.roundedBorder)
-                .padding(.horizontal, Spacing.lg)
-                .padding(.bottom, Spacing.sm)
-                .onChange(of: viewModel.searchText) { _, _ in
-                    Task { await viewModel.load() }
-                }
-
-            HStack {
-                TextField("Quick capture (no due date)", text: $viewModel.draftTitle)
-                    .textFieldStyle(.roundedBorder)
-                Button("Add") {
-                    Task { try? await viewModel.quickCapture() }
-                }
-                .disabled(viewModel.draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            }
-            .padding(.horizontal, Spacing.lg)
-            .padding(.bottom, Spacing.sm)
-
-            if viewModel.tasks.isEmpty, !viewModel.isLoading {
-                EmptyStateView(
-                    symbolName: "checkmark.circle",
-                    message: emptyMessage
-                )
-                .frame(maxHeight: .infinity)
-            } else {
-                List {
-                    ForEach(viewModel.tasks) { task in
-                        taskRow(task)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    Task { try? await viewModel.delete(task) }
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                                Button {
-                                    Task { try? await viewModel.duplicate(task) }
-                                } label: {
-                                    Label("Duplicate", systemImage: "plus.square.on.square")
-                                }
-                                .tint(Color.LifePilot.accentEnd)
-                            }
-                            .swipeActions(edge: .leading) {
-                                Button {
-                                    Task { try? await viewModel.snooze(task, by: 3600) }
-                                } label: {
-                                    Label("1h", systemImage: "clock.arrow.circlepath")
-                                }
-                                .tint(Color.LifePilot.accentEnd)
-                            }
-                    }
-                }
-                .listStyle(.plain)
-            }
+            filterPicker
+            searchField
+            captureRow
+            taskList
         }
         .background(Color.LifePilot.backgroundPrimary)
         .navigationTitle("Tasks")
         .task { await viewModel.load() }
+    }
+
+    private var filterPicker: some View {
+        Picker(
+            "Filter",
+            selection: Binding(
+                get: { viewModel.filter },
+                set: { newValue in Task { await viewModel.setFilter(newValue) } }
+            )
+        ) {
+            ForEach(TasksViewModel.TaskFilter.allCases, id: \.self) { filter in
+                Text(filter.rawValue.capitalized).tag(filter)
+            }
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal, Spacing.lg)
+        .padding(.vertical, Spacing.sm)
+    }
+
+    private var searchField: some View {
+        TextField("Search", text: $viewModel.searchText)
+            .textFieldStyle(.roundedBorder)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.bottom, Spacing.sm)
+            .onChange(of: viewModel.searchText) { _, _ in
+                Task { await viewModel.load() }
+            }
+    }
+
+    private var captureRow: some View {
+        HStack {
+            TextField("Quick capture (no due date)", text: $viewModel.draftTitle)
+                .textFieldStyle(.roundedBorder)
+            Button("Add") {
+                Task { try? await viewModel.quickCapture() }
+            }
+            .disabled(viewModel.draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }
+        .padding(.horizontal, Spacing.lg)
+        .padding(.bottom, Spacing.sm)
+    }
+
+    @ViewBuilder
+    private var taskList: some View {
+        if viewModel.tasks.isEmpty, !viewModel.isLoading {
+            EmptyStateView(
+                symbolName: "checkmark.circle",
+                message: emptyMessage
+            )
+            .frame(maxHeight: .infinity)
+        } else {
+            List {
+                ForEach(viewModel.tasks) { task in
+                    taskRow(task)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            trailingSwipeActions(for: task)
+                        }
+                        .swipeActions(edge: .leading) {
+                            leadingSwipeActions(for: task)
+                        }
+                        .contextMenu {
+                            recurrenceMenu(for: task)
+                        }
+                }
+            }
+            .listStyle(.plain)
+        }
+    }
+
+    @ViewBuilder
+    private func trailingSwipeActions(for task: TaskItem) -> some View {
+        Button(role: .destructive) {
+            Task { try? await viewModel.delete(task) }
+        } label: {
+            Label("Delete", systemImage: "trash")
+        }
+        Button {
+            Task { try? await viewModel.duplicate(task) }
+        } label: {
+            Label("Duplicate", systemImage: "plus.square.on.square")
+        }
+        .tint(Color.LifePilot.accentEnd)
+    }
+
+    @ViewBuilder
+    private func leadingSwipeActions(for task: TaskItem) -> some View {
+        Button {
+            Task { try? await viewModel.snooze(task, by: 3600) }
+        } label: {
+            Label("1h", systemImage: "clock.arrow.circlepath")
+        }
+        .tint(Color.LifePilot.accentEnd)
+        if task.recurrence != nil {
+            Button {
+                Task { try? await viewModel.skipOccurrence(task) }
+            } label: {
+                Label("Skip", systemImage: "forward.end")
+            }
+            .tint(Color.LifePilot.textSecondary)
+        }
+    }
+
+    @ViewBuilder
+    private func recurrenceMenu(for task: TaskItem) -> some View {
+        if task.recurrence != nil {
+            Button("Skip this occurrence") {
+                Task { try? await viewModel.skipOccurrence(task) }
+            }
+            Button("Reschedule this only (+1 day)") {
+                let next = (task.dueDate ?? Date()).addingTimeInterval(86_400)
+                Task {
+                    try? await viewModel.reschedule(task, to: next, scope: .thisOccurrenceOnly)
+                }
+            }
+            Button("Reschedule series (+1 day)") {
+                let next = (task.dueDate ?? Date()).addingTimeInterval(86_400)
+                Task {
+                    try? await viewModel.reschedule(task, to: next, scope: .entireSeries)
+                }
+            }
+        }
     }
 
     private var emptyMessage: String {
@@ -110,15 +169,7 @@ public struct TasksView: View {
                         .font(.body)
                         .strikethrough(task.isCompleted)
                         .foregroundStyle(Color.LifePilot.textPrimary)
-                    if let due = task.dueDate {
-                        Text(due.formatted(date: .abbreviated, time: .shortened))
-                            .font(.caption)
-                            .foregroundStyle(Color.LifePilot.textSecondary)
-                    } else {
-                        Text("Inbox · unscheduled")
-                            .font(.caption)
-                            .foregroundStyle(Color.LifePilot.textSecondary)
-                    }
+                    dueCaption(for: task)
                 }
                 Spacer()
                 Text(task.priority.rawValue)
@@ -127,6 +178,33 @@ public struct TasksView: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(task.title), \(task.isCompleted ? "completed" : "incomplete")")
+        .accessibilityLabel(accessibilityLabel(for: task))
+    }
+
+    @ViewBuilder
+    private func dueCaption(for task: TaskItem) -> some View {
+        if let due = task.dueDate {
+            HStack(spacing: 4) {
+                Text(due.formatted(date: .abbreviated, time: .shortened))
+                if task.recurrence != nil {
+                    Image(systemName: "repeat")
+                    Text(task.recurrence?.frequency.rawValue ?? "")
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(Color.LifePilot.textSecondary)
+        } else {
+            Text("Inbox · unscheduled")
+                .font(.caption)
+                .foregroundStyle(Color.LifePilot.textSecondary)
+        }
+    }
+
+    private func accessibilityLabel(for task: TaskItem) -> String {
+        var parts = [task.title, task.isCompleted ? "completed" : "incomplete"]
+        if task.recurrence != nil {
+            parts.append("repeating")
+        }
+        return parts.joined(separator: ", ")
     }
 }

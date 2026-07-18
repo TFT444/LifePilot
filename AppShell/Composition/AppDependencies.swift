@@ -18,6 +18,10 @@ public struct AppDependencies: Sendable {
     public let notificationScheduler: any NotificationScheduling
     public let calendarIntegration: any CalendarIntegrating
     public let remindersIntegration: any RemindersIntegrating
+    public let weatherIntegration: any WeatherIntegrating
+    public let travelIntegration: any TravelTimeIntegrating
+    public let cloudSync: any CloudSyncIntegrating
+    public let locationProvider: any LocationProviding
 
     public init(
         ghostBrain: GhostBrainServing,
@@ -30,7 +34,11 @@ public struct AppDependencies: Sendable {
         actionExecutor: any ActionExecuting,
         notificationScheduler: any NotificationScheduling = NoOpNotificationScheduler(),
         calendarIntegration: any CalendarIntegrating = UnavailableCalendarIntegration(),
-        remindersIntegration: any RemindersIntegrating = UnavailableRemindersIntegration()
+        remindersIntegration: any RemindersIntegrating = UnavailableRemindersIntegration(),
+        weatherIntegration: any WeatherIntegrating = UnavailableWeatherIntegration(),
+        travelIntegration: any TravelTimeIntegrating = UnavailableTravelTimeIntegration(),
+        cloudSync: any CloudSyncIntegrating = DisabledCloudSyncIntegration(),
+        locationProvider: any LocationProviding = UnavailableLocationProvider()
     ) {
         self.ghostBrain = ghostBrain
         self.timelineProvider = timelineProvider
@@ -43,17 +51,26 @@ public struct AppDependencies: Sendable {
         self.notificationScheduler = notificationScheduler
         self.calendarIntegration = calendarIntegration
         self.remindersIntegration = remindersIntegration
+        self.weatherIntegration = weatherIntegration
+        self.travelIntegration = travelIntegration
+        self.cloudSync = cloudSync
+        self.locationProvider = locationProvider
     }
 
-    /// Production wiring: SwiftData-backed stores, real notification scheduler,
-    /// EventKit adapters (graceful when denied), deterministic planning.
-    /// Under XCTest / SPM test host, uses in-memory SwiftData and no-op system
-    /// adapters because `UNUserNotificationCenter` / EventKit require an app bundle.
     public static var live: AppDependencies {
         let testing = Self.isRunningUnitTests
+        let cloudSync = OptionalCloudKitSyncIntegration()
+        let cloudEnabled = !testing && UserDefaults.standard.bool(
+            forKey: OptionalCloudKitSyncIntegration.enabledDefaultsKey
+        )
         let controller: PersistenceController
         if testing, let memory = try? PersistenceController(inMemory: true) {
             controller = memory
+        } else if let disk = try? PersistenceController(
+            inMemory: false,
+            cloudKitEnabled: cloudEnabled
+        ) {
+            controller = disk
         } else {
             controller = PersistenceController.shared
         }
@@ -62,6 +79,9 @@ public struct AppDependencies: Sendable {
         let preferenceStore = SwiftDataPreferenceStore(container: controller.container)
         let approvalStore = SwiftDataApprovalStore(container: controller.container)
         let executor = LocalActionExecutor(taskStore: taskStore, eventStore: eventStore)
+        let location: any LocationProviding = testing
+            ? UnavailableLocationProvider()
+            : SystemLocationProvider()
         return AppDependencies(
             ghostBrain: GhostBrainService(),
             timelineProvider: StoreBackedTimelineProvider(
@@ -82,7 +102,15 @@ public struct AppDependencies: Sendable {
                 : EventKitCalendarIntegration(),
             remindersIntegration: testing
                 ? UnavailableRemindersIntegration()
-                : EventKitRemindersIntegration()
+                : EventKitRemindersIntegration(),
+            weatherIntegration: testing
+                ? UnavailableWeatherIntegration()
+                : WeatherKitIntegration(locationProvider: location),
+            travelIntegration: testing
+                ? UnavailableTravelTimeIntegration()
+                : MapKitTravelTimeIntegration(),
+            cloudSync: testing ? DisabledCloudSyncIntegration() : cloudSync,
+            locationProvider: location
         )
     }
 
@@ -100,11 +128,11 @@ public struct AppDependencies: Sendable {
         return NSClassFromString("XCTestCase") != nil
     }
 
-    /// Preview / demo wiring with seeded in-memory stores.
     public static var preview: AppDependencies {
         let taskStore = InMemoryTaskStore(seed: MockTasks.items())
         let eventStore = InMemoryEventStore(seed: MockCalendar.events())
         let executor = LocalActionExecutor(taskStore: taskStore, eventStore: eventStore)
+        let location = StaticLocationProvider()
         return AppDependencies(
             ghostBrain: MockRecommendationProvider(),
             timelineProvider: StoreBackedTimelineProvider(
@@ -119,7 +147,11 @@ public struct AppDependencies: Sendable {
             actionExecutor: executor,
             notificationScheduler: NoOpNotificationScheduler(),
             calendarIntegration: UnavailableCalendarIntegration(),
-            remindersIntegration: UnavailableRemindersIntegration()
+            remindersIntegration: UnavailableRemindersIntegration(),
+            weatherIntegration: StaticWeatherIntegration(snapshot: MockWeather.snapshot()),
+            travelIntegration: StaticTravelTimeIntegration(minutes: 18),
+            cloudSync: DisabledCloudSyncIntegration(),
+            locationProvider: location
         )
     }
 }

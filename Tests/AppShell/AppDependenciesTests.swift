@@ -13,6 +13,8 @@ final class AppDependenciesTests: XCTestCase {
         // XCTest host cannot construct UNUserNotificationCenter / EventKit safely.
         XCTAssertTrue(dependencies.notificationScheduler is NoOpNotificationScheduler)
         XCTAssertTrue(dependencies.calendarIntegration is UnavailableCalendarIntegration)
+        XCTAssertTrue(dependencies.weatherIntegration is UnavailableWeatherIntegration)
+        XCTAssertTrue(dependencies.travelIntegration is UnavailableTravelTimeIntegration)
     }
 
     func testPreviewDependenciesUseInMemoryStores() async {

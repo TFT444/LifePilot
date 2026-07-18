@@ -37,6 +37,7 @@ public protocol TravelTimeIntegrating: Sendable {
 public protocol CloudSyncIntegrating: Sendable {
     func authorizationState() async -> CapabilityState
     func isSyncEnabled() async -> Bool
+    func setSyncEnabled(_ enabled: Bool) async throws
 }
 
 /// Deterministic doubles for unit tests (#37 / #38).
@@ -101,5 +102,70 @@ public struct DisabledCloudSyncIntegration: CloudSyncIntegrating {
 
     public func isSyncEnabled() async -> Bool {
         false
+    }
+
+    public func setSyncEnabled(_: Bool) async throws {
+        throw DomainError.unavailableNamed("iCloud sync is disabled in this build")
+    }
+}
+
+/// UserDefaults-backed optional iCloud sync preference (local-first).
+public struct OptionalCloudKitSyncIntegration: CloudSyncIntegrating {
+    public static let enabledDefaultsKey = "lifepilot.cloudKitSyncEnabled"
+
+    private let defaults: UserDefaults
+
+    public init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+    }
+
+    public func authorizationState() async -> CapabilityState {
+        await isSyncEnabled() ? .authorized : .notDetermined
+    }
+
+    public func isSyncEnabled() async -> Bool {
+        defaults.bool(forKey: Self.enabledDefaultsKey)
+    }
+
+    public func setSyncEnabled(_ enabled: Bool) async throws {
+        defaults.set(enabled, forKey: Self.enabledDefaultsKey)
+    }
+}
+
+/// Fixed weather snapshot for previews and deterministic briefing tests.
+public struct StaticWeatherIntegration: WeatherIntegrating {
+    private let snapshot: WeatherSnapshot
+
+    public init(snapshot: WeatherSnapshot) {
+        self.snapshot = snapshot
+    }
+
+    public func authorizationState() async -> CapabilityState {
+        .authorized
+    }
+
+    public func currentWeather() async throws -> WeatherSnapshot {
+        snapshot
+    }
+}
+
+/// Fixed travel ETA for previews and deterministic leave-by tests.
+public struct StaticTravelTimeIntegration: TravelTimeIntegrating {
+    private let minutes: Int
+
+    public init(minutes: Int) {
+        self.minutes = max(1, minutes)
+    }
+
+    public func authorizationState() async -> CapabilityState {
+        .authorized
+    }
+
+    public func travelTimeMinutes(
+        from _: String,
+        to _: String,
+        departingAt _: Date
+    ) async throws -> Int {
+        minutes
     }
 }

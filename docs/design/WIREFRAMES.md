@@ -3,7 +3,8 @@
 **Issue:** [#31](https://github.com/TFT444/LifePilot/issues/31)  
 **Journeys:** [USER_JOURNEYS.md](USER_JOURNEYS.md)  
 **Onboarding:** [ONBOARDING_PERMISSIONS.md](ONBOARDING_PERMISSIONS.md)  
-**Tokens:** [TOKENS_AND_LAYOUT.md](TOKENS_AND_LAYOUT.md)
+**Tokens:** [TOKENS_AND_LAYOUT.md](TOKENS_AND_LAYOUT.md)  
+**Visual north star:** [PHASE2_VISUAL_TARGET.md](PHASE2_VISUAL_TARGET.md) (Phase 2 showcase — dark glass, briefing, timeline spine)
 
 Low-fidelity layouts for every MVP screen and system state. Fidelity goal: structure, hierarchy, and navigation — not visual polish.
 

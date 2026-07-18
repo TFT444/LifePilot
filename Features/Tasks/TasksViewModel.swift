@@ -93,6 +93,17 @@ public final class TasksViewModel {
         updated.isCompleted.toggle()
         updated.completedAt = updated.isCompleted ? clock.now() : nil
         updated.updatedAt = clock.now()
+        // Completing a recurring task advances to the next occurrence instead of closing the series.
+        if updated.isCompleted {
+            if let advanced = RecurrenceEngine.skipOne(task, now: clock.now()) {
+                var next = advanced
+                next.isCompleted = false
+                next.completedAt = nil
+                try await taskStore.save(next)
+                await load()
+                return
+            }
+        }
         try await taskStore.save(updated)
         await load()
     }
@@ -125,6 +136,29 @@ public final class TasksViewModel {
             recurrence: task.recurrence
         )
         try await taskStore.save(copy)
+        await load()
+    }
+
+    /// Skip this occurrence; keep the series rule for later dates.
+    public func skipOccurrence(_ task: TaskItem) async throws {
+        guard let updated = RecurrenceEngine.skipOne(task, now: clock.now()) else { return }
+        try await taskStore.save(updated)
+        await load()
+    }
+
+    /// Reschedule due date for this occurrence only, or the entire series.
+    public func reschedule(
+        _ task: TaskItem,
+        to newDue: Date,
+        scope: RecurrenceEngine.EditScope
+    ) async throws {
+        let updated = RecurrenceEngine.reschedule(
+            task,
+            to: newDue,
+            scope: scope,
+            now: clock.now()
+        )
+        try await taskStore.save(updated)
         await load()
     }
 }

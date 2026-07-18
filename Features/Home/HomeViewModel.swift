@@ -2,41 +2,75 @@ import Foundation
 import LifePilotCore
 import LifePilotDesignSystem
 
+/// Optional system integrations for Home briefing enrichment.
+public struct HomeBriefingIntegrations: Sendable {
+    public var calendar: any CalendarIntegrating
+    public var weather: any WeatherIntegrating
+    public var travel: any TravelTimeIntegrating
+    public var location: any LocationProviding
+
+    public init(
+        calendar: any CalendarIntegrating = UnavailableCalendarIntegration(),
+        weather: any WeatherIntegrating = UnavailableWeatherIntegration(),
+        travel: any TravelTimeIntegrating = UnavailableTravelTimeIntegration(),
+        location: any LocationProviding = UnavailableLocationProvider()
+    ) {
+        self.calendar = calendar
+        self.weather = weather
+        self.travel = travel
+        self.location = location
+    }
+}
+
+/// User-visible recovery banner on Home.
+public struct HomeStatusBanner: Equatable, Sendable {
+    public var message: String
+    public var style: StatusBanner.Style
+
+    public init(message: String, style: StatusBanner.Style) {
+        self.message = message
+        self.style = style
+    }
+}
+
 /// Store- and planning-backed Home / Morning Briefing state.
 @Observable
 @MainActor
 public final class HomeViewModel {
-    public private(set) var greeting: String = ""
-    public private(set) var dateText: String = ""
-    public private(set) var recommendations: [BriefingCard.Content] = []
-    public private(set) var upcomingEvents: [CalendarEvent] = []
-    public private(set) var topTasks: [TaskItem] = []
-    public private(set) var findings: [PlanningFinding] = []
-    public private(set) var freshnessSummary: String = "Local"
-    public private(set) var lastUpdated: Date?
-    public private(set) var loadState: LoadableState<Bool> = .idle
-    public private(set) var isLoading = false
+    public internal(set) var greeting: String = ""
+    public internal(set) var dateText: String = ""
+    public internal(set) var recommendations: [BriefingCard.Content] = []
+    public internal(set) var upcomingEvents: [CalendarEvent] = []
+    public internal(set) var topTasks: [TaskItem] = []
+    public internal(set) var findings: [PlanningFinding] = []
+    public internal(set) var weatherSummary: String?
+    public internal(set) var leaveBySummary: String?
+    public internal(set) var freshnessSummary: String = "Local"
+    public internal(set) var lastUpdated: Date?
+    public internal(set) var statusBanner: HomeStatusBanner?
+    public internal(set) var loadState: LoadableState<Bool> = .idle
+    public internal(set) var isLoading = false
 
-    private let taskStore: any TaskStore
-    private let eventStore: any EventStore
-    private let preferenceStore: any PreferenceStore
-    private let planningEngine: any PlanningEngine
-    private let calendarIntegration: any CalendarIntegrating
-    private let clock: any ClockProviding
+    let taskStore: any TaskStore
+    let eventStore: any EventStore
+    let preferenceStore: any PreferenceStore
+    let planningEngine: any PlanningEngine
+    let integrations: HomeBriefingIntegrations
+    let clock: any ClockProviding
 
     public init(
         taskStore: any TaskStore,
         eventStore: any EventStore,
         preferenceStore: any PreferenceStore,
         planningEngine: any PlanningEngine = DeterministicPlanningEngine(),
-        calendarIntegration: any CalendarIntegrating = UnavailableCalendarIntegration(),
+        integrations: HomeBriefingIntegrations = HomeBriefingIntegrations(),
         clock: any ClockProviding = SystemClock()
     ) {
         self.taskStore = taskStore
         self.eventStore = eventStore
         self.preferenceStore = preferenceStore
         self.planningEngine = planningEngine
-        self.calendarIntegration = calendarIntegration
+        self.integrations = integrations
         self.clock = clock
     }
 
@@ -49,9 +83,39 @@ public final class HomeViewModel {
         let preferences = await preferenceStore.loadPreferences()
         let tasks = await taskStore.allTasks()
         let hydrated = await hydrateEvents(now: now)
-        applyBriefing(now: now, preferences: preferences, tasks: tasks, events: hydrated.events)
-        freshnessSummary = hydrated.notes.joined(separator: " · ")
+        let weather = try? await integrations.weather.currentWeather()
+        let leaveBy = await enrichLeaveBy(
+            events: hydrated.events,
+            weather: weather,
+            preferences: preferences,
+            now: now
+        )
+
+        applyBriefing(
+            now: now,
+            preferences: preferences,
+            tasks: tasks,
+            events: hydrated.events,
+            extraFindings: leaveBy.findings
+        )
+        leaveBySummary = leaveBy.summary
+        weatherSummary = weather.map {
+            "\($0.temperatureFahrenheit)° \($0.condition.rawValue)"
+        }
+
+        var notes = hydrated.notes
+        if weather != nil {
+            notes.append("Weather")
+        }
+        if leaveBy.summary != nil {
+            notes.append("Leave-by")
+        }
+        freshnessSummary = notes.joined(separator: " · ")
         lastUpdated = now
+        statusBanner = await makeStatusBanner(
+            calendarNotes: hydrated.notes,
+            hasWeather: weather != nil
+        )
         loadState = recommendations.isEmpty && upcomingEvents.isEmpty && topTasks.isEmpty
             ? .empty
             : .loaded(true)
@@ -59,89 +123,5 @@ public final class HomeViewModel {
 
     public func refresh() async {
         await load()
-    }
-
-    private func hydrateEvents(now: Date) async -> (events: [CalendarEvent], notes: [String]) {
-        var events = await eventStore.allEvents()
-        var notes = ["Local data"]
-        let calendarState = await calendarIntegration.authorizationState()
-        if calendarState == .authorized || calendarState == .limited {
-            let dayStart = Calendar.current.startOfDay(for: now)
-            let dayEnd = Calendar.current.date(byAdding: .day, value: 2, to: dayStart) ?? now
-            if let remote = try? await calendarIntegration.fetchEvents(from: dayStart, to: dayEnd) {
-                events = mergeEvents(local: events, remote: remote)
-                notes.append("Calendar connected")
-            } else {
-                notes.append("Calendar unavailable — showing local")
-            }
-        } else if calendarState == .denied {
-            notes.append("Calendar denied")
-        }
-        return (events, notes)
-    }
-
-    private func applyBriefing(
-        now: Date,
-        preferences: UserPreferences,
-        tasks: [TaskItem],
-        events: [CalendarEvent]
-    ) {
-        topTasks = tasks.filter { !$0.isCompleted }
-            .sorted { lhs, rhs in
-                (lhs.dueDate ?? .distantFuture, lhs.priority) < (rhs.dueDate ?? .distantFuture, rhs.priority)
-            }
-            .prefix(5)
-            .map { $0 }
-
-        upcomingEvents = events
-            .filter { $0.startDate >= now && $0.status != .declined }
-            .sorted { $0.startDate < $1.startDate }
-            .prefix(6)
-            .map { $0 }
-
-        findings = planningEngine.analyze(
-            events: events,
-            tasks: tasks,
-            preferences: preferences,
-            now: now
-        )
-        recommendations = findings.prefix(6).map { finding in
-            BriefingCard.Content(
-                title: finding.title,
-                reasoning: finding.evidence.first?.summary ?? finding.detail,
-                sourceAgent: finding.evidence.first?.sourceAgent ?? .planning,
-                riskBadgeText: finding.riskLevel == .low ? nil : finding.riskLevel.rawValue.capitalized
-            )
-        }
-        greeting = Self.greeting(for: now)
-        dateText = now.formatted(.dateTime.weekday(.wide).month(.wide).day())
-    }
-
-    private func mergeEvents(local: [CalendarEvent], remote: [CalendarEvent]) -> [CalendarEvent] {
-        var byExternal: [String: CalendarEvent] = [:]
-        for event in local {
-            if let key = event.externalIdentifier {
-                byExternal[key] = event
-            }
-        }
-        var merged = local.filter { $0.externalIdentifier == nil }
-        for remoteEvent in remote {
-            if let key = remoteEvent.externalIdentifier, byExternal[key] == nil {
-                merged.append(remoteEvent)
-            } else if remoteEvent.externalIdentifier == nil {
-                merged.append(remoteEvent)
-            }
-        }
-        return merged
-    }
-
-    private static func greeting(for date: Date) -> String {
-        let hour = Calendar.current.component(.hour, from: date)
-        switch hour {
-        case 5 ..< 12: return "Good morning"
-        case 12 ..< 17: return "Good afternoon"
-        case 17 ..< 22: return "Good evening"
-        default: return "Hello"
-        }
     }
 }

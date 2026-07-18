@@ -48,12 +48,51 @@ final class HomeViewModelTests: XCTestCase {
             taskStore: InMemoryTaskStore(),
             eventStore: InMemoryEventStore(),
             preferenceStore: InMemoryPreferenceStore(),
-            calendarIntegration: UnavailableCalendarIntegration()
+            integrations: HomeBriefingIntegrations(
+                calendar: UnavailableCalendarIntegration()
+            )
         )
 
         await viewModel.load()
 
         XCTAssertTrue(viewModel.freshnessSummary.contains("Calendar") || viewModel.freshnessSummary.contains("Local"))
         XCTAssertFalse(viewModel.isLoading)
+    }
+
+    func testLoadIncludesWeatherAndLeaveBy() async {
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let eventStore = InMemoryEventStore(seed: [
+            CalendarEvent(
+                title: "Office",
+                location: "Downtown",
+                startDate: now.addingTimeInterval(7200),
+                endDate: now.addingTimeInterval(9000),
+                travelBufferMinutes: 25
+            ),
+        ])
+        let weather = WeatherSnapshot(
+            condition: .rain,
+            temperatureFahrenheit: 60,
+            highFahrenheit: 64,
+            lowFahrenheit: 52,
+            precipitationChance: 0.6,
+            asOf: now
+        )
+        let viewModel = HomeViewModel(
+            taskStore: InMemoryTaskStore(),
+            eventStore: eventStore,
+            preferenceStore: InMemoryPreferenceStore(),
+            integrations: HomeBriefingIntegrations(
+                weather: StaticWeatherIntegration(snapshot: weather),
+                travel: StaticTravelTimeIntegration(minutes: 22)
+            ),
+            clock: FixedClock(now)
+        )
+
+        await viewModel.load()
+
+        XCTAssertNotNil(viewModel.weatherSummary)
+        XCTAssertNotNil(viewModel.leaveBySummary)
+        XCTAssertTrue(viewModel.freshnessSummary.contains("Weather"))
     }
 }

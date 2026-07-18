@@ -24,6 +24,7 @@ final class AppRouteTests: XCTestCase {
     func testResolvesCorePaths() {
         XCTAssertEqual(AppRoute.resolve(pathComponents: ["tasks", "today"]), .tasks(filter: .today))
         XCTAssertEqual(AppRoute.resolve(pathComponents: ["approvals"]), .approvals)
+        XCTAssertEqual(AppRoute.resolve(pathComponents: ["search"]), .search)
         XCTAssertEqual(AppRoute.resolve(pathComponents: ["capture", "event"]), .quickCapture(.event))
         XCTAssertNil(AppRoute.resolve(pathComponents: ["unknown"]))
     }
@@ -85,5 +86,26 @@ final class IntegrationProtocolTests: XCTestCase {
         let sync = DisabledCloudSyncIntegration()
         let enabled = await sync.isSyncEnabled()
         XCTAssertFalse(enabled)
+        do {
+            try await sync.setSyncEnabled(true)
+            XCTFail("Disabled sync should reject enable")
+        } catch {
+            // expected
+        }
+    }
+
+    func testOptionalCloudKitToggleRoundTrip() async throws {
+        let suiteName = "lifepilot.tests.cloudkit.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
+        let sync = OptionalCloudKitSyncIntegration(defaults: defaults)
+        let initiallyEnabled = await sync.isSyncEnabled()
+        XCTAssertFalse(initiallyEnabled)
+        try await sync.setSyncEnabled(true)
+        let enabled = await sync.isSyncEnabled()
+        XCTAssertTrue(enabled)
+        try await sync.setSyncEnabled(false)
+        let disabled = await sync.isSyncEnabled()
+        XCTAssertFalse(disabled)
     }
 }

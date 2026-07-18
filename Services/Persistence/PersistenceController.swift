@@ -8,7 +8,7 @@ public final class PersistenceController: @unchecked Sendable {
 
     public static let shared = PersistenceController.makeShared()
 
-    public init(inMemory: Bool = false) throws {
+    public init(inMemory: Bool = false, cloudKitEnabled: Bool = false) throws {
         let schema = Schema([
             PersistedTaskEntity.self,
             PersistedEventEntity.self,
@@ -17,10 +17,14 @@ public final class PersistenceController: @unchecked Sendable {
             PersistedApprovalEntity.self,
             PersistedAuditEntity.self,
         ])
+        // CloudKit is opt-in and never required for local-first use.
+        let cloudKit: ModelConfiguration.CloudKitDatabase =
+            (!inMemory && cloudKitEnabled) ? .automatic : .none
         let configuration = ModelConfiguration(
             "LifePilot",
             schema: schema,
-            isStoredInMemoryOnly: inMemory
+            isStoredInMemoryOnly: inMemory,
+            cloudKitDatabase: cloudKit
         )
         container = try ModelContainer(for: schema, configurations: [configuration])
         isInMemory = inMemory

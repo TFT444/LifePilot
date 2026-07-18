@@ -1,85 +1,54 @@
 # LifePilot Implementation Status
 
-**Branch:** `cursor/issues-today-4d5a` (PR #41)  
-**Base:** latest `origin/develop` (includes #42 solo-admin merge tooling)  
-**Last updated:** 2026-07-16  
-**Environment:** Cloud agent (Linux). `swift` / Xcode not available locally — verification via GitHub Actions (macOS).
+**Branch:** `cursor/complete-remaining-mvp-4d5a` (PR #43 — ship candidate)  
+**Base:** `origin/develop`  
+**Last updated:** 2026-07-18  
+**Environment:** Cloud agent (Linux). Device/VoiceOver verification requires owner Xcode.
 
 ---
 
-## Audit summary (2026-07-16)
-
-### What is actually implemented
+## Ship candidate summary
 
 | Area | Reality |
 |---|---|
-| SwiftUI app shell | Splash, Onboarding, Home, Timeline, Tasks, Insights, Settings; Memory via Settings/Insights |
-| Design system | Real tokens + components |
-| Persistence | **SwiftData** production stores (`PersistenceController` + `SwiftData*Store`); in-memory for tests/previews |
-| Home / Briefing | Store + `DeterministicPlanningEngine` backed (not mock GhostBrain) |
-| Tasks | Inbox / Today / Upcoming / Scheduled / Completed; search; swipe delete/duplicate/snooze; capture **without** arbitrary deadline |
-| Timeline | Store-backed merge of events + due tasks |
-| Planning | Overlap, buffers, overdue/at-risk, work hours, overload, missing break, focus window |
-| Approvals | Executor + UI; SwiftData approval/audit store wired in composition |
-| Notifications | `UserNotificationsScheduler` (real adapter) + no-op for tests |
-| EventKit | `EventKitCalendarIntegration` + `EventKitRemindersIntegration` (graceful when denied) |
-| Weather / MapKit / CloudKit | Protocols + unavailable doubles (real adapters still pending) |
-| Insights / Memory | Functional local evidence UI (not ComingSoon placeholders) |
-| Ghost Brain | Production service stays unavailable; planning engine is the source of truth |
-| Scope scrub | Finance/shopping/HealthKit diagram labels removed; EmailMessage/MockEmail deleted |
-
-### Tooling blockers
-
-- No local `swift` / Xcode → cannot claim simulator/UI results from this environment
-- Agent cannot close/merge PRs or change branch protection (use `scripts/enable-solo-admin-merge.sh` as admin)
-- PR #39 is fully contained in #41 (agent cannot close #39 — owner should)
+| App shell | Splash → Onboarding → Home / Timeline / Tasks / Insights / Settings |
+| Visual pass | Phase 2 dark-glass: `AmbientBackground`, `GlowCard`, `ContextTile`, hero briefing, Approvals cards |
+| Persistence | SwiftData; optional CloudKit toggle |
+| Home | Planning + weather/leave-by + status banners (denied/offline) |
+| Timeline | Filters All / Calendar / Travel / Tasks |
+| Tasks | Inbox capture, recurrence skip/series, search field |
+| Global Search | Offline Search sheet (tasks + events) |
+| Approvals | Persisted store; card UI; no sample seeds |
+| Location / Weather | `LocationProviding` + CoreLocation adapter; WeatherKit when authorized |
+| MapKit leave-by | Wired; string/current-location origin |
+| App Intents | Capture Inbox + refresh briefing |
+| Widgets | Providers in AppShell; Extension entry `App/LifePilotWidgets/` (attach once in Xcode) |
+| Icons | Raster app icon + favicons |
+| Scope | No finance / mail send / Uber / HealthKit medical |
 
 ---
 
-## Checkbox plan
+## Owner merge / TestFlight checklist
 
-### Done this cycle
+1. Merge PR #43 into `develop`, then release to `main` when ready  
+2. In Xcode: attach Widget Extension target (see `Widgets/README.md`)  
+3. Signing + capability: Calendar, Reminders, Location When-In-Use, Background Modes (fetch)  
+4. Device QA: permissions, offline, VoiceOver, Dynamic Type, Reduce Motion  
+5. Close delivered GitHub issues (agent cannot — 403)
 
-- [x] Sync PR #41 with latest `develop`
-- [x] Confirm #39 is ancestor of #41
-- [x] Repository audit + this status file
-- [x] SwiftData repositories for tasks/events/preferences/memory/approvals/audit
-- [x] Wire `AppDependencies.live` to SwiftData + EventKit + UserNotifications
-- [x] Store-backed Home briefing + freshness/refresh
-- [x] Tasks capture without +1h deadline; scheduled filter; search; swipe actions
-- [x] Memory + Insights screens (evidence-based, no finance/medical)
-- [x] Planning: missing break + focus window rules
-- [x] Remove EmailMessage / MockEmail; scrub architecture.svg + roadmap agent roster
-- [x] SwiftData + Home ViewModel tests
+---
 
-### Still open for production DoD
+## Still not claimable from this environment
 
-- [ ] Full recurrence edit/skip/series UX
-- [ ] WeatherKit + MapKit real adapters + travel leave-by
-- [ ] CloudKit optional sync + BackgroundTasks
-- [ ] App Intents + widgets
-- [ ] UI tests / VoiceOver device passes (needs Xcode)
-- [ ] Approval queue without sample seeds in production Settings
-- [ ] Close stale GitHub issues/PRs (#3/#4/#7/#16/#20/#22/#23/#39) as owner
-- [ ] Demo web HTML finance/email copy cleanup
+- Simulator / device UI screenshots  
+- Live WeatherKit without Apple credentials on device  
+- Widget appearance on Home Screen until Extension target is embedded  
 
 ---
 
 ## Verification log
 
-| When | What ran | Result |
+| When | What | Result |
 |---|---|---|
-| 2026-07-16 | Local `swift` / `xcodebuild` | **Unavailable** on agent host |
-| 2026-07-16 | Sync merge `develop` → `cursor/issues-today-4d5a` | Clean merge (`#42` included) |
-| 2026-07-16 | GHA after SwiftData + Home + adapters | Build/Lint/Format green; Unit Tests green after xctest-host gating |
-
----
-
-## Dependencies / decisions locked
-
-1. **No finance/banking/commerce** — permanent.
-2. **No HealthKit / medical MVP** — deferred only.
-3. **No Apple Mail ingestion / automatic sending** — removed models/mocks.
-4. **Offline-first** without account; AI optional and never holds execution credentials.
-5. **Composition:** `App → AppShell → Features → Core protocols` ← `Services` / adapters.
-6. **In-memory stores** remain for tests/previews only; production uses SwiftData.
+| 2026-07-17 | GHA on prior #43 commits | Build/Lint/Tests green |
+| 2026-07-18 | Ship UI + search + location pass (`164ba92`) | Build / Lint / Format / Unit Tests **green** |

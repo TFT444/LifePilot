@@ -344,8 +344,8 @@ function renderSettings() {
       <div class="settings-group">
         <h3>Connections</h3>
         <div class="settings-row"><span>Calendar</span><span style="color:var(--signal-success)">Mock</span></div>
-        <div class="settings-row"><span>Email</span><span style="color:var(--signal-success)">Mock</span></div>
-        <div class="settings-row"><span>Maps & Travel</span><span style="color:var(--text-secondary)">Phase 7</span></div>
+        <div class="settings-row"><span>Reminders</span><span style="color:var(--signal-success)">Mock</span></div>
+        <div class="settings-row"><span>Maps & Travel</span><span style="color:var(--text-secondary)">Leave-by ETA</span></div>
       </div>
       <div class="settings-group">
         <h3>About</h3>
