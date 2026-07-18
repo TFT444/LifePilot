@@ -7,37 +7,55 @@ import CoreLocation
 
 #if canImport(CoreLocation)
 /// CoreLocation When-In-Use adapter. Request only from Settings / Home weather path.
-public final class CoreLocationProvider: NSObject, LocationProviding, CLLocationManagerDelegate, @unchecked Sendable {
+final class CoreLocationProvider: NSObject, LocationProviding, CLLocationManagerDelegate, @unchecked Sendable {
     private let manager = CLLocationManager()
     private let lock = NSLock()
     private var continuation: CheckedContinuation<CLLocation, Error>?
 
-    public override init() {
+    override init() {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
     }
 
-    public func authorizationState() async -> CapabilityState {
+    func authorizationState() async -> CapabilityState {
         switch manager.authorizationStatus {
-        case .notDetermined: return .notDetermined
-        case .restricted, .denied: return .denied
-        case .authorizedAlways, .authorizedWhenInUse: return .authorized
-        @unknown default: return .notDetermined
+        case .notDetermined:
+            return .notDetermined
+        case .restricted, .denied:
+            return .denied
+        #if os(iOS) || os(tvOS) || os(watchOS)
+        case .authorizedAlways, .authorizedWhenInUse:
+            return .authorized
+        #else
+        case .authorized:
+            return .authorized
+        #endif
+        @unknown default:
+            return .notDetermined
         }
     }
 
-    public func requestAuthorization() async -> CapabilityState {
+    func requestAuthorization() async -> CapabilityState {
         if manager.authorizationStatus == .notDetermined {
+            #if os(iOS) || os(tvOS) || os(watchOS)
             manager.requestWhenInUseAuthorization()
+            #elseif os(macOS)
+            manager.requestAlwaysAuthorization()
+            #endif
             try? await Task.sleep(for: .milliseconds(500))
         }
         return await authorizationState()
     }
 
-    public func currentCoordinate() async throws -> GeoCoordinate {
+    func currentCoordinate() async throws -> GeoCoordinate {
         let status = manager.authorizationStatus
-        guard status == .authorizedWhenInUse || status == .authorizedAlways else {
+        #if os(iOS) || os(tvOS) || os(watchOS)
+        let allowed = status == .authorizedWhenInUse || status == .authorizedAlways
+        #else
+        let allowed = status == .authorized
+        #endif
+        guard allowed else {
             throw DomainError.unauthorized
         }
         let location: CLLocation = try await withCheckedThrowingContinuation { cont in
@@ -57,7 +75,7 @@ public final class CoreLocationProvider: NSObject, LocationProviding, CLLocation
         )
     }
 
-    public func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         lock.lock()
         let cont = continuation
         continuation = nil
@@ -71,7 +89,7 @@ public final class CoreLocationProvider: NSObject, LocationProviding, CLLocation
         }
     }
 
-    public func locationManager(_: CLLocationManager, didFailWithError error: Error) {
+    func locationManager(_: CLLocationManager, didFailWithError error: Error) {
         lock.lock()
         let cont = continuation
         continuation = nil

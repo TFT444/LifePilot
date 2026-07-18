@@ -33,15 +33,21 @@ public struct WeatherKitIntegration: WeatherIntegrating {
             do {
                 return try await fetchWeatherKit(at: coord)
             } catch {
-                if let fallback { return fallback }
+                if let fallback {
+                    return fallback
+                }
                 throw error
             }
             #else
-            if let fallback { return fallback }
+            if let fallback {
+                return fallback
+            }
             throw DomainError.unavailableNamed("WeatherKit unavailable on this platform")
             #endif
         }
-        if let fallback { return fallback }
+        if let fallback {
+            return fallback
+        }
         throw DomainError.unavailableNamed(
             "Location needed for weather; briefing continues without it"
         )
