@@ -7,15 +7,29 @@ public struct HomeBriefingIntegrations: Sendable {
     public var calendar: any CalendarIntegrating
     public var weather: any WeatherIntegrating
     public var travel: any TravelTimeIntegrating
+    public var location: any LocationProviding
 
     public init(
         calendar: any CalendarIntegrating = UnavailableCalendarIntegration(),
         weather: any WeatherIntegrating = UnavailableWeatherIntegration(),
-        travel: any TravelTimeIntegrating = UnavailableTravelTimeIntegration()
+        travel: any TravelTimeIntegrating = UnavailableTravelTimeIntegration(),
+        location: any LocationProviding = UnavailableLocationProvider()
     ) {
         self.calendar = calendar
         self.weather = weather
         self.travel = travel
+        self.location = location
+    }
+}
+
+/// User-visible recovery banner on Home.
+public struct HomeStatusBanner: Equatable, Sendable {
+    public var message: String
+    public var style: StatusBanner.Style
+
+    public init(message: String, style: StatusBanner.Style) {
+        self.message = message
+        self.style = style
     }
 }
 
@@ -33,6 +47,7 @@ public final class HomeViewModel {
     public private(set) var leaveBySummary: String?
     public private(set) var freshnessSummary: String = "Local"
     public private(set) var lastUpdated: Date?
+    public private(set) var statusBanner: HomeStatusBanner?
     public private(set) var loadState: LoadableState<Bool> = .idle
     public private(set) var isLoading = false
 
@@ -97,9 +112,46 @@ public final class HomeViewModel {
         }
         freshnessSummary = notes.joined(separator: " · ")
         lastUpdated = now
+        statusBanner = await makeStatusBanner(
+            calendarNotes: hydrated.notes,
+            hasWeather: weather != nil
+        )
         loadState = recommendations.isEmpty && upcomingEvents.isEmpty && topTasks.isEmpty
             ? .empty
             : .loaded(true)
+    }
+
+    private func makeStatusBanner(
+        calendarNotes: [String],
+        hasWeather: Bool
+    ) async -> HomeStatusBanner? {
+        let calendarState = await integrations.calendar.authorizationState()
+        if calendarState == .denied {
+            return HomeStatusBanner(
+                message: "Calendar access denied — showing LifePilot-owned events only.",
+                style: .warning
+            )
+        }
+        let locationState = await integrations.location.authorizationState()
+        if locationState == .denied {
+            return HomeStatusBanner(
+                message: "Location denied — weather and live leave-by are limited.",
+                style: .warning
+            )
+        }
+        if calendarNotes.contains(where: { $0.localizedCaseInsensitiveContains("unavailable") }) {
+            return HomeStatusBanner(
+                message: "Calendar temporarily unavailable — local schedule is shown.",
+                style: .info
+            )
+        }
+        if !hasWeather, locationState == .notDetermined {
+            return HomeStatusBanner(
+                message: "Enable Location in Settings for weather context.",
+                style: .info
+            )
+        }
+        return nil
     }
 
     public func refresh() async {

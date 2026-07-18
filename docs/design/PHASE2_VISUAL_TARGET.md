@@ -98,3 +98,13 @@ Allowed approval examples: reschedule event, create/update local task, write to 
 6. Settings profile header + grouped rows  
 
 Wire logic already exists for stores, planning, leave-by, approvals, and recurrence — UI pass should **restyle and compose**, not re-invent domain.
+
+## Implemented (2026-07-18)
+
+- `AmbientBackground`, `GlowCard`, `ContextTile`, `StatusBanner`
+- Home hero + context grid + status banners
+- Timeline filter chips
+- Approvals card stack
+- Insights glow cards + ambient background
+- Settings profile header + location enable CTA
+- Global Search sheet from tab toolbars

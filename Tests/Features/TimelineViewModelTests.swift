@@ -32,6 +32,23 @@ final class TimelineViewModelTests: XCTestCase {
         XCTAssertTrue(kinds.contains(.event))
         XCTAssertTrue(kinds.contains(.task))
     }
+
+    func testFilterTasksAndTravel() async {
+        let provider = StubTimelineProvider(entries: [
+            TimelineEntry(date: Date(), title: "Standup", subtitle: nil, kind: .event),
+            TimelineEntry(date: Date(), title: "Ship deck", subtitle: nil, kind: .task),
+            TimelineEntry(date: Date(), title: "Leave home", subtitle: "Travel buffer", kind: .signal),
+        ])
+        let viewModel = TimelineViewModel(timelineProvider: provider)
+        await viewModel.load()
+        XCTAssertEqual(viewModel.entries.count, 3)
+        viewModel.setFilter(.tasks)
+        XCTAssertEqual(viewModel.entries.count, 1)
+        XCTAssertEqual(viewModel.entries.first?.kind, .task)
+        viewModel.setFilter(.travel)
+        XCTAssertEqual(viewModel.entries.count, 1)
+        XCTAssertEqual(viewModel.entries.first?.kind, .signal)
+    }
 }
 
 private struct StubTimelineProvider: TimelineProviding {

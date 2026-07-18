@@ -40,6 +40,13 @@ final class ComponentConstructionTests: XCTestCase {
         _ = EmptyStateView(symbolName: "tray", message: "Nothing here")
     }
 
+    func testAmbientBackgroundAndGlowCardConstruct() {
+        _ = AmbientBackground()
+        _ = GlowCard { Text("Glow") }
+        _ = ContextTile(symbolName: "cloud", title: "22°", subtitle: "London")
+        _ = StatusBanner(message: "Offline", style: .warning, actionTitle: "Retry", action: {})
+    }
+
     func testQuickActionCardConstructs() {
         _ = QuickActionCard(symbolName: "envelope.fill", title: "Inbox")
     }

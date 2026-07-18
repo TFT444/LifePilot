@@ -1,84 +1,54 @@
 # LifePilot Implementation Status
 
-**Branch:** `cursor/complete-remaining-mvp-4d5a`  
-**Base:** latest `origin/develop` (`bdc53d3`, includes #41 + #42)  
-**Last updated:** 2026-07-17  
-**Environment:** Cloud agent (Linux). `swift` / Xcode not available locally — verification via GitHub Actions (macOS).
+**Branch:** `cursor/complete-remaining-mvp-4d5a` (PR #43 — ship candidate)  
+**Base:** `origin/develop`  
+**Last updated:** 2026-07-18  
+**Environment:** Cloud agent (Linux). Device/VoiceOver verification requires owner Xcode.
 
 ---
 
-## Audit summary (2026-07-17)
-
-### What is actually implemented
+## Ship candidate summary
 
 | Area | Reality |
 |---|---|
-| SwiftUI app shell | Splash, Onboarding, Home, Timeline, Tasks, Insights, Settings; Memory via Settings/Insights |
-| Design system | Real tokens + components |
-| Persistence | **SwiftData** production stores; optional CloudKit when Settings toggle is on |
-| Home / Briefing | Store + planning + weather/leave-by enrichment |
-| Tasks | Filters, search, swipe actions, **recurrence skip / this-vs-series** |
-| Timeline | Store-backed merge of events + due tasks |
-| Planning | Overlap, buffers, overdue/at-risk, work hours, overload, missing break, focus window, leave-by |
-| Approvals | Executor + UI; **persisted ApprovalStore only — no sample seeds** |
-| Notifications | `UserNotificationsScheduler` + no-op for tests |
-| EventKit | Calendar + Reminders adapters (graceful when denied) |
-| Weather / MapKit | Adapters wired; leave-by uses MapKit ETA or preference buffers |
-| CloudKit / BackgroundTasks | Optional sync toggle + BGAppRefresh registration |
-| App Intents | Capture Inbox task + refresh briefing shortcuts |
-| Widgets | Timeline providers + Today/Upcoming configs in AppShell (attach Widget Extension — see `Widgets/README.md`) |
-| Icons | Raster `AppIcon-1024.png` + website favicons from `Assets/brand/logo.svg` |
-| Insights / Memory | Functional local evidence UI |
-| Ghost Brain | Production service stays unavailable; planning engine is source of truth |
-| Scope scrub | Finance/email demo copy removed from `demo/` + `Website/public/demo.js` |
-
-### Tooling blockers
-
-- No local `swift` / Xcode → cannot claim simulator/UI / VoiceOver results from this environment
-- Agent cannot close GitHub issues/PRs (403) — owner must close stale issues
-- Widget Extension `@main` bundle still needs an Xcode target (providers ship in AppShell)
+| App shell | Splash → Onboarding → Home / Timeline / Tasks / Insights / Settings |
+| Visual pass | Phase 2 dark-glass: `AmbientBackground`, `GlowCard`, `ContextTile`, hero briefing, Approvals cards |
+| Persistence | SwiftData; optional CloudKit toggle |
+| Home | Planning + weather/leave-by + status banners (denied/offline) |
+| Timeline | Filters All / Calendar / Travel / Tasks |
+| Tasks | Inbox capture, recurrence skip/series, search field |
+| Global Search | Offline Search sheet (tasks + events) |
+| Approvals | Persisted store; card UI; no sample seeds |
+| Location / Weather | `LocationProviding` + CoreLocation adapter; WeatherKit when authorized |
+| MapKit leave-by | Wired; string/current-location origin |
+| App Intents | Capture Inbox + refresh briefing |
+| Widgets | Providers in AppShell; Extension entry `App/LifePilotWidgets/` (attach once in Xcode) |
+| Icons | Raster app icon + favicons |
+| Scope | No finance / mail send / Uber / HealthKit medical |
 
 ---
 
-## Checkbox plan
+## Owner merge / TestFlight checklist
 
-### Done this cycle (`cursor/complete-remaining-mvp-4d5a`)
+1. Merge PR #43 into `develop`, then release to `main` when ready  
+2. In Xcode: attach Widget Extension target (see `Widgets/README.md`)  
+3. Signing + capability: Calendar, Reminders, Location When-In-Use, Background Modes (fetch)  
+4. Device QA: permissions, offline, VoiceOver, Dynamic Type, Reduce Motion  
+5. Close delivered GitHub issues (agent cannot — 403)
 
-- [x] Approvals queue loads/persists via `ApprovalStore` (no Settings sample seeds)
-- [x] Recurrence engine + Tasks skip / this-vs-series UX
-- [x] Weather + MapKit leave-by briefing enrichment
-- [x] Optional CloudKit preference + SwiftData CloudKit config hook
-- [x] BackgroundTasks briefing refresh registration
-- [x] App Intents (capture + briefing refresh)
-- [x] Widget providers/views + wiring README
-- [x] Demo HTML/JS finance + email scrub
-- [x] #2 raster app icon + favicons (`scripts/generate-brand-icons.sh`)
-- [x] Unit tests for recurrence, leave-by, Home weather path, cloud toggle
+---
 
-### Still open for production DoD
+## Still not claimable from this environment
 
-- [ ] **UI visual pass** against [Phase 2 showcase](design/PHASE2_VISUAL_TARGET.md) (dark glass Home / Timeline / Approvals polish)
-- [ ] Widget Extension Xcode target (`@main` WidgetBundle) — see `Widgets/README.md`
-- [ ] WeatherKit live location (needs CLLocation permission UX)
-- [ ] UI tests / VoiceOver device passes (needs Xcode)
-- [ ] Owner: close stale GitHub issues already delivered (#3/#4/#7/#24–#38, etc.); leave #2 until icon PR merges
+- Simulator / device UI screenshots  
+- Live WeatherKit without Apple credentials on device  
+- Widget appearance on Home Screen until Extension target is embedded  
 
 ---
 
 ## Verification log
 
-| When | What ran | Result |
+| When | What | Result |
 |---|---|---|
-| 2026-07-17 | Local `swift` / `xcodebuild` | **Unavailable** on agent host |
-| 2026-07-17 | `cairosvg` + Pillow icon export | App icon 1024 + web favicons written |
-| 2026-07-17 | GHA on PR #43 (`4fc8465`) | Build / Lint / Format / Unit Tests **green** |
-
----
-
-## Dependencies / decisions locked
-
-1. **No finance/banking/commerce** — permanent.
-2. **No Apple Mail ingestion / auto-send** — permanent.
-3. **No HealthKit medical MVP** — deferred.
-4. Offline-first; CloudKit optional and never required.
-5. Every external write: ActionProposal → Approval → Executor.
+| 2026-07-17 | GHA on prior #43 commits | Build/Lint/Tests green |
+| 2026-07-18 | Ship UI + search + location pass | Pending GHA after push |

@@ -21,6 +21,7 @@ public struct AppDependencies: Sendable {
     public let weatherIntegration: any WeatherIntegrating
     public let travelIntegration: any TravelTimeIntegrating
     public let cloudSync: any CloudSyncIntegrating
+    public let locationProvider: any LocationProviding
 
     public init(
         ghostBrain: GhostBrainServing,
@@ -36,7 +37,8 @@ public struct AppDependencies: Sendable {
         remindersIntegration: any RemindersIntegrating = UnavailableRemindersIntegration(),
         weatherIntegration: any WeatherIntegrating = UnavailableWeatherIntegration(),
         travelIntegration: any TravelTimeIntegrating = UnavailableTravelTimeIntegration(),
-        cloudSync: any CloudSyncIntegrating = DisabledCloudSyncIntegration()
+        cloudSync: any CloudSyncIntegrating = DisabledCloudSyncIntegration(),
+        locationProvider: any LocationProviding = UnavailableLocationProvider()
     ) {
         self.ghostBrain = ghostBrain
         self.timelineProvider = timelineProvider
@@ -52,12 +54,9 @@ public struct AppDependencies: Sendable {
         self.weatherIntegration = weatherIntegration
         self.travelIntegration = travelIntegration
         self.cloudSync = cloudSync
+        self.locationProvider = locationProvider
     }
 
-    /// Production wiring: SwiftData-backed stores, real notification scheduler,
-    /// EventKit / MapKit adapters (graceful when denied), deterministic planning.
-    /// Under XCTest / SPM test host, uses in-memory SwiftData and no-op system
-    /// adapters because `UNUserNotificationCenter` / EventKit require an app bundle.
     public static var live: AppDependencies {
         let testing = Self.isRunningUnitTests
         let cloudSync = OptionalCloudKitSyncIntegration()
@@ -80,6 +79,9 @@ public struct AppDependencies: Sendable {
         let preferenceStore = SwiftDataPreferenceStore(container: controller.container)
         let approvalStore = SwiftDataApprovalStore(container: controller.container)
         let executor = LocalActionExecutor(taskStore: taskStore, eventStore: eventStore)
+        let location: any LocationProviding = testing
+            ? UnavailableLocationProvider()
+            : SystemLocationProvider()
         return AppDependencies(
             ghostBrain: GhostBrainService(),
             timelineProvider: StoreBackedTimelineProvider(
@@ -103,11 +105,12 @@ public struct AppDependencies: Sendable {
                 : EventKitRemindersIntegration(),
             weatherIntegration: testing
                 ? UnavailableWeatherIntegration()
-                : WeatherKitIntegration(),
+                : WeatherKitIntegration(locationProvider: location),
             travelIntegration: testing
                 ? UnavailableTravelTimeIntegration()
                 : MapKitTravelTimeIntegration(),
-            cloudSync: testing ? DisabledCloudSyncIntegration() : cloudSync
+            cloudSync: testing ? DisabledCloudSyncIntegration() : cloudSync,
+            locationProvider: location
         )
     }
 
@@ -125,11 +128,11 @@ public struct AppDependencies: Sendable {
         return NSClassFromString("XCTestCase") != nil
     }
 
-    /// Preview / demo wiring with seeded in-memory stores.
     public static var preview: AppDependencies {
         let taskStore = InMemoryTaskStore(seed: MockTasks.items())
         let eventStore = InMemoryEventStore(seed: MockCalendar.events())
         let executor = LocalActionExecutor(taskStore: taskStore, eventStore: eventStore)
+        let location = StaticLocationProvider()
         return AppDependencies(
             ghostBrain: MockRecommendationProvider(),
             timelineProvider: StoreBackedTimelineProvider(
@@ -147,7 +150,8 @@ public struct AppDependencies: Sendable {
             remindersIntegration: UnavailableRemindersIntegration(),
             weatherIntegration: StaticWeatherIntegration(snapshot: MockWeather.snapshot()),
             travelIntegration: StaticTravelTimeIntegration(minutes: 18),
-            cloudSync: DisabledCloudSyncIntegration()
+            cloudSync: DisabledCloudSyncIntegration(),
+            locationProvider: location
         )
     }
 }

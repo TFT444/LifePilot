@@ -21,22 +21,22 @@ public struct InsightsView: View {
     }
 
     public var body: some View {
-        Group {
-            if viewModel.insights.isEmpty {
-                EmptyStateView(
-                    symbolName: "chart.line.uptrend.xyaxis",
-                    message: viewModel.statusMessage
-                )
-            } else {
-                List {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Spacing.lg) {
+                if viewModel.insights.isEmpty {
+                    EmptyStateView(
+                        symbolName: "chart.line.uptrend.xyaxis",
+                        message: viewModel.statusMessage
+                    )
+                } else {
                     ForEach(viewModel.insights) { insight in
                         insightRow(insight)
                     }
                 }
-                .listStyle(.plain)
             }
+            .padding(Spacing.lg)
         }
-        .background(Color.LifePilot.backgroundPrimary)
+        .background(AmbientBackground())
         .navigationTitle("Insights")
         .task { await viewModel.load() }
         .toolbar {
@@ -49,25 +49,24 @@ public struct InsightsView: View {
     }
 
     private func insightRow(_ insight: LifeInsight) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text(insight.title)
-                .font(.LifePilot.titleMedium)
-            Text(insight.detail)
-                .font(.LifePilot.body)
-                .foregroundStyle(Color.LifePilot.textPrimary)
-            Text("Evidence: \(insight.evidence)")
+        GlowCard {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                Text(insight.title)
+                    .font(.LifePilot.titleMedium)
+                    .foregroundStyle(Color.LifePilot.textPrimary)
+                Text(insight.detail)
+                    .font(.LifePilot.body)
+                    .foregroundStyle(Color.LifePilot.textPrimary)
+                Text("Evidence: \(insight.evidence)")
+                    .font(.LifePilot.caption)
+                    .foregroundStyle(Color.LifePilot.textSecondary)
+                Text("Method: \(insight.method)")
+                    .font(.caption2)
+                    .foregroundStyle(Color.LifePilot.textSecondary)
+                Button("Dismiss") {
+                    viewModel.dismiss(insight)
+                }
                 .font(.LifePilot.caption)
-                .foregroundStyle(Color.LifePilot.textSecondary)
-            Text("Method: \(insight.method)")
-                .font(.caption2)
-                .foregroundStyle(Color.LifePilot.textSecondary)
-        }
-        .padding(.vertical, Spacing.xs)
-        .swipeActions {
-            Button {
-                viewModel.dismiss(insight)
-            } label: {
-                Label("Dismiss", systemImage: "eye.slash")
             }
         }
     }

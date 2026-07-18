@@ -24,6 +24,7 @@ final class AppRouteTests: XCTestCase {
     func testResolvesCorePaths() {
         XCTAssertEqual(AppRoute.resolve(pathComponents: ["tasks", "today"]), .tasks(filter: .today))
         XCTAssertEqual(AppRoute.resolve(pathComponents: ["approvals"]), .approvals)
+        XCTAssertEqual(AppRoute.resolve(pathComponents: ["search"]), .search)
         XCTAssertEqual(AppRoute.resolve(pathComponents: ["capture", "event"]), .quickCapture(.event))
         XCTAssertNil(AppRoute.resolve(pathComponents: ["unknown"]))
     }

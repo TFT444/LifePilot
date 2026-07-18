@@ -11,6 +11,7 @@ public struct RootTabView: View {
     @State private var isCapturing = false
     @State private var captureKind: AppRoute.QuickCaptureKind = .task
     @State private var captureTitle = ""
+    @State private var isSearching = false
 
     public init(dependencies: AppDependencies) {
         self.dependencies = dependencies
@@ -21,6 +22,16 @@ public struct RootTabView: View {
             ForEach(AppTab.allCases) { tab in
                 NavigationStack {
                     destination(for: tab)
+                        .toolbar {
+                            ToolbarItem(placement: .primaryAction) {
+                                Button {
+                                    isSearching = true
+                                } label: {
+                                    Image(systemName: "magnifyingglass")
+                                }
+                                .accessibilityLabel("Search")
+                            }
+                        }
                 }
                 .tabItem {
                     Label(tab.title, systemImage: tab.symbolName)
@@ -37,6 +48,7 @@ public struct RootTabView: View {
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: 44))
                     .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(LinearGradient.LifePilot.accent)
                     .padding(.trailing, Spacing.lg)
                     .padding(.bottom, Spacing.xl)
             }
@@ -56,6 +68,19 @@ public struct RootTabView: View {
             )
             .presentationDetents([.medium])
         }
+        .sheet(isPresented: $isSearching) {
+            NavigationStack {
+                SearchView(
+                    taskStore: dependencies.taskStore,
+                    eventStore: dependencies.eventStore
+                )
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Done") { isSearching = false }
+                    }
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -71,7 +96,8 @@ public struct RootTabView: View {
                     integrations: HomeBriefingIntegrations(
                         calendar: dependencies.calendarIntegration,
                         weather: dependencies.weatherIntegration,
-                        travel: dependencies.travelIntegration
+                        travel: dependencies.travelIntegration,
+                        location: dependencies.locationProvider
                     )
                 )
             )
@@ -94,7 +120,12 @@ public struct RootTabView: View {
                 preferenceStore: dependencies.preferenceStore,
                 actionExecutor: dependencies.actionExecutor,
                 approvalStore: dependencies.approvalStore,
-                cloudSync: dependencies.cloudSync
+                connections: SettingsConnections(
+                    cloudSync: dependencies.cloudSync,
+                    locationProvider: dependencies.locationProvider,
+                    calendarIntegration: dependencies.calendarIntegration,
+                    remindersIntegration: dependencies.remindersIntegration
+                )
             )
         }
     }
@@ -105,12 +136,10 @@ public struct RootTabView: View {
         do {
             switch captureKind {
             case .task, .reminder:
-                // Inbox capture — no arbitrary deadline unless the user sets one later.
                 try await dependencies.taskStore.save(
                     TaskItem(title: title, listID: TaskList.inbox.id)
                 )
             case .event:
-                // Default: starts in 30 minutes for 30 minutes — editable later.
                 let start = Date().addingTimeInterval(30 * 60)
                 try await dependencies.eventStore.save(
                     CalendarEvent(
@@ -123,7 +152,7 @@ public struct RootTabView: View {
             isCapturing = false
             captureTitle = ""
         } catch {
-            // Keep sheet open so the user can retry; toast lands in a later polish pass.
+            // Keep sheet open so the user can retry.
         }
     }
 }

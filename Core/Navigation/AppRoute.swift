@@ -12,6 +12,7 @@ public enum AppRoute: Hashable, Sendable, Codable {
     case memory
     case insights
     case settings
+    case search
     case briefing
     case quickCapture(QuickCaptureKind)
 
@@ -35,6 +36,7 @@ public enum AppRoute: Hashable, Sendable, Codable {
         "memory": .memory,
         "insights": .insights,
         "settings": .settings,
+        "search": .search,
         "briefing": .briefing,
     ]
 
