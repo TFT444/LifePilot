@@ -51,4 +51,4 @@
 | When | What | Result |
 |---|---|---|
 | 2026-07-17 | GHA on prior #43 commits | Build/Lint/Tests green |
-| 2026-07-18 | Ship UI + search + location pass | Pending GHA after push |
+| 2026-07-18 | Ship UI + search + location pass (`164ba92`) | Build / Lint / Format / Unit Tests **green** |
