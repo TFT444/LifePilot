@@ -14,8 +14,12 @@ public struct SearchView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            TextField("Search tasks and events", text: $viewModel.query)
-                .textFieldStyle(.roundedBorder)
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(Color.LifePilot.textSecondary)
+                TextField("Search tasks and events", text: $viewModel.query)
+            }
+                .lifePilotField()
                 .padding(Spacing.lg)
                 .onChange(of: viewModel.query) { _, _ in
                     Task { await viewModel.search() }
@@ -36,22 +40,44 @@ public struct SearchView: View {
                 .padding(Spacing.lg)
                 Spacer()
             } else {
-                List(viewModel.results) { result in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(result.title)
-                            .font(.LifePilot.body)
-                        Text(result.subtitle)
-                            .font(.LifePilot.caption)
-                            .foregroundStyle(Color.LifePilot.textSecondary)
+                List {
+                    ForEach(SearchViewModel.Result.Kind.allCases, id: \.self) { kind in
+                        let matches = viewModel.results.filter { $0.kind == kind }
+                        if !matches.isEmpty {
+                            Section(kind.title) {
+                                ForEach(matches) { result in
+                                    resultRow(result)
+                                }
+                            }
+                        }
                     }
-                    .accessibilityElement(children: .combine)
                 }
                 .listStyle(.plain)
+                .scrollContentBackground(.hidden)
             }
         }
-        .background(Color.LifePilot.backgroundPrimary)
+        .background(AmbientBackground())
         .navigationTitle("Search")
         .task { await viewModel.search() }
+    }
+
+    private func resultRow(_ result: SearchViewModel.Result) -> some View {
+        HStack(spacing: Spacing.md) {
+            Image(systemName: result.kind.symbolName)
+                .foregroundStyle(result.kind == .task
+                    ? Color.LifePilot.signalSuccess
+                    : Color.LifePilot.accentStart)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(result.title)
+                    .font(.LifePilot.body)
+                Text(result.subtitle)
+                    .font(.LifePilot.caption)
+                    .foregroundStyle(Color.LifePilot.textSecondary)
+            }
+        }
+        .padding(.vertical, Spacing.xs)
+        .listRowBackground(Color.LifePilot.backgroundElevated.opacity(0.82))
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -59,9 +85,26 @@ public struct SearchView: View {
 @MainActor
 public final class SearchViewModel {
     public struct Result: Identifiable, Hashable, Sendable {
+        public enum Kind: String, CaseIterable, Hashable, Sendable {
+            case task
+            case event
+
+            var title: String {
+                rawValue.capitalized + "s"
+            }
+
+            var symbolName: String {
+                switch self {
+                case .task: "checkmark.circle"
+                case .event: "calendar"
+                }
+            }
+        }
+
         public let id: UUID
         public var title: String
         public var subtitle: String
+        public var kind: Kind
     }
 
     public var query = ""
@@ -95,7 +138,8 @@ public final class SearchViewModel {
                     title: task.title,
                     subtitle: task.dueDate.map {
                         "Task · \($0.formatted(date: .abbreviated, time: .shortened))"
-                    } ?? "Task · Inbox"
+                    } ?? "Task · Inbox",
+                    kind: .task
                 )
             )
         }
@@ -108,7 +152,8 @@ public final class SearchViewModel {
                 Result(
                     id: event.id,
                     title: event.title,
-                    subtitle: "Event · \(event.startDate.formatted(date: .abbreviated, time: .shortened))"
+                    subtitle: "Event · \(event.startDate.formatted(date: .abbreviated, time: .shortened))",
+                    kind: .event
                 )
             )
         }

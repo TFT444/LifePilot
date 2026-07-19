@@ -48,7 +48,16 @@ final class ComponentConstructionTests: XCTestCase {
     }
 
     func testQuickActionCardConstructs() {
-        _ = QuickActionCard(symbolName: "envelope.fill", title: "Inbox")
+        _ = QuickActionCard(symbolName: "tray.fill", title: "Task Inbox")
+    }
+
+    func testPremiumComponentsConstruct() {
+        _ = BrandMark()
+        _ = FilterChip(title: "Today", isSelected: true, action: {})
+        _ = TextField("Title", text: .constant("")).lifePilotField()
+        _ = ContextRibbon(weather: "14°", leaveBy: "08:35", freshness: "Updated")
+        _ = PreparationCard(eyebrow: "Next", title: "Design review", detail: "At 10:00")
+        _ = InsightHero(title: "Patterns", detail: "Evidence-led")
     }
 
     func testDesignSystemCatalogViewConstructs() {

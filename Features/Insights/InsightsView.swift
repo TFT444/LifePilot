@@ -23,6 +23,10 @@ public struct InsightsView: View {
     public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
+                InsightHero(
+                    title: "Patterns, with proof",
+                    detail: "LifePilot reflects only what your local tasks and schedule support."
+                )
                 if viewModel.insights.isEmpty {
                     EmptyStateView(
                         symbolName: "chart.line.uptrend.xyaxis",
@@ -51,17 +55,20 @@ public struct InsightsView: View {
     private func insightRow(_ insight: LifeInsight) -> some View {
         GlowCard {
             VStack(alignment: .leading, spacing: Spacing.sm) {
+                Label("EVIDENCE-BASED", systemImage: "checkmark.seal.fill")
+                    .font(.LifePilot.caption)
+                    .foregroundStyle(Color.LifePilot.accentTeal)
                 Text(insight.title)
                     .font(.LifePilot.titleMedium)
                     .foregroundStyle(Color.LifePilot.textPrimary)
                 Text(insight.detail)
                     .font(.LifePilot.body)
                     .foregroundStyle(Color.LifePilot.textPrimary)
-                Text("Evidence: \(insight.evidence)")
+                Label(insight.evidence, systemImage: "doc.text.magnifyingglass")
                     .font(.LifePilot.caption)
                     .foregroundStyle(Color.LifePilot.textSecondary)
-                Text("Method: \(insight.method)")
-                    .font(.caption2)
+                Text("How this was found: \(insight.method)")
+                    .font(.LifePilot.caption)
                     .foregroundStyle(Color.LifePilot.textSecondary)
                 Button("Dismiss") {
                     viewModel.dismiss(insight)

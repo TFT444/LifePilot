@@ -81,8 +81,8 @@ public struct InsightCard: View {
 
 #Preview {
     HStack(spacing: Spacing.sm) {
-        InsightCard(value: "4.5 hrs", label: "Time saved this week", trend: .up)
-        InsightCard(value: "94%", label: "Productivity score", trend: .flat)
+        InsightCard(value: "3", label: "Late meetings this month", trend: .up)
+        InsightCard(value: "2", label: "Tight buffers this week", trend: .flat)
     }
     .padding()
 }

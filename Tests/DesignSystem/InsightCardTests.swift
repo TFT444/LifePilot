@@ -3,8 +3,8 @@ import XCTest
 
 final class InsightCardTests: XCTestCase {
     func testConstructsWithAndWithoutTrend() {
-        _ = InsightCard(value: "4.5 hrs", label: "Time saved this week")
-        _ = InsightCard(value: "94%", label: "Productivity score", trend: .up)
+        _ = InsightCard(value: "3", label: "Late meetings this month")
+        _ = InsightCard(value: "2", label: "Tight buffers this week", trend: .up)
         _ = InsightCard(value: "2", label: "Conflicts resolved", trend: .down)
         _ = InsightCard(value: "0", label: "No change", trend: .flat)
     }

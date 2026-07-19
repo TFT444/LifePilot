@@ -30,6 +30,12 @@ extension Color {
         /// flat color.
         public static let accentStart = Color(hex: 0x7C3AED)
         public static let accentEnd = Color(hex: 0x2563EB)
+        public static let accentTeal = Color(hex: 0x2DD4BF)
+        public static let onAccent = Color.white
+        public static let borderSubtle = Color(
+            light: Color(hex: 0xD8DBE8),
+            dark: Color(hex: 0x262640)
+        )
 
         // MARK: - Text
 
@@ -56,6 +62,17 @@ extension LinearGradient {
         /// table, `color.accent.primary`.
         public static let accent = LinearGradient(
             colors: [Color.LifePilot.accentStart, Color.LifePilot.accentEnd],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+
+        /// Reserved for the one primary moment on a screen.
+        public static let hero = LinearGradient(
+            colors: [
+                Color.LifePilot.accentStart,
+                Color.LifePilot.accentEnd,
+                Color.LifePilot.accentTeal,
+            ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )

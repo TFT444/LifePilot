@@ -7,6 +7,7 @@ import SwiftUI
 public struct LifePilotRootView: View {
     @State private var phase: LaunchPhase = .splash
     @State private var launchError: String?
+    @State private var preferredScheme: ColorScheme?
     private let dependencies: AppDependencies
     private let launchStore: any LaunchStateStoring
 
@@ -38,6 +39,7 @@ public struct LifePilotRootView: View {
                 RootTabView(dependencies: dependencies)
             }
         }
+        .preferredColorScheme(preferredScheme)
         .overlay(alignment: .bottom) {
             if let launchError {
                 Text(launchError)
@@ -56,6 +58,12 @@ public struct LifePilotRootView: View {
     private func boot() async {
         try? await Task.sleep(for: .seconds(1.2))
         let state = await launchStore.load()
+        let preferences = await dependencies.preferenceStore.loadPreferences()
+        preferredScheme = switch preferences.appearance {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
+        }
         withAnimation(.easeInOut(duration: 0.35)) {
             phase = state.shouldShowOnboarding ? .onboarding : .main
         }

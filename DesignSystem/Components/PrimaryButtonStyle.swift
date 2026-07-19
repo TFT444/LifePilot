@@ -6,6 +6,8 @@ import SwiftUI
 /// meaningful rather than decorative, per docs/DESIGN_SYSTEM.md's "Calm by
 /// default" principle.
 public struct PrimaryButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     public init() {}
 
     public func makeBody(configuration: Configuration) -> some View {
@@ -19,7 +21,7 @@ public struct PrimaryButtonStyle: ButtonStyle {
             .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous))
             .opacity(configuration.isPressed ? 0.85 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(Motion.quick, value: configuration.isPressed)
+            .animation(reduceMotion ? nil : Motion.quick, value: configuration.isPressed)
     }
 }
 

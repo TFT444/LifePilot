@@ -1,5 +1,6 @@
 import Foundation
 import LifePilotCore
+import LifePilotDesignSystem
 import SwiftUI
 
 #if canImport(WidgetKit)
@@ -94,19 +95,30 @@ public struct TodayBriefingWidgetView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("LifePilot")
-                .font(.caption.weight(.bold))
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            HStack {
+                BrandMark(size: 30)
+                Text("LifePilot")
+                    .font(.LifePilot.caption.weight(.bold))
+            }
             Text(entry.greeting)
-                .font(.caption2)
+                .font(.LifePilot.caption)
+                .foregroundStyle(Color.LifePilot.textSecondary)
             Text(entry.headline)
-                .font(.headline)
+                .font(.LifePilot.titleMedium)
                 .lineLimit(2)
             Text(entry.detail)
-                .font(.caption2)
+                .font(.LifePilot.caption)
+                .foregroundStyle(Color.LifePilot.textSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .padding()
+        .containerBackground(for: .widget) {
+            Color.LifePilot.backgroundPrimary
+                .overlay(
+                    LinearGradient.LifePilot.hero
+                        .opacity(0.16)
+                )
+        }
     }
 }
 
@@ -118,17 +130,25 @@ public struct UpcomingAgendaWidgetView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Upcoming")
-                .font(.caption.weight(.bold))
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Label("Upcoming", systemImage: "calendar")
+                .font(.LifePilot.caption.weight(.bold))
+                .foregroundStyle(Color.LifePilot.accentTeal)
             Text(entry.headline)
-                .font(.headline)
+                .font(.LifePilot.titleMedium)
                 .lineLimit(3)
             Text(entry.detail)
-                .font(.caption2)
+                .font(.LifePilot.caption)
+                .foregroundStyle(Color.LifePilot.textSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .padding()
+        .containerBackground(for: .widget) {
+            Color.LifePilot.backgroundPrimary
+                .overlay(
+                    LinearGradient.LifePilot.accent
+                        .opacity(0.12)
+                )
+        }
     }
 }
 

@@ -2,6 +2,9 @@ import SwiftUI
 
 /// Soft radial washes behind briefing / timeline screens (Phase 2 dark glass look).
 public struct AmbientBackground: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shifted = false
+
     public init() {}
 
     public var body: some View {
@@ -16,6 +19,7 @@ public struct AmbientBackground: View {
                 startRadius: 20,
                 endRadius: 320
             )
+            .offset(x: shifted ? -18 : 0, y: shifted ? 12 : 0)
             RadialGradient(
                 colors: [
                     Color.LifePilot.accentEnd.opacity(0.18),
@@ -25,9 +29,21 @@ public struct AmbientBackground: View {
                 startRadius: 10,
                 endRadius: 280
             )
+            .offset(x: shifted ? 16 : 0, y: shifted ? -10 : 0)
+            Circle()
+                .fill(Color.LifePilot.accentTeal.opacity(0.07))
+                .frame(width: 220, height: 220)
+                .blur(radius: 42)
+                .offset(x: shifted ? 150 : 175, y: shifted ? 240 : 270)
         }
         .ignoresSafeArea()
         .accessibilityHidden(true)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 2.2).repeatCount(2, autoreverses: true)) {
+                shifted = true
+            }
+        }
     }
 }
 

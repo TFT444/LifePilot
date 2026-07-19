@@ -40,6 +40,10 @@ public struct RootTabView: View {
             }
         }
         .tint(Color.LifePilot.accentEnd)
+        #if os(iOS)
+        .toolbarBackground(.ultraThinMaterial, for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
+        #endif
         .overlay(alignment: .bottomTrailing) {
             Button {
                 captureKind = .task
@@ -57,7 +61,7 @@ public struct RootTabView: View {
         .sheet(isPresented: $isCapturing) {
             QuickCaptureView(
                 title: $captureTitle,
-                kind: captureKind,
+                kind: $captureKind,
                 onSubmit: {
                     Task { await submitCapture() }
                 },

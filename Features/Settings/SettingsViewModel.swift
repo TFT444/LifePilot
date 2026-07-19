@@ -65,6 +65,17 @@ public final class SettingsViewModel {
         try await preferenceStore.savePreferences(preferences)
     }
 
+    public func setQuietHours(start: Int, end: Int) async throws {
+        preferences.quietHoursStart = min(23, max(0, start))
+        preferences.quietHoursEnd = min(23, max(0, end))
+        try await preferenceStore.savePreferences(preferences)
+    }
+
+    public func setAppearance(_ appearance: UserPreferences.AppearancePreference) async throws {
+        preferences.appearance = appearance
+        try await preferenceStore.savePreferences(preferences)
+    }
+
     public func setCloudSyncEnabled(_ enabled: Bool) async {
         do {
             try await cloudSync.setSyncEnabled(enabled)

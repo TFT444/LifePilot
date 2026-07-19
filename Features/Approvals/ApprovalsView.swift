@@ -6,6 +6,8 @@ import SwiftUI
 public struct ApprovalsView: View {
     @State private var viewModel: ApprovalsViewModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var selectedProposal: ActionProposal?
+    @State private var decisionMessage: String?
 
     public init(viewModel: ApprovalsViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -16,6 +18,10 @@ public struct ApprovalsView: View {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 if let error = viewModel.lastError {
                     StatusBanner(message: error, style: .risk)
+                }
+                if let decisionMessage {
+                    StatusBanner(message: decisionMessage, style: .info)
+                        .accessibilityLabel(decisionMessage)
                 }
 
                 Text(
@@ -61,6 +67,10 @@ public struct ApprovalsView: View {
         .background(AmbientBackground())
         .navigationTitle("Approvals")
         .task { await viewModel.load() }
+        .sheet(item: $selectedProposal) { proposal in
+            proposalReview(proposal)
+                .presentationDetents([.medium, .large])
+        }
     }
 
     private func pendingCard(_ proposal: ActionProposal) -> some View {
@@ -78,17 +88,86 @@ public struct ApprovalsView: View {
                         .foregroundStyle(Color.LifePilot.textSecondary)
                 }
                 HStack(spacing: Spacing.sm) {
-                    Button("Approve") {
-                        Task { await viewModel.approve(proposal) }
+                    Button("Review exact change") {
+                        selectedProposal = proposal
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.LifePilot.accentEnd)
+                    .buttonStyle(.lifePilotPrimary)
                     Button("Decline") {
-                        Task { await viewModel.reject(proposal) }
+                        Task {
+                            await viewModel.reject(proposal)
+                            decisionMessage = "Declined. Nothing was changed."
+                        }
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.lifePilotSecondary)
                 }
                 .accessibilityElement(children: .contain)
+            }
+        }
+    }
+
+    private func proposalReview(_ proposal: ActionProposal) -> some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: Spacing.lg) {
+                    StatusBanner(
+                        message: "Approval applies only to the exact values shown below.",
+                        style: .warning
+                    )
+                    PreparationCard(
+                        eyebrow: proposal.actionType.rawValue,
+                        title: proposal.title,
+                        detail: proposal.detail,
+                        symbolName: "checkmark.shield"
+                    )
+                    SectionHeader(title: "Exact change", symbolName: "arrow.left.arrow.right")
+                    GlowCard {
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            ForEach(proposal.parameters.keys.sorted(), id: \.self) { key in
+                                HStack(alignment: .top) {
+                                    Text(key.capitalized)
+                                        .font(.LifePilot.caption)
+                                        .foregroundStyle(Color.LifePilot.textSecondary)
+                                    Spacer()
+                                    Text(proposal.parameters[key] ?? "")
+                                        .font(.LifePilot.body)
+                                        .foregroundStyle(Color.LifePilot.textPrimary)
+                                        .multilineTextAlignment(.trailing)
+                                }
+                            }
+                        }
+                    }
+                    if let evidence = proposal.evidence.first {
+                        Label(evidence.summary, systemImage: "doc.text.magnifyingglass")
+                            .font(.LifePilot.caption)
+                            .foregroundStyle(Color.LifePilot.textSecondary)
+                    }
+                    Button("Approve and execute") {
+                        selectedProposal = nil
+                        Task {
+                            await viewModel.approve(proposal)
+                            decisionMessage = viewModel.lastError == nil
+                                ? "Approved and execution confirmed."
+                                : "Approved, but execution needs attention."
+                        }
+                    }
+                    .buttonStyle(.lifePilotPrimary)
+                    Button("Decline — make no change") {
+                        selectedProposal = nil
+                        Task {
+                            await viewModel.reject(proposal)
+                            decisionMessage = "Declined. Nothing was changed."
+                        }
+                    }
+                    .buttonStyle(.lifePilotSecondary)
+                }
+                .padding(Spacing.lg)
+            }
+            .background(AmbientBackground())
+            .navigationTitle("Review Proposal")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { selectedProposal = nil }
+                }
             }
         }
     }

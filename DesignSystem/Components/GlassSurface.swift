@@ -25,6 +25,7 @@ public struct GlassSurface<Content: View>: View {
 /// `.lifePilotGlass()` both apply — extracted per this PR's Task 3 so the
 /// `.ultraThinMaterial` background is defined once.
 public struct GlassModifier: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     private let cornerRadius: CGFloat
 
     public init(cornerRadius: CGFloat = 0) {
@@ -34,11 +35,23 @@ public struct GlassModifier: ViewModifier {
     public func body(content: Content) -> some View {
         if cornerRadius > 0 {
             content
-                .background(.ultraThinMaterial)
+                .background(
+                    reduceTransparency
+                        ? AnyShapeStyle(Color.LifePilot.backgroundElevated)
+                        : AnyShapeStyle(.ultraThinMaterial)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .stroke(Color.LifePilot.borderSubtle, lineWidth: reduceTransparency ? 1.5 : 0.5)
+                )
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         } else {
             content
-                .background(.ultraThinMaterial)
+                .background(
+                    reduceTransparency
+                        ? AnyShapeStyle(Color.LifePilot.backgroundElevated)
+                        : AnyShapeStyle(.ultraThinMaterial)
+                )
         }
     }
 }
