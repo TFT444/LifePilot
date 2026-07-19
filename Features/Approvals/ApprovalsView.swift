@@ -120,45 +120,13 @@ public struct ApprovalsView: View {
                         symbolName: "checkmark.shield"
                     )
                     SectionHeader(title: "Exact change", symbolName: "arrow.left.arrow.right")
-                    GlowCard {
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            ForEach(proposal.parameters.keys.sorted(), id: \.self) { key in
-                                HStack(alignment: .top) {
-                                    Text(key.capitalized)
-                                        .font(.LifePilot.caption)
-                                        .foregroundStyle(Color.LifePilot.textSecondary)
-                                    Spacer()
-                                    Text(proposal.parameters[key] ?? "")
-                                        .font(.LifePilot.body)
-                                        .foregroundStyle(Color.LifePilot.textPrimary)
-                                        .multilineTextAlignment(.trailing)
-                                }
-                            }
-                        }
-                    }
+                    proposalParameters(proposal)
                     if let evidence = proposal.evidence.first {
                         Label(evidence.summary, systemImage: "doc.text.magnifyingglass")
                             .font(.LifePilot.caption)
                             .foregroundStyle(Color.LifePilot.textSecondary)
                     }
-                    Button("Approve and execute") {
-                        selectedProposal = nil
-                        Task {
-                            await viewModel.approve(proposal)
-                            decisionMessage = viewModel.lastError == nil
-                                ? "Approved and execution confirmed."
-                                : "Approved, but execution needs attention."
-                        }
-                    }
-                    .buttonStyle(.lifePilotPrimary)
-                    Button("Decline — make no change") {
-                        selectedProposal = nil
-                        Task {
-                            await viewModel.reject(proposal)
-                            decisionMessage = "Declined. Nothing was changed."
-                        }
-                    }
-                    .buttonStyle(.lifePilotSecondary)
+                    proposalActions(proposal)
                 }
                 .padding(Spacing.lg)
             }
@@ -169,6 +137,48 @@ public struct ApprovalsView: View {
                     Button("Close") { selectedProposal = nil }
                 }
             }
+        }
+    }
+
+    private func proposalParameters(_ proposal: ActionProposal) -> some View {
+        GlowCard {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                ForEach(proposal.parameters.keys.sorted(), id: \.self) { key in
+                    HStack(alignment: .top) {
+                        Text(key.capitalized)
+                            .font(.LifePilot.caption)
+                            .foregroundStyle(Color.LifePilot.textSecondary)
+                        Spacer()
+                        Text(proposal.parameters[key] ?? "")
+                            .font(.LifePilot.body)
+                            .foregroundStyle(Color.LifePilot.textPrimary)
+                            .multilineTextAlignment(.trailing)
+                    }
+                }
+            }
+        }
+    }
+
+    private func proposalActions(_ proposal: ActionProposal) -> some View {
+        VStack(spacing: Spacing.sm) {
+            Button("Approve and execute") {
+                selectedProposal = nil
+                Task {
+                    await viewModel.approve(proposal)
+                    decisionMessage = viewModel.lastError == nil
+                        ? "Approved and execution confirmed."
+                        : "Approved, but execution needs attention."
+                }
+            }
+            .buttonStyle(.lifePilotPrimary)
+            Button("Decline — make no change") {
+                selectedProposal = nil
+                Task {
+                    await viewModel.reject(proposal)
+                    decisionMessage = "Declined. Nothing was changed."
+                }
+            }
+            .buttonStyle(.lifePilotSecondary)
         }
     }
 }

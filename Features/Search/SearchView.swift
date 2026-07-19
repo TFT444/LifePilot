@@ -41,7 +41,7 @@ public struct SearchView: View {
                 Spacer()
             } else {
                 List {
-                    ForEach(SearchViewModel.Result.Kind.allCases, id: \.self) { kind in
+                    ForEach(SearchResultKind.allCases, id: \.self) { kind in
                         let matches = viewModel.results.filter { $0.kind == kind }
                         if !matches.isEmpty {
                             Section(kind.title) {
@@ -85,26 +85,10 @@ public struct SearchView: View {
 @MainActor
 public final class SearchViewModel {
     public struct Result: Identifiable, Hashable, Sendable {
-        public enum Kind: String, CaseIterable, Hashable, Sendable {
-            case task
-            case event
-
-            var title: String {
-                rawValue.capitalized + "s"
-            }
-
-            var symbolName: String {
-                switch self {
-                case .task: "checkmark.circle"
-                case .event: "calendar"
-                }
-            }
-        }
-
         public let id: UUID
         public var title: String
         public var subtitle: String
-        public var kind: Kind
+        public var kind: SearchResultKind
     }
 
     public var query = ""
@@ -158,5 +142,21 @@ public final class SearchViewModel {
             )
         }
         results = matched.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+    }
+}
+
+public enum SearchResultKind: String, CaseIterable, Hashable, Sendable {
+    case task
+    case event
+
+    var title: String {
+        rawValue.capitalized + "s"
+    }
+
+    var symbolName: String {
+        switch self {
+        case .task: "checkmark.circle"
+        case .event: "calendar"
+        }
     }
 }
