@@ -1182,6 +1182,9 @@
     return fetchJSON(url).then(v => cacheSet(cacheKey, v));
   }
 
+  // Escape untrusted API strings before they touch innerHTML (defense-in-depth XSS).
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
   const cleanDest = (s) => (s || 'Check front of train')
     .replace(' Underground Station', '').replace(' Rail Station', '').replace(' DLR Station', '').replace(' Station', '');
 
@@ -1231,7 +1234,7 @@
   function arrRow(a, scope, i) {
     return `<div class="arr-row">
       <div class="arr-line" style="background:${lineColor(a.line)}"></div>
-      <div class="arr-body"><div class="arr-dest">${a.dest}</div><div class="arr-meta">${a.line}${a.platform ? ' · ' + a.platform : ''}</div></div>
+      <div class="arr-body"><div class="arr-dest">${esc(a.dest)}</div><div class="arr-meta">${esc(a.line)}${a.platform ? ' · ' + esc(a.platform) : ''}</div></div>
       <div class="arr-eta" id="eta-${scope}-${i}">${etaLabel(a)}</div>
     </div>`;
   }
@@ -1256,7 +1259,7 @@
     const rows = st.arrivals.slice(0, 3).map((a, i) => arrRow(a, 'h', i)).join('');
     const disrupted = st.status.filter(s => s.sev !== 'good').slice(0, 2);
     const alert = disrupted.length
-      ? `<div class="tfl-alert"><span class="a-ico">⚠️</span><span class="a-txt"><b>${disrupted.map(d => d.name).join(', ')}</b> — ${disrupted[0].status.toLowerCase()}. Tap for details.</span></div>`
+      ? `<div class="tfl-alert"><span class="a-ico">⚠️</span><span class="a-txt"><b>${esc(disrupted.map(d => d.name).join(', '))}</b> — ${esc(disrupted[0].status.toLowerCase())}. Tap for details.</span></div>`
       : '';
     el.innerHTML = `
       <div class="tfl-head">
@@ -1289,7 +1292,7 @@
     const arrivals = st.loading
       ? `<div class="tfl-skeleton"></div><div class="tfl-skeleton" style="width:85%"></div><div class="tfl-skeleton" style="width:70%"></div>`
       : (st.arrivals.length ? st.arrivals.slice(0, 8).map((a, i) => arrRow(a, 'b', i)).join('') : `<div class="arr-meta" style="padding:0.6rem 0">No trains reported right now.</div>`);
-    const statusList = st.status.map(s => `<div class="status-line"><span class="sl-badge" style="background:${lineColor(s.name)};color:${lineText(s.name)}">${s.name}</span><span class="sl-status ${s.sev}">${s.status}</span></div>`).join('');
+    const statusList = st.status.map(s => `<div class="status-line"><span class="sl-badge" style="background:${lineColor(s.name)};color:${lineText(s.name)}">${esc(s.name)}</span><span class="sl-status ${s.sev}">${esc(s.status)}</span></div>`).join('');
     body.innerHTML = `
       <span class="sheet-badge ${st.live ? 'med' : 'high'}">${st.live ? 'Live · TfL Unified API' : 'Sample data · offline'}</span>
       <h2>Trains near you</h2>
