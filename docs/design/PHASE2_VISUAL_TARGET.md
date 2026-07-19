@@ -108,3 +108,13 @@ Wire logic already exists for stores, planning, leave-by, approvals, and recurre
 - Insights glow cards + ambient background
 - Settings profile header + location enable CTA
 - Global Search sheet from tab toolbars
+
+## Production refinement (2026-07-19)
+
+- Replaced Home’s equal-weight dashboard grid with an editorial briefing hierarchy.
+- Added a compact live context ribbon and one primary preparation surface.
+- Added brand mark, bounded depth entrance, teal hero accent, styled fields, reusable filter chips, and connection-state rows.
+- Applied the visual system to Tasks, Search, Memory, Quick Capture, Onboarding, Splash, Settings, Approvals, Insights, Timeline, and widgets.
+- Added Reduce Motion and Reduce Transparency fallbacks.
+- Added exact-parameter proposal review before Approval execution.
+- Removed prohibited/fabricated finance and productivity examples from previews.
