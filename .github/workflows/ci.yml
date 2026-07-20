@@ -68,24 +68,17 @@ jobs:
             2>&1 | tee "$CI_ARTIFACTS/native-build.log"
 
       - name: Install and launch simulator smoke test
+        timeout-minutes: 8
         run: |
           set -euo pipefail
 
-          runtime_id="$(
-            xcrun simctl list runtimes --json \
-              | jq -r '[.runtimes[] | select(.isAvailable and (.identifier | contains("iOS")))] | last | .identifier'
-          )"
-          device_type="$(
-            xcrun simctl list devicetypes --json \
-              | jq -r '[.devicetypes[] | select(.name == "iPhone 16")] | first | .identifier'
+          simulator_id="$(
+            xcrun simctl list devices available --json \
+              | jq -r '[.devices[][] | select(.isAvailable and .name == "iPhone 16")] | first | .udid'
           )"
 
-          if [[ -z "$runtime_id" || "$runtime_id" == "null" ]]; then
-            echo "No available iOS Simulator runtime was found." >&2
-            exit 1
-          fi
-          if [[ -z "$device_type" || "$device_type" == "null" ]]; then
-            echo "The iPhone 16 Simulator device type is unavailable." >&2
+          if [[ -z "$simulator_id" || "$simulator_id" == "null" ]]; then
+            echo "No available iPhone 16 Simulator was found." >&2
             exit 1
           fi
           if [[ ! -d "$APP_PATH" ]]; then
@@ -93,15 +86,8 @@ jobs:
             exit 1
           fi
 
-          simulator_id="$(
-            xcrun simctl create \
-              "LifePilot CI ${GITHUB_RUN_ID}" \
-              "$device_type" \
-              "$runtime_id"
-          )"
           cleanup() {
             xcrun simctl shutdown "$simulator_id" >/dev/null 2>&1 || true
-            xcrun simctl delete "$simulator_id" >/dev/null 2>&1 || true
           }
           trap cleanup EXIT
 
