@@ -4,7 +4,7 @@ import XCTest
 @testable import LifePilotServices
 
 final class TfLTransitServiceTests: XCTestCase {
-    // Sample payloads matching the real TfL Unified API response shapes.
+    /// Sample payloads matching the real TfL Unified API response shapes.
     private let arrivalsJSON = Data("""
     [
       {

@@ -4,14 +4,16 @@ import XCTest
 @testable import LifePilotGhostBrain
 
 final class EventTextParserTests: XCTestCase {
-    // A fixed, time-zone-independent clock so parsing is deterministic.
+    /// A fixed, time-zone-independent clock so parsing is deterministic.
     private func utcCalendar() -> Calendar {
         var cal = Calendar(identifier: .gregorian)
-        if let utc = TimeZone(identifier: "UTC") { cal.timeZone = utc }
+        if let utc = TimeZone(identifier: "UTC") {
+            cal.timeZone = utc
+        }
         return cal
     }
 
-    // Monday, 5 Jan 2026, 08:00 UTC.
+    /// Monday, 5 Jan 2026, 08:00 UTC.
     private func referenceNow() -> Date {
         makeDate(year: 2026, month: 1, day: 5, hour: 8)
     }

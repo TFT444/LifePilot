@@ -39,9 +39,15 @@ public struct EventTextParser: Sendable {
         let title = Self.cleanTitle(titleSource, fallback: text)
 
         var confidence = 0.5
-        if time != nil { confidence += 0.25 }
-        if day != nil { confidence += 0.2 }
-        if location != nil { confidence += 0.05 }
+        if time != nil {
+            confidence += 0.25
+        }
+        if day != nil {
+            confidence += 0.2
+        }
+        if location != nil {
+            confidence += 0.05
+        }
 
         return CapturedEvent(
             title: title,
@@ -128,7 +134,9 @@ private extension EventTextParser {
         let today = calendar.startOfDay(for: now)
         let current = calendar.component(.weekday, from: today)
         var delta = weekday - current
-        if delta < 0 { delta += 7 }
+        if delta < 0 {
+            delta += 7
+        }
         return calendar.date(byAdding: .day, value: delta, to: today) ?? today
     }
 
@@ -152,9 +160,15 @@ extension EventTextParser {
             var hour = Int(match.group(1) ?? "0") ?? 0
             let minute = Int(match.group(2) ?? "0") ?? 0
             let isPM = (match.group(3) ?? "").lowercased() == "p"
-            if hour == 12 { hour = 0 }
-            if isPM { hour += 12 }
-            if hour <= 23, minute <= 59 { return ParsedTime(hour: hour, minute: minute, matched: match.matched) }
+            if hour == 12 {
+                hour = 0
+            }
+            if isPM {
+                hour += 12
+            }
+            if hour <= 23, minute <= 59 {
+                return ParsedTime(hour: hour, minute: minute, matched: match.matched)
+            }
         }
         // 24-hour, e.g. "14:30", "09:00"
         if let match = firstMatch(#"\b([01]?\d|2[0-3]):([0-5]\d)\b"#, in: text, caseInsensitive: false) {
@@ -179,13 +193,17 @@ extension EventTextParser {
             let matches = regex.matches(in: text, range: NSRange(location: 0, length: nsText.length))
             for match in matches where match.numberOfRanges > 1 {
                 let tail = nsText.substring(with: match.range(at: 1)).trimmingCharacters(in: .whitespaces)
-                if tail.isEmpty { continue }
+                if tail.isEmpty {
+                    continue
+                }
                 // Skip a pure "at 2:30 PM" style time reference.
                 if let time = findTime(in: tail), time.matched.trimmingCharacters(in: .whitespaces) == tail {
                     continue
                 }
                 let cleaned = stripLeadingTime(from: tail)
-                if cleaned.isEmpty { continue }
+                if cleaned.isEmpty {
+                    continue
+                }
                 return (cleaned, nsText.substring(with: match.range(at: 0)))
             }
         }
@@ -199,7 +217,9 @@ extension EventTextParser {
             result = result.trimmingCharacters(in: CharacterSet(charactersIn: " ,-"))
                 .trimmingCharacters(in: .whitespaces)
             // "2:30 PM at Baker St" → after dropping time we may have "at Baker St".
-            if result.lowercased().hasPrefix("at ") { result = String(result.dropFirst(3)) }
+            if result.lowercased().hasPrefix("at ") {
+                result = String(result.dropFirst(3))
+            }
         }
         return result.trimmingCharacters(in: .whitespaces)
     }
@@ -250,7 +270,9 @@ extension EventTextParser {
             self.groups = groups
         }
 
-        func group(_ index: Int) -> String? { index < groups.count ? groups[index] : nil }
+        func group(_ index: Int) -> String? {
+            index < groups.count ? groups[index] : nil
+        }
     }
 
     static func firstMatch(_ pattern: String, in text: String, caseInsensitive: Bool) -> RegexMatch? {

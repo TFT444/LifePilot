@@ -40,8 +40,12 @@ public struct TransitLineStatus: Identifiable, Hashable, Sendable {
         /// "Severe Delays", "Part Suspended", etc.
         public static func classify(_ description: String) -> Severity {
             let text = description.lowercased()
-            if text == "good service" { return .good }
-            if text.contains("minor") { return .minor }
+            if text == "good service" {
+                return .good
+            }
+            if text.contains("minor") {
+                return .minor
+            }
             return .severe
         }
     }
