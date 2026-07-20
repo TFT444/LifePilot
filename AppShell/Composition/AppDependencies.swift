@@ -78,7 +78,15 @@ public struct AppDependencies: Sendable {
         let eventStore = SwiftDataEventStore(container: controller.container)
         let preferenceStore = SwiftDataPreferenceStore(container: controller.container)
         let approvalStore = SwiftDataApprovalStore(container: controller.container)
-        let executor = LocalActionExecutor(taskStore: taskStore, eventStore: eventStore)
+        let notificationScheduler: any NotificationScheduling = testing
+            ? NoOpNotificationScheduler()
+            : UserNotificationsScheduler()
+        let executor = LocalActionExecutor(
+            taskStore: taskStore,
+            eventStore: eventStore,
+            notificationScheduler: notificationScheduler,
+            approvalStore: approvalStore
+        )
         let location: any LocationProviding = testing
             ? UnavailableLocationProvider()
             : SystemLocationProvider()
@@ -94,9 +102,7 @@ public struct AppDependencies: Sendable {
             approvalStore: approvalStore,
             planningEngine: DeterministicPlanningEngine(),
             actionExecutor: executor,
-            notificationScheduler: testing
-                ? NoOpNotificationScheduler()
-                : UserNotificationsScheduler(),
+            notificationScheduler: notificationScheduler,
             calendarIntegration: testing
                 ? UnavailableCalendarIntegration()
                 : EventKitCalendarIntegration(),
@@ -131,7 +137,14 @@ public struct AppDependencies: Sendable {
     public static var preview: AppDependencies {
         let taskStore = InMemoryTaskStore(seed: MockTasks.items())
         let eventStore = InMemoryEventStore(seed: MockCalendar.events())
-        let executor = LocalActionExecutor(taskStore: taskStore, eventStore: eventStore)
+        let approvalStore = InMemoryApprovalStore()
+        let notificationScheduler = NoOpNotificationScheduler()
+        let executor = LocalActionExecutor(
+            taskStore: taskStore,
+            eventStore: eventStore,
+            notificationScheduler: notificationScheduler,
+            approvalStore: approvalStore
+        )
         let location = StaticLocationProvider()
         return AppDependencies(
             ghostBrain: MockRecommendationProvider(),
@@ -142,10 +155,10 @@ public struct AppDependencies: Sendable {
             taskStore: taskStore,
             eventStore: eventStore,
             preferenceStore: InMemoryPreferenceStore(),
-            approvalStore: InMemoryApprovalStore(),
+            approvalStore: approvalStore,
             planningEngine: DeterministicPlanningEngine(),
             actionExecutor: executor,
-            notificationScheduler: NoOpNotificationScheduler(),
+            notificationScheduler: notificationScheduler,
             calendarIntegration: UnavailableCalendarIntegration(),
             remindersIntegration: UnavailableRemindersIntegration(),
             weatherIntegration: StaticWeatherIntegration(snapshot: MockWeather.snapshot()),
