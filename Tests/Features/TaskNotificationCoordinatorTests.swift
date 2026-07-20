@@ -6,7 +6,7 @@ import XCTest
 final class TaskNotificationCoordinatorTests: XCTestCase {
     private let now = Date(timeIntervalSince1970: 1_753_000_000)
 
-    func testSchedulesPrivateDeterministicNotificationAndReschedulesAfterEdit() async throws {
+    func testSchedulesPrivateDeterministicNotificationAndReschedulesAfterEdit() async {
         let scheduler = RecordingNotificationScheduler(state: .authorized)
         let preferences = NotificationPreferenceStore(
             preferences: UserPreferences(
@@ -155,34 +155,84 @@ private actor RecordingNotificationScheduler: NotificationScheduling {
     private var recorded: [NotificationRequest] = []
     private var cancelled: [String] = []
 
-    init(state: PermissionState) { self.state = state }
+    init(state: PermissionState) {
+        self.state = state
+    }
 
-    func authorizationState() async -> PermissionState { state }
-    func requestAuthorization() async throws -> Bool { state == .authorized }
+    func authorizationState() async -> PermissionState {
+        state
+    }
+
+    func requestAuthorization() async throws -> Bool {
+        state == .authorized
+    }
+
     func schedule(id: String, title: String, body: String, fireDate: Date) async throws {
         recorded.append(NotificationRequest(id: id, title: title, body: body, fireDate: fireDate))
     }
-    func cancel(id: String) async throws { cancelled.append(id) }
-    func cancelAll() async throws { cancelled.removeAll() }
-    func requests() -> [NotificationRequest] { recorded }
-    func cancelledIDs() -> [String] { cancelled }
-    func setState(_ state: PermissionState) { self.state = state }
+
+    func cancel(id: String) async throws {
+        cancelled.append(id)
+    }
+
+    func cancelAll() async throws {
+        cancelled.removeAll()
+    }
+
+    func requests() -> [NotificationRequest] {
+        recorded
+    }
+
+    func cancelledIDs() -> [String] {
+        cancelled
+    }
+
+    func setState(_ state: PermissionState) {
+        self.state = state
+    }
 }
 
 private actor NotificationPreferenceStore: PreferenceStore {
     private var preferences: UserPreferences
-    init(preferences: UserPreferences) { self.preferences = preferences }
-    func loadPreferences() async -> UserPreferences { preferences }
-    func savePreferences(_ preferences: UserPreferences) async throws { self.preferences = preferences }
-    func allMemory() async -> [MemoryItem] { [] }
-    func saveMemory(_: MemoryItem) async throws {}
-    func deleteMemory(id _: UUID) async throws {}
-    func exportAll() async throws -> Data { Data() }
-    func deleteAllLifePilotData() async throws {}
+
+    init(preferences: UserPreferences) {
+        self.preferences = preferences
+    }
+
+    func loadPreferences() async -> UserPreferences {
+        preferences
+    }
+
+    func savePreferences(_ preferences: UserPreferences) async throws {
+        self.preferences = preferences
+    }
+
+    func allMemory() async -> [MemoryItem] {
+        []
+    }
+
+    func saveMemory(_: MemoryItem) async throws {
+    }
+
+    func deleteMemory(id _: UUID) async throws {
+    }
+
+    func exportAll() async throws -> Data {
+        Data()
+    }
+
+    func deleteAllLifePilotData() async throws {
+    }
 }
 
 private struct FixedNotificationClock: ClockProviding {
     let value: Date
-    init(_ value: Date) { self.value = value }
-    func now() -> Date { value }
+
+    init(_ value: Date) {
+        self.value = value
+    }
+
+    func now() -> Date {
+        value
+    }
 }

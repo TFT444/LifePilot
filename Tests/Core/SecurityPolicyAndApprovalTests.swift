@@ -99,9 +99,9 @@ final class SecurityPolicyAndApprovalTests: XCTestCase {
         let firstCreationCount = await reminders.creationCount()
         XCTAssertEqual(firstCreationCount, 1)
         let creation = await reminders.lastCreation()
-        XCTAssertEqual(creation?.0, "Call Mum")
-        XCTAssertEqual(creation?.3?.frequency, .weekly)
-        XCTAssertEqual(creation?.3?.daysOfWeek, [3])
+        XCTAssertEqual(creation?.title, "Call Mum")
+        XCTAssertEqual(creation?.recurrence?.frequency, .weekly)
+        XCTAssertEqual(creation?.recurrence?.daysOfWeek, [3])
     }
 
     func testReminderWriteRecoversAfterPermissionIsRestored() async throws {

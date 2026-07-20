@@ -176,7 +176,7 @@ public final class EventKitRemindersIntegration: RemindersIntegrating, @unchecke
         return RecurrenceRule(
             frequency: frequency,
             interval: rule.interval,
-            daysOfWeek: rule.daysOfTheWeek?.map { $0.dayOfTheWeek.rawValue } ?? [],
+            daysOfWeek: rule.daysOfTheWeek?.map(\.dayOfTheWeek.rawValue) ?? [],
             endDate: rule.recurrenceEnd?.endDate
         )
     }

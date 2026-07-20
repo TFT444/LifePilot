@@ -27,12 +27,24 @@ extension LocalActionExecutor {
         case .cancelNotification:
             try await cancelNotification(from: proposal)
             return nil
+        case .rescheduleEventKitEvent, .createEventKitReminder,
+             .forbiddenExternalFinancial, .forbiddenSendEmail:
+            return try await applyExternalSideEffects(for: proposal)
+        }
+    }
+
+    private func applyExternalSideEffects(for proposal: ActionProposal) async throws -> String? {
+        switch proposal.actionType {
         case .createEventKitReminder:
             return try await createEventKitReminder(from: proposal)
         case .rescheduleEventKitEvent:
             throw DomainError.invalidState("External write is not connected yet.")
         case .forbiddenExternalFinancial, .forbiddenSendEmail:
             throw DomainError.unauthorized
+        case .createLocalTask, .completeLocalTask, .rescheduleLocalTask,
+             .createLocalEvent, .updateLocalEvent, .deleteLocalRecord,
+             .scheduleNotification, .cancelNotification:
+            throw DomainError.invalidState("Expected an external action.")
         }
     }
 
@@ -41,11 +53,13 @@ extension LocalActionExecutor {
             throw DomainError.invalidState("Apple Reminder creation is not configured.")
         }
         let title = try requiredString("title", in: proposal, fallback: proposal.title)
+        let dueDate = try optionalDate("dueDate", in: proposal)
+        let recurrence = try recurrenceRule(in: proposal)
         let identifier = try await remindersIntegration.createReminder(
             title: title,
             notes: proposal.parameters["notes"],
-            dueDate: try optionalDate("dueDate", in: proposal),
-            recurrence: try recurrenceRule(in: proposal)
+            dueDate: dueDate,
+            recurrence: recurrence
         )
         return "Created Apple Reminder (\(identifier))"
     }
@@ -64,12 +78,17 @@ extension LocalActionExecutor {
         } else {
             interval = 1
         }
-        let days = try proposal.parameters["recurrenceDays"]?.split(separator: ",").map { value in
-            guard let day = Int(value), (1 ... 7).contains(day) else {
-                throw DomainError.validationFailed(field: "recurrenceDays")
+        let days: [Int]
+        if let values = proposal.parameters["recurrenceDays"]?.split(separator: ",") {
+            days = try values.map { value in
+                guard let day = Int(value), (1 ... 7).contains(day) else {
+                    throw DomainError.validationFailed(field: "recurrenceDays")
+                }
+                return day
             }
-            return day
-        } ?? []
+        } else {
+            days = []
+        }
         return RecurrenceRule(frequency: frequency, interval: interval, daysOfWeek: days)
     }
 

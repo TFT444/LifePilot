@@ -82,8 +82,7 @@ extension HomeViewModel {
                 }
                 for var reminder in reminders {
                     if let identifier = reminder.externalIdentifier,
-                       let existing = existingByExternal[identifier]
-                    {
+                       let existing = existingByExternal[identifier] {
                         reminder = TaskItem(
                             id: existing.id,
                             title: reminder.title,
