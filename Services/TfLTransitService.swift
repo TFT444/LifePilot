@@ -73,7 +73,9 @@ public struct TfLTransitService: TransitProviding {
                     return
                 }
                 guard let data else {
-                    continuation.resume(throwing: DomainError.unavailable("TfL returned no data"))
+                    continuation.resume(
+                        throwing: DomainError.unavailableNamed("TfL returned no data")
+                    )
                     return
                 }
                 continuation.resume(returning: data)
