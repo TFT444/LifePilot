@@ -1,3 +1,5 @@
+import Foundation
+
 /// Shared domain errors. Feature-specific errors may graduate to dedicated
 /// enums once they need richer payloads (docs/ENGINEERING_GUIDE.md).
 public enum DomainError: Error, Sendable, Equatable {
