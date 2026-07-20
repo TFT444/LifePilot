@@ -44,4 +44,20 @@ final class SettingsAndMemoryViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.filteredItems.map(\.title), ["School pickup"])
         XCTAssertTrue(viewModel.pinnedItems.isEmpty)
     }
+
+    func testTransitConfigurationPersistsWithoutApiSecret() async {
+        let store = InMemoryPreferenceStore()
+        let viewModel = SettingsViewModel(preferenceStore: store)
+
+        await viewModel.setTransitConfiguration(
+            stopID: " 940GZZLUOXC ",
+            stopName: " Oxford Circus ",
+            linesText: "Victoria, Central, victoria"
+        )
+
+        let saved = await store.loadPreferences()
+        XCTAssertEqual(saved.transitStopID, "940GZZLUOXC")
+        XCTAssertEqual(saved.transitStopName, "Oxford Circus")
+        XCTAssertEqual(saved.transitLineNames, ["Victoria", "Central"])
+    }
 }

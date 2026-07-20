@@ -13,4 +13,38 @@ public protocol TransitProviding: Sendable {
     /// Current status for every line on the default network (e.g. all Tube
     /// lines).
     func lineStatuses() async throws -> [TransitLineStatus]
+
+    /// One coherent response for feature UIs. Implementations may override
+    /// this to add persistent caching and stale-data recovery.
+    func snapshot(at stopId: String, lines: [String]) async throws -> TransitSnapshot
+}
+
+public extension TransitProviding {
+    func snapshot(at stopId: String, lines: [String]) async throws -> TransitSnapshot {
+        async let departures = departures(at: stopId)
+        async let statuses = lineStatuses()
+        let (loadedDepartures, loadedStatuses) = try await (departures, statuses)
+        let selectedLines = Set(lines.map { $0.lowercased() })
+        let filtered = loadedStatuses.filter { status in
+            selectedLines.isEmpty || selectedLines.contains(status.lineName.lowercased())
+        }
+        return TransitSnapshot(
+            departures: loadedDepartures,
+            lineStatuses: filtered,
+            fetchedAt: Date(),
+            sourceName: "Transit provider"
+        )
+    }
+}
+
+public struct UnavailableTransitProvider: TransitProviding {
+    public init() {}
+
+    public func departures(at _: String) async throws -> [TransitDeparture] {
+        throw DomainError.unavailableNamed("Transit data is unavailable in this build.")
+    }
+
+    public func lineStatuses() async throws -> [TransitLineStatus] {
+        throw DomainError.unavailableNamed("Transit data is unavailable in this build.")
+    }
 }

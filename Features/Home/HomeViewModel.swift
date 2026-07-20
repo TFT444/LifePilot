@@ -8,6 +8,7 @@ public struct HomeBriefingIntegrations: Sendable {
     public var reminders: any RemindersIntegrating
     public var weather: any WeatherIntegrating
     public var travel: any TravelTimeIntegrating
+    public var transit: any TransitProviding
     public var location: any LocationProviding
 
     public init(
@@ -15,12 +16,14 @@ public struct HomeBriefingIntegrations: Sendable {
         reminders: any RemindersIntegrating = UnavailableRemindersIntegration(),
         weather: any WeatherIntegrating = UnavailableWeatherIntegration(),
         travel: any TravelTimeIntegrating = UnavailableTravelTimeIntegration(),
+        transit: any TransitProviding = UnavailableTransitProvider(),
         location: any LocationProviding = UnavailableLocationProvider()
     ) {
         self.calendar = calendar
         self.reminders = reminders
         self.weather = weather
         self.travel = travel
+        self.transit = transit
         self.location = location
     }
 }
@@ -48,6 +51,13 @@ public final class HomeViewModel {
     public internal(set) var findings: [PlanningFinding] = []
     public internal(set) var weatherSummary: String?
     public internal(set) var leaveBySummary: String?
+    public internal(set) var transitDepartures: [TransitDeparture] = []
+    public internal(set) var transitStatuses: [TransitLineStatus] = []
+    public internal(set) var transitFetchedAt: Date?
+    public internal(set) var transitSource: String?
+    public internal(set) var transitStopName: String?
+    public internal(set) var transitIsStale = false
+    public internal(set) var transitConfigured = false
     public internal(set) var freshnessSummary: String = "Local"
     public internal(set) var lastUpdated: Date?
     public internal(set) var statusBanner: HomeStatusBanner?
@@ -88,6 +98,7 @@ public final class HomeViewModel {
         let hydratedTasks = await hydrateTasks(local: localTasks)
         let hydrated = await hydrateEvents(now: now)
         let weather = try? await integrations.weather.currentWeather()
+        let transit = await loadTransit(preferences: preferences, now: now)
         let leaveBy = await enrichLeaveBy(
             events: hydrated.events,
             weather: weather,
@@ -100,8 +111,9 @@ public final class HomeViewModel {
             preferences: preferences,
             tasks: hydratedTasks.tasks,
             events: hydrated.events,
-            extraFindings: leaveBy.findings
+            extraFindings: leaveBy.findings + transit.findings
         )
+        applyTransit(transit)
         leaveBySummary = leaveBy.summary
         weatherSummary = weather.map {
             "\($0.temperatureFahrenheit)° \($0.condition.rawValue)"
@@ -115,11 +127,15 @@ public final class HomeViewModel {
         if leaveBy.summary != nil {
             notes.append("Leave-by")
         }
+        if let transitNote = transit.note {
+            notes.append(transitNote)
+        }
         freshnessSummary = notes.joined(separator: " · ")
         lastUpdated = now
         statusBanner = await makeStatusBanner(
             calendarNotes: hydrated.notes,
-            hasWeather: weather != nil
+            hasWeather: weather != nil,
+            transitError: transit.errorMessage
         )
         loadState = recommendations.isEmpty && upcomingEvents.isEmpty && topTasks.isEmpty
             ? .empty

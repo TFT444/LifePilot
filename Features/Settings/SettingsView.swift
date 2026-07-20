@@ -20,6 +20,9 @@ public struct SettingsConnections: Sendable {
 public struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
     @State private var confirmDelete = false
+    @State private var transitStopID = ""
+    @State private var transitStopName = ""
+    @State private var transitLines = ""
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
     private let preferenceStore: any PreferenceStore
@@ -117,6 +120,22 @@ public struct SettingsView: View {
                     )
                 }
             }
+
+            TransitSettingsSection(
+                stopID: $transitStopID,
+                stopName: $transitStopName,
+                lines: $transitLines,
+                message: viewModel.transitMessage,
+                onSave: {
+                    Task {
+                        await viewModel.setTransitConfiguration(
+                            stopID: transitStopID,
+                            stopName: transitStopName,
+                            linesText: transitLines
+                        )
+                    }
+                }
+            )
 
             Section("Sync") {
                 Toggle(
@@ -226,7 +245,12 @@ public struct SettingsView: View {
         .scrollContentBackground(.hidden)
         .background(AmbientBackground())
         .navigationTitle("Settings")
-        .task { await viewModel.load() }
+        .task {
+            await viewModel.load()
+            transitStopID = viewModel.preferences.transitStopID
+            transitStopName = viewModel.preferences.transitStopName
+            transitLines = viewModel.preferences.transitLineNames.joined(separator: ", ")
+        }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
             Task {
@@ -273,6 +297,37 @@ public struct SettingsView: View {
         Task {
             await viewModel.requestConnection(kind)
             onPermissionsChanged()
+        }
+    }
+}
+
+private struct TransitSettingsSection: View {
+    @Binding var stopID: String
+    @Binding var stopName: String
+    @Binding var lines: String
+    let message: String?
+    let onSave: () -> Void
+
+    var body: some View {
+        Section("Live transit") {
+            TextField("Stop ID (for example 940GZZLUOXC)", text: $stopID)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .accessibilityLabel("Transit stop identifier")
+            TextField("Stop name (optional)", text: $stopName)
+                .accessibilityLabel("Transit stop name")
+            TextField("Lines, separated by commas (optional)", text: $lines)
+                .accessibilityLabel("Relevant transit lines")
+            Button("Save transit stop", action: onSave)
+            Text("Uses TfL's public-data path with no client API secret. "
+                + "Leave the stop ID blank to disable live transit.")
+                .font(.LifePilot.caption)
+                .foregroundStyle(Color.LifePilot.textSecondary)
+            if let message {
+                Text(message)
+                    .font(.LifePilot.caption)
+                    .foregroundStyle(Color.LifePilot.textSecondary)
+            }
         }
     }
 }
