@@ -118,6 +118,7 @@ public struct RootTabView: View {
                         reminders: dependencies.remindersIntegration,
                         weather: dependencies.weatherIntegration,
                         travel: dependencies.travelIntegration,
+                        transit: dependencies.transitIntegration,
                         location: dependencies.locationProvider
                     )
                 )

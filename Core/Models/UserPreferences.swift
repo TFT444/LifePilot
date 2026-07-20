@@ -65,6 +65,9 @@ public struct UserPreferences: Hashable, Sendable, Codable {
     public var sensitiveNotificationPreviews: Bool
     public var appearance: AppearancePreference
     public var skippedPermissionIDs: Set<String>
+    public var transitStopID: String
+    public var transitStopName: String
+    public var transitLineNames: [String]
 
     public init(
         onboardingCompleted: Bool = false,
@@ -79,7 +82,10 @@ public struct UserPreferences: Hashable, Sendable, Codable {
         workDays: [Int] = [2, 3, 4, 5, 6],
         sensitiveNotificationPreviews: Bool = false,
         appearance: AppearancePreference = .system,
-        skippedPermissionIDs: Set<String> = []
+        skippedPermissionIDs: Set<String> = [],
+        transitStopID: String = "",
+        transitStopName: String = "",
+        transitLineNames: [String] = []
     ) {
         self.onboardingCompleted = onboardingCompleted
         self.briefingHour = briefingHour
@@ -94,6 +100,9 @@ public struct UserPreferences: Hashable, Sendable, Codable {
         self.sensitiveNotificationPreviews = sensitiveNotificationPreviews
         self.appearance = appearance
         self.skippedPermissionIDs = skippedPermissionIDs
+        self.transitStopID = transitStopID
+        self.transitStopName = transitStopName
+        self.transitLineNames = transitLineNames
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -110,6 +119,9 @@ public struct UserPreferences: Hashable, Sendable, Codable {
         case sensitiveNotificationPreviews
         case appearance
         case skippedPermissionIDs
+        case transitStopID
+        case transitStopName
+        case transitLineNames
     }
 
     public init(from decoder: Decoder) throws {
@@ -152,7 +164,10 @@ public struct UserPreferences: Hashable, Sendable, Codable {
                 defaultValue: defaults.sensitiveNotificationPreviews
             ),
             appearance: Self.decode(.appearance, from: container, defaultValue: defaults.appearance),
-            skippedPermissionIDs: Self.decode(.skippedPermissionIDs, from: container, defaultValue: Set<String>())
+            skippedPermissionIDs: Self.decode(.skippedPermissionIDs, from: container, defaultValue: Set<String>()),
+            transitStopID: Self.decode(.transitStopID, from: container, defaultValue: ""),
+            transitStopName: Self.decode(.transitStopName, from: container, defaultValue: ""),
+            transitLineNames: Self.decode(.transitLineNames, from: container, defaultValue: [String]())
         )
     }
 
@@ -174,6 +189,9 @@ public struct UserPreferences: Hashable, Sendable, Codable {
         )
         try container.encode(appearance, forKey: .appearance)
         try container.encode(skippedPermissionIDs, forKey: .skippedPermissionIDs)
+        try container.encode(transitStopID, forKey: .transitStopID)
+        try container.encode(transitStopName, forKey: .transitStopName)
+        try container.encode(transitLineNames, forKey: .transitLineNames)
     }
 
     private static func decodeOptionalHour(

@@ -3,7 +3,7 @@ import Foundation
 /// The current service status of a transit line (e.g. a Tube line), normalised
 /// from a provider feed. Drives the disruption banners and "reroute" reasoning
 /// the Travel Agent surfaces to Ghost Brain.
-public struct TransitLineStatus: Identifiable, Hashable, Sendable {
+public struct TransitLineStatus: Identifiable, Hashable, Sendable, Codable {
     public var id: String { lineName }
     public let lineName: String
     public let statusDescription: String
@@ -18,7 +18,7 @@ public struct TransitLineStatus: Identifiable, Hashable, Sendable {
     /// Whether this line is running normally.
     public var isGoodService: Bool { severity == .good }
 
-    public enum Severity: String, Comparable, CaseIterable, Sendable {
+    public enum Severity: String, Comparable, CaseIterable, Sendable, Codable {
         case good
         case minor
         case severe

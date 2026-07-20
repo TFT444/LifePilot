@@ -51,6 +51,7 @@ public struct HomeView: View {
                 )
                 primaryPreparation
                     .lifePilotDepthEntrance(delay: 0.08)
+                transitSection
                 prioritiesSection
                 upcomingScheduleSection
                 preparedSection
@@ -155,6 +156,20 @@ public struct HomeView: View {
     }
 
     @ViewBuilder
+    private var transitSection: some View {
+        if viewModel.transitConfigured {
+            TransitBriefingSection(
+                departures: viewModel.transitDepartures,
+                statuses: viewModel.transitStatuses,
+                fetchedAt: viewModel.transitFetchedAt,
+                source: viewModel.transitSource,
+                stopName: viewModel.transitStopName,
+                isStale: viewModel.transitIsStale
+            )
+        }
+    }
+
+    @ViewBuilder
     private var preparedSection: some View {
         if viewModel.recommendations.count > 1 {
             VStack(alignment: .leading, spacing: Spacing.md) {
@@ -226,5 +241,86 @@ public struct HomeView: View {
             return "A few priorities, with room to move."
         }
         return "A quiet day. Add only what matters."
+    }
+}
+
+private struct TransitBriefingSection: View {
+    let departures: [TransitDeparture]
+    let statuses: [TransitLineStatus]
+    let fetchedAt: Date?
+    let source: String?
+    let stopName: String?
+    let isStale: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            SectionHeader(title: title, symbolName: "tram.fill")
+            if departures.isEmpty, statuses.isEmpty {
+                EmptyStateView(
+                    symbolName: "tram",
+                    message: "No matching transit data is available right now."
+                )
+            } else {
+                transitCard
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private var transitCard: some View {
+        GlowCard {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                ForEach(statuses) { status in
+                    Label(
+                        "\(status.lineName): \(status.statusDescription)",
+                        systemImage: status.isGoodService
+                            ? "checkmark.circle.fill"
+                            : "exclamationmark.triangle.fill"
+                    )
+                    .font(.LifePilot.caption)
+                    .foregroundStyle(status.isGoodService
+                        ? Color.LifePilot.signalSuccess
+                        : Color.LifePilot.signalRisk)
+                }
+                ForEach(Array(departures.prefix(4))) { departure in
+                    departureRow(departure)
+                }
+                Text(attribution)
+                    .font(.LifePilot.caption)
+                    .foregroundStyle(Color.LifePilot.textSecondary)
+            }
+        }
+    }
+
+    private func departureRow(_ departure: TransitDeparture) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Text("\(departure.lineName) to \(departure.destination)")
+                    .font(.LifePilot.body)
+                if let platform = departure.platform {
+                    Text(platform)
+                        .font(.LifePilot.caption)
+                        .foregroundStyle(Color.LifePilot.textSecondary)
+                }
+            }
+            Spacer()
+            Text(departure.etaLabel)
+                .font(.LifePilot.caption)
+                .foregroundStyle(Color.LifePilot.textSecondary)
+        }
+    }
+
+    private var attribution: String {
+        let provider = source ?? "Transit provider"
+        let freshness = isStale ? "Cached - may be stale" : "Live"
+        if let fetchedAt {
+            return "\(provider) - \(freshness) - updated "
+                + fetchedAt.formatted(date: .omitted, time: .shortened)
+        }
+        return "\(provider) - \(freshness)"
+    }
+
+    private var title: String {
+        stopName.map { "Transit - \($0)" } ?? "Live transit"
     }
 }

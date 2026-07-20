@@ -5,7 +5,8 @@ import LifePilotDesignSystem
 extension HomeViewModel {
     func makeStatusBanner(
         calendarNotes: [String],
-        hasWeather: Bool
+        hasWeather: Bool,
+        transitError: String?
     ) async -> HomeStatusBanner? {
         let calendarState = await integrations.calendar.authorizationState()
         if calendarState == .denied {
@@ -30,6 +31,12 @@ extension HomeViewModel {
         if !hasWeather, locationState == .notDetermined {
             return HomeStatusBanner(
                 message: "Enable Location in Settings for weather context.",
+                style: .info
+            )
+        }
+        if let transitError {
+            return HomeStatusBanner(
+                message: "Transit could not refresh - \(transitError)",
                 style: .info
             )
         }
