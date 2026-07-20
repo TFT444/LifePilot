@@ -43,7 +43,7 @@ public struct SecurityPolicy: Sendable {
 /// adapters. Every action type is handled explicitly; unsupported actions fail
 /// before any success state or audit entry can be produced.
 public actor LocalActionExecutor: ActionExecuting {
-    let policy: SecurityPolicy
+    private let policy: SecurityPolicy
     let taskStore: any TaskStore
     let eventStore: any EventStore
     let notificationScheduler: (any NotificationScheduling)?

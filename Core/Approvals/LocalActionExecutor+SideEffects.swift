@@ -20,12 +20,7 @@ extension LocalActionExecutor {
         case .cancelNotification:
             try await cancelNotification(from: proposal)
         case .rescheduleEventKitEvent, .createEventKitReminder:
-            guard case let .unsupported(reason) = policy.disposition(
-                for: proposal.actionType
-            ) else {
-                throw DomainError.invalidState("External write is not connected yet.")
-            }
-            throw DomainError.invalidState(reason)
+            throw DomainError.invalidState("External write is not connected yet.")
         case .forbiddenExternalFinancial, .forbiddenSendEmail:
             throw DomainError.unauthorized
         }
