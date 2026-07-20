@@ -22,7 +22,7 @@ public struct TfLTransitService: TransitProviding {
     /// Production initialiser using `URLSession`.
     public init(appKey: String? = nil, session: URLSession = .shared) {
         self.appKey = appKey
-        self.fetch = { url in try await Self.load(url, session: session) }
+        fetch = { url in try await Self.load(url, session: session) }
     }
 
     /// Testing initialiser with an injected fetch (no network).
@@ -44,13 +44,14 @@ public struct TfLTransitService: TransitProviding {
     // MARK: - URL building
 
     func url(path: String) -> URL {
+        let fallback = URL(string: Self.baseURL) ?? URL(fileURLWithPath: "/")
         guard var comps = URLComponents(string: Self.baseURL + path) else {
-            return URL(string: Self.baseURL)!
+            return fallback
         }
         if let appKey, !appKey.isEmpty {
             comps.queryItems = [URLQueryItem(name: "app_key", value: appKey)]
         }
-        return comps.url ?? URL(string: Self.baseURL)!
+        return comps.url ?? fallback
     }
 
     // MARK: - Networking
@@ -62,8 +63,9 @@ public struct TfLTransitService: TransitProviding {
                     continuation.resume(throwing: error)
                     return
                 }
-                if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
-                    continuation.resume(throwing: DomainError.unavailable("TfL request failed: HTTP \(http.statusCode)"))
+                if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode) {
+                    continuation
+                        .resume(throwing: DomainError.unavailable("TfL request failed: HTTP \(http.statusCode)"))
                     return
                 }
                 guard let data else {

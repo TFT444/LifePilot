@@ -6,10 +6,30 @@ import LifePilotCore
 public enum MockTransit {
     public static func departures() -> [TransitDeparture] {
         [
-            TransitDeparture(lineName: "Victoria", destination: "Brixton", platform: "Southbound · Plat 5", secondsToStation: 60),
-            TransitDeparture(lineName: "Central", destination: "Epping", platform: "Eastbound · Plat 2", secondsToStation: 150),
-            TransitDeparture(lineName: "Bakerloo", destination: "Elephant & Castle", platform: "Southbound · Plat 3", secondsToStation: 240),
-            TransitDeparture(lineName: "Victoria", destination: "Walthamstow Central", platform: "Northbound · Plat 6", secondsToStation: 360),
+            TransitDeparture(
+                lineName: "Victoria",
+                destination: "Brixton",
+                platform: "Southbound · Plat 5",
+                secondsToStation: 60
+            ),
+            TransitDeparture(
+                lineName: "Central",
+                destination: "Epping",
+                platform: "Eastbound · Plat 2",
+                secondsToStation: 150
+            ),
+            TransitDeparture(
+                lineName: "Bakerloo",
+                destination: "Elephant & Castle",
+                platform: "Southbound · Plat 3",
+                secondsToStation: 240
+            ),
+            TransitDeparture(
+                lineName: "Victoria",
+                destination: "Walthamstow Central",
+                platform: "Northbound · Plat 6",
+                secondsToStation: 360
+            ),
         ]
     }
 
@@ -28,7 +48,7 @@ public enum MockTransit {
 public struct MockTransitProvider: TransitProviding {
     public init() {}
 
-    public func departures(at stopId: String) async throws -> [TransitDeparture] {
+    public func departures(at _: String) async throws -> [TransitDeparture] {
         MockTransit.departures()
     }
 

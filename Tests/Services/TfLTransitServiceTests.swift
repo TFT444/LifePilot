@@ -1,23 +1,33 @@
 import Foundation
 import XCTest
-@testable import LifePilotServices
 @testable import LifePilotCore
+@testable import LifePilotServices
 
 final class TfLTransitServiceTests: XCTestCase {
     // Sample payloads matching the real TfL Unified API response shapes.
-    private let arrivalsJSON = """
+    private let arrivalsJSON = Data("""
     [
-      {"id":"1","lineName":"Central","destinationName":"Epping Underground Station","towards":"Epping","platformName":"Eastbound - Platform 2","timeToStation":240},
-      {"id":"2","lineName":"Victoria","destinationName":"Brixton Underground Station","towards":"Brixton","platformName":"Southbound - Platform 5","timeToStation":60}
+      {
+        "id": "1", "lineName": "Central",
+        "destinationName": "Epping Underground Station",
+        "towards": "Epping", "platformName": "Eastbound - Platform 2",
+        "timeToStation": 240
+      },
+      {
+        "id": "2", "lineName": "Victoria",
+        "destinationName": "Brixton Underground Station",
+        "towards": "Brixton", "platformName": "Southbound - Platform 5",
+        "timeToStation": 60
+      }
     ]
-    """.data(using: .utf8)!
+    """.utf8)
 
-    private let statusJSON = """
+    private let statusJSON = Data("""
     [
-      {"name":"Bakerloo","lineStatuses":[{"statusSeverityDescription":"Good Service"}]},
-      {"name":"Circle","lineStatuses":[{"statusSeverityDescription":"Severe Delays"}]}
+      { "name": "Bakerloo", "lineStatuses": [{ "statusSeverityDescription": "Good Service" }] },
+      { "name": "Circle", "lineStatuses": [{ "statusSeverityDescription": "Severe Delays" }] }
     ]
-    """.data(using: .utf8)!
+    """.utf8)
 
     func testDecodeDeparturesSortsAndCleansNames() throws {
         let departures = try TfLTransitService.decodeDepartures(from: arrivalsJSON)
@@ -50,15 +60,15 @@ final class TfLTransitServiceTests: XCTestCase {
     }
 
     func testDeparturesUsesInjectedFetch() async throws {
-        let data = arrivalsJSON
-        let service = TfLTransitService { _ in data }
+        let payload = arrivalsJSON
+        let service = TfLTransitService { _ in payload }
         let departures = try await service.departures(at: "940GZZLUOXC")
         XCTAssertEqual(departures.first?.lineName, "Victoria")
     }
 
     func testLineStatusesUsesInjectedFetch() async throws {
-        let data = statusJSON
-        let service = TfLTransitService { _ in data }
+        let payload = statusJSON
+        let service = TfLTransitService { _ in payload }
         let statuses = try await service.lineStatuses()
         XCTAssertEqual(statuses.count, 2)
     }

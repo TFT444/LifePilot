@@ -47,7 +47,13 @@ final class CapturedEventTests: XCTestCase {
 
     func testMakeReminderCarriesFields() {
         let date = Date(timeIntervalSince1970: 50_000)
-        let event = CapturedEvent(title: "Dentist", date: date, location: "Baker St", details: "Bring card", confidence: 0.9)
+        let event = CapturedEvent(
+            title: "Dentist",
+            date: date,
+            location: "Baker St",
+            details: "Bring card",
+            confidence: 0.9
+        )
         let reminder = event.makeReminder(leadTime: 900)
         XCTAssertNotNil(reminder)
         XCTAssertEqual(reminder?.title, "Dentist")

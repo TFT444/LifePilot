@@ -24,7 +24,7 @@ public struct EventTextParser: Sendable {
             return CapturedEvent(title: "New reminder", confidence: 0)
         }
 
-        let time = Self.findTime(in: text)
+        let time: ParsedTime? = Self.findTime(in: text)
         let day = findDay(in: text, now: now)
         let location = Self.findLocation(in: text)
 
@@ -54,7 +54,18 @@ public struct EventTextParser: Sendable {
 
     // MARK: - Date resolution
 
-    private func resolveDate(day: Date?, time: (hour: Int, minute: Int, matched: String)?, now: Date) -> Date? {
+    /// A time-of-day parsed out of free text, plus the exact substring matched.
+    struct ParsedTime {
+        let hour: Int
+        let minute: Int
+        let matched: String
+    }
+
+    private func resolveDate(
+        day: Date?,
+        time: ParsedTime?,
+        now: Date
+    ) -> Date? {
         // Need at least a time or a day to produce a concrete date.
         guard day != nil || time != nil else { return nil }
         let base = day ?? now
@@ -67,21 +78,21 @@ public struct EventTextParser: Sendable {
 
     // MARK: - Time
 
-    static func findTime(in text: String) -> (hour: Int, minute: Int, matched: String)? {
+    static func findTime(in text: String) -> ParsedTime? {
         // 12-hour with am/pm, e.g. "2:30 PM", "6 am", "8p.m."
-        if let m = firstMatch(#"\b(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?\b"#, in: text, caseInsensitive: true) {
-            var hour = Int(m.group(1) ?? "0") ?? 0
-            let minute = Int(m.group(2) ?? "0") ?? 0
-            let isPM = (m.group(3) ?? "").lowercased() == "p"
+        if let match = firstMatch(#"\b(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?\b"#, in: text, caseInsensitive: true) {
+            var hour = Int(match.group(1) ?? "0") ?? 0
+            let minute = Int(match.group(2) ?? "0") ?? 0
+            let isPM = (match.group(3) ?? "").lowercased() == "p"
             if hour == 12 { hour = 0 }
             if isPM { hour += 12 }
-            if hour <= 23, minute <= 59 { return (hour, minute, m.matched) }
+            if hour <= 23, minute <= 59 { return ParsedTime(hour: hour, minute: minute, matched: match.matched) }
         }
         // 24-hour, e.g. "14:30", "09:00"
-        if let m = firstMatch(#"\b([01]?\d|2[0-3]):([0-5]\d)\b"#, in: text, caseInsensitive: false) {
-            let hour = Int(m.group(1) ?? "0") ?? 0
-            let minute = Int(m.group(2) ?? "0") ?? 0
-            return (hour, minute, m.matched)
+        if let match = firstMatch(#"\b([01]?\d|2[0-3]):([0-5]\d)\b"#, in: text, caseInsensitive: false) {
+            let hour = Int(match.group(1) ?? "0") ?? 0
+            let minute = Int(match.group(2) ?? "0") ?? 0
+            return ParsedTime(hour: hour, minute: minute, matched: match.matched)
         }
         return nil
     }
@@ -110,17 +121,17 @@ public struct EventTextParser: Sendable {
         }
 
         // "14 July" / "July 14" / "14 Jul"
-        if let m = Self.firstMatch(#"\b(\d{1,2})\s+([A-Za-z]{3,9})\b"#, in: text, caseInsensitive: true),
-           let month = Self.monthNumber(m.group(2)) {
-            if let d = makeDate(day: Int(m.group(1) ?? "") ?? 0, month: month, now: now) {
-                return (d, m.matched)
-            }
+        if let match = Self.firstMatch(#"\b(\d{1,2})\s+([A-Za-z]{3,9})\b"#, in: text, caseInsensitive: true),
+           let month = Self.monthNumber(match.group(2)),
+           let date = makeDate(day: Int(match.group(1) ?? "") ?? 0, month: month, now: now)
+        {
+            return (date, match.matched)
         }
-        if let m = Self.firstMatch(#"\b([A-Za-z]{3,9})\s+(\d{1,2})\b"#, in: text, caseInsensitive: true),
-           let month = Self.monthNumber(m.group(1)) {
-            if let d = makeDate(day: Int(m.group(2) ?? "") ?? 0, month: month, now: now) {
-                return (d, m.matched)
-            }
+        if let match = Self.firstMatch(#"\b([A-Za-z]{3,9})\s+(\d{1,2})\b"#, in: text, caseInsensitive: true),
+           let month = Self.monthNumber(match.group(1)),
+           let date = makeDate(day: Int(match.group(2) ?? "") ?? 0, month: month, now: now)
+        {
+            return (date, match.matched)
         }
         return nil
     }
@@ -156,19 +167,19 @@ public struct EventTextParser: Sendable {
         let patterns = [#"\bat\s+(.+)$"#, #"@\s*(.+)$"#]
         for pattern in patterns {
             guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else { continue }
-            let ns = text as NSString
-            let matches = regex.matches(in: text, range: NSRange(location: 0, length: ns.length))
+            let nsText = text as NSString
+            let matches = regex.matches(in: text, range: NSRange(location: 0, length: nsText.length))
             for match in matches where match.numberOfRanges > 1 {
-                let tail = ns.substring(with: match.range(at: 1)).trimmingCharacters(in: .whitespaces)
+                let tail = nsText.substring(with: match.range(at: 1)).trimmingCharacters(in: .whitespaces)
                 if tail.isEmpty { continue }
-                // Skip "at 2:30 PM" style time references.
-                if findTime(in: tail) != nil, findTime(in: tail)?.matched.trimmingCharacters(in: .whitespaces) == tail {
+                // Skip a pure "at 2:30 PM" style time reference.
+                if let time = findTime(in: tail), time.matched.trimmingCharacters(in: .whitespaces) == tail {
                     continue
                 }
                 // Strip a leading time if the tail is "2:30 PM at Baker St".
                 let cleaned = stripLeadingTime(from: tail)
                 if cleaned.isEmpty { continue }
-                return (cleaned, ns.substring(with: match.range(at: 0)))
+                return (cleaned, nsText.substring(with: match.range(at: 0)))
             }
         }
         return nil
@@ -176,10 +187,11 @@ public struct EventTextParser: Sendable {
 
     private static func stripLeadingTime(from text: String) -> String {
         var result = text
-        if let t = findTime(in: text), text.hasPrefix(t.matched) {
-            result = String(text.dropFirst(t.matched.count))
-            result = result.trimmingCharacters(in: CharacterSet(charactersIn: " ,-")).trimmingCharacters(in: .whitespaces)
-            // "2:30 PM at Baker St" → after dropping time we may have "at Baker St"
+        if let time = findTime(in: text), text.hasPrefix(time.matched) {
+            result = String(text.dropFirst(time.matched.count))
+            result = result.trimmingCharacters(in: CharacterSet(charactersIn: " ,-"))
+                .trimmingCharacters(in: .whitespaces)
+            // "2:30 PM at Baker St" → after dropping time we may have "at Baker St".
             if result.lowercased().hasPrefix("at ") { result = String(result.dropFirst(3)) }
         }
         return result.trimmingCharacters(in: .whitespaces)
@@ -188,25 +200,37 @@ public struct EventTextParser: Sendable {
     // MARK: - Title
 
     static func cleanTitle(_ source: String, fallback: String) -> String {
-        var t = source
+        var title = source
         // Remove common leftover connective words and separators.
         for filler in [" on ", " at ", " @ "] {
-            t = t.replacingOccurrences(of: filler, with: " ", options: [.caseInsensitive])
+            title = title.replacingOccurrences(of: filler, with: " ", options: [.caseInsensitive])
         }
-        t = t.replacingOccurrences(of: #"\s{2,}"#, with: " ", options: [.regularExpression])
-        t = t.trimmingCharacters(in: CharacterSet(charactersIn: " ,-–—:"))
-        t = t.trimmingCharacters(in: .whitespacesAndNewlines)
-        return t.isEmpty ? fallback.trimmingCharacters(in: .whitespacesAndNewlines) : t
+        title = title.replacingOccurrences(of: #"\s{2,}"#, with: " ", options: [.regularExpression])
+        title = title.trimmingCharacters(in: CharacterSet(charactersIn: " ,-–—:"))
+        title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        return title.isEmpty ? fallback.trimmingCharacters(in: .whitespacesAndNewlines) : title
     }
 
     // MARK: - Month names
 
     static func monthNumber(_ raw: String?) -> Int? {
         guard let raw = raw?.lowercased() else { return nil }
-        let months = ["january", "february", "march", "april", "may", "june",
-                      "july", "august", "september", "october", "november", "december"]
-        for (i, full) in months.enumerated() {
-            if raw == full || raw == String(full.prefix(3)) { return i + 1 }
+        let months = [
+            "january",
+            "february",
+            "march",
+            "april",
+            "may",
+            "june",
+            "july",
+            "august",
+            "september",
+            "october",
+            "november",
+            "december",
+        ]
+        for (idx, full) in months.enumerated() where raw == full || raw == String(full.prefix(3)) {
+            return idx + 1
         }
         return nil
     }
@@ -216,35 +240,41 @@ public struct EventTextParser: Sendable {
     struct RegexMatch {
         let matched: String
         private let groups: [String?]
-        init(matched: String, groups: [String?]) { self.matched = matched; self.groups = groups }
-        func group(_ i: Int) -> String? { i < groups.count ? groups[i] : nil }
+        init(matched: String, groups: [String?]) {
+            self.matched = matched
+            self.groups = groups
+        }
+
+        func group(_ index: Int) -> String? { index < groups.count ? groups[index] : nil }
     }
 
     static func firstMatch(_ pattern: String, in text: String, caseInsensitive: Bool) -> RegexMatch? {
         let options: NSRegularExpression.Options = caseInsensitive ? [.caseInsensitive] : []
         guard let regex = try? NSRegularExpression(pattern: pattern, options: options) else { return nil }
-        let ns = text as NSString
-        guard let m = regex.firstMatch(in: text, range: NSRange(location: 0, length: ns.length)) else { return nil }
-        var groups: [String?] = []
-        for i in 0..<m.numberOfRanges {
-            let r = m.range(at: i)
-            groups.append(r.location == NSNotFound ? nil : ns.substring(with: r))
+        let nsText = text as NSString
+        guard let match = regex.firstMatch(in: text, range: NSRange(location: 0, length: nsText.length)) else {
+            return nil
         }
-        return RegexMatch(matched: ns.substring(with: m.range(at: 0)), groups: groups)
+        var groups: [String?] = []
+        for index in 0 ..< match.numberOfRanges {
+            let range = match.range(at: index)
+            groups.append(range.location == NSNotFound ? nil : nsText.substring(with: range))
+        }
+        return RegexMatch(matched: nsText.substring(with: match.range(at: 0)), groups: groups)
     }
 
     // MARK: - Small string helpers
 
     private func rangeOfWord(_ word: String, in lower: String) -> Range<String.Index>? {
-        guard let r = lower.range(of: word) else { return nil }
-        let beforeOK = r.lowerBound == lower.startIndex || !lower[lower.index(before: r.lowerBound)].isLetter
-        let afterOK = r.upperBound == lower.endIndex || !lower[r.upperBound].isLetter
-        return (beforeOK && afterOK) ? r : nil
+        guard let range = lower.range(of: word) else { return nil }
+        let beforeOK = range.lowerBound == lower.startIndex || !lower[lower.index(before: range.lowerBound)].isLetter
+        let afterOK = range.upperBound == lower.endIndex || !lower[range.upperBound].isLetter
+        return (beforeOK && afterOK) ? range : nil
     }
 
     private func matchedSlice(_ token: String, in text: String) -> String {
-        if let r = text.range(of: token, options: [.caseInsensitive]) {
-            return String(text[r])
+        if let range = text.range(of: token, options: [.caseInsensitive]) {
+            return String(text[range])
         }
         return token
     }
