@@ -26,7 +26,7 @@ jobs:
     outputs:
       publish_dir: ${{ steps.pick.outputs.publish_dir }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: pick
         run: |
           if [ -f index.html ] && grep -q "LifePilot" index.html; then
@@ -49,7 +49,7 @@ jobs:
     needs: resolve-demo-dir
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Stage publish directory
         id: stage
@@ -80,7 +80,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Stage artifact
         run: |
