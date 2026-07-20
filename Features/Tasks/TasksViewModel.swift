@@ -14,9 +14,15 @@ public final class TasksViewModel {
 
     private let taskStore: any TaskStore
     private let clock: any ClockProviding
+    private let notifications: TaskNotificationCoordinator?
 
-    public init(taskStore: any TaskStore, clock: any ClockProviding = SystemClock()) {
+    public init(
+        taskStore: any TaskStore,
+        notifications: TaskNotificationCoordinator? = nil,
+        clock: any ClockProviding = SystemClock()
+    ) {
         self.taskStore = taskStore
+        self.notifications = notifications
         self.clock = clock
     }
 
@@ -32,6 +38,7 @@ public final class TasksViewModel {
         isLoading = true
         defer { isLoading = false }
         let all = await taskStore.allTasks()
+        await notifications?.reconcileAll(all)
         let now = clock.now()
         let calendar = Calendar.current
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -84,6 +91,7 @@ public final class TasksViewModel {
         // No arbitrary one-hour deadline — land in Inbox until the user schedules.
         let task = TaskItem(title: title, listID: TaskList.inbox.id)
         try await taskStore.save(task)
+        await notifications?.reconcile(task)
         draftTitle = ""
         await load()
     }
@@ -100,11 +108,13 @@ public final class TasksViewModel {
                 next.isCompleted = false
                 next.completedAt = nil
                 try await taskStore.save(next)
+                await notifications?.reconcile(next)
                 await load()
                 return
             }
         }
         try await taskStore.save(updated)
+        await notifications?.reconcile(updated)
         await load()
     }
 
@@ -114,11 +124,13 @@ public final class TasksViewModel {
         updated.dueDate = base.addingTimeInterval(interval)
         updated.updatedAt = clock.now()
         try await taskStore.save(updated)
+        await notifications?.reconcile(updated)
         await load()
     }
 
     public func delete(_ task: TaskItem) async throws {
         try await taskStore.delete(id: task.id)
+        await notifications?.cancel(taskID: task.id)
         await load()
     }
 
@@ -136,6 +148,7 @@ public final class TasksViewModel {
             recurrence: task.recurrence
         )
         try await taskStore.save(copy)
+        await notifications?.reconcile(copy)
         await load()
     }
 
@@ -143,6 +156,7 @@ public final class TasksViewModel {
     public func skipOccurrence(_ task: TaskItem) async throws {
         guard let updated = RecurrenceEngine.skipOne(task, now: clock.now()) else { return }
         try await taskStore.save(updated)
+        await notifications?.reconcile(updated)
         await load()
     }
 
@@ -159,6 +173,7 @@ public final class TasksViewModel {
             now: clock.now()
         )
         try await taskStore.save(updated)
+        await notifications?.reconcile(updated)
         await load()
     }
 }

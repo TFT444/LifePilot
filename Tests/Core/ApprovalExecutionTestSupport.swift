@@ -6,15 +6,48 @@ func makeExecutor(
     taskStore: FakeTaskStore = FakeTaskStore(),
     eventStore: FakeEventStore = FakeEventStore(),
     notificationScheduler: FakeNotificationScheduler? = nil,
+    remindersIntegration: (any RemindersIntegrating)? = nil,
     approvalStore: (any ApprovalStore)? = nil
 ) -> LocalActionExecutor {
     LocalActionExecutor(
+        policy: SecurityPolicy(allowReminderWrites: remindersIntegration != nil),
         taskStore: taskStore,
         eventStore: eventStore,
         notificationScheduler: notificationScheduler,
+        remindersIntegration: remindersIntegration,
         approvalStore: approvalStore,
         clock: FixedClock(Date(timeIntervalSince1970: 1_700_000_000))
     )
+}
+
+actor FakeRemindersIntegration: RemindersIntegrating {
+    private var state: CapabilityState
+    private(set) var creations: [(String, String?, Date?, RecurrenceRule?)] = []
+
+    init(state: CapabilityState = .authorized) {
+        self.state = state
+    }
+
+    func authorizationState() async -> CapabilityState { state }
+    func requestAccess() async throws -> Bool { state == .authorized || state == .limited }
+    func fetchOpenReminders() async throws -> [TaskItem] { [] }
+
+    func createReminder(
+        title: String,
+        notes: String?,
+        dueDate: Date?,
+        recurrence: RecurrenceRule?
+    ) async throws -> String {
+        guard state == .authorized || state == .limited else {
+            throw DomainError.unavailableNamed("Reminders access denied")
+        }
+        creations.append((title, notes, dueDate, recurrence))
+        return "external-reminder-id"
+    }
+
+    func creationCount() -> Int { creations.count }
+    func lastCreation() -> (String, String?, Date?, RecurrenceRule?)? { creations.last }
+    func setState(_ state: CapabilityState) { self.state = state }
 }
 
 func approved(_ proposal: ActionProposal) -> ApprovalRecord {

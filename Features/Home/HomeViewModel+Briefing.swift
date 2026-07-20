@@ -14,6 +14,13 @@ extension HomeViewModel {
                 style: .warning
             )
         }
+        let remindersState = await integrations.reminders.authorizationState()
+        if remindersState == .denied || remindersState == .restricted {
+            return HomeStatusBanner(
+                message: "Reminders access denied — local tasks still work. Reconnect in Settings.",
+                style: .warning
+            )
+        }
         let locationState = await integrations.location.authorizationState()
         if locationState == .denied {
             return HomeStatusBanner(
@@ -59,7 +66,44 @@ extension HomeViewModel {
         let remindersState = await integrations.reminders.authorizationState()
         if remindersState == .authorized || remindersState == .limited {
             if let reminders = try? await integrations.reminders.fetchOpenReminders() {
-                return (local + reminders, ["Reminders connected"])
+                var existingByExternal: [String: TaskItem] = [:]
+                for task in local {
+                    if let identifier = task.externalIdentifier {
+                        existingByExternal[identifier] = task
+                    }
+                }
+                let remoteIdentifiers = Set(reminders.compactMap(\.externalIdentifier))
+                for task in local where task.source == .eventKitReminders {
+                    guard let identifier = task.externalIdentifier,
+                          !remoteIdentifiers.contains(identifier)
+                    else { continue }
+                    try? await taskStore.delete(id: task.id)
+                    existingByExternal.removeValue(forKey: identifier)
+                }
+                for var reminder in reminders {
+                    if let identifier = reminder.externalIdentifier,
+                       let existing = existingByExternal[identifier]
+                    {
+                        reminder = TaskItem(
+                            id: existing.id,
+                            title: reminder.title,
+                            notes: reminder.notes,
+                            dueDate: reminder.dueDate,
+                            isCompleted: reminder.isCompleted,
+                            completedAt: reminder.completedAt,
+                            source: .eventKitReminders,
+                            externalIdentifier: identifier,
+                            syncState: .synced,
+                            createdAt: existing.createdAt,
+                            updatedAt: Date()
+                        )
+                    }
+                    try? await taskStore.save(reminder)
+                    if let identifier = reminder.externalIdentifier {
+                        existingByExternal[identifier] = reminder
+                    }
+                }
+                return (await taskStore.allTasks(), ["Reminders connected"])
             }
             return (local, ["Reminders unavailable - showing local tasks"])
         }

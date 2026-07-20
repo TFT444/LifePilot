@@ -18,6 +18,7 @@ public struct TaskItem: Identifiable, Hashable, Sendable, Codable {
     public var context: LifeContext
     public var recurrence: RecurrenceRule?
     public var source: DataSource
+    public var externalIdentifier: String?
     public var syncState: SyncState
     public var createdAt: Date
     public var updatedAt: Date
@@ -38,6 +39,7 @@ public struct TaskItem: Identifiable, Hashable, Sendable, Codable {
         context: LifeContext = .personal,
         recurrence: RecurrenceRule? = nil,
         source: DataSource = .local,
+        externalIdentifier: String? = nil,
         syncState: SyncState = .localOnly,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
@@ -57,6 +59,7 @@ public struct TaskItem: Identifiable, Hashable, Sendable, Codable {
         self.context = context
         self.recurrence = recurrence
         self.source = source
+        self.externalIdentifier = externalIdentifier
         self.syncState = syncState
         self.createdAt = createdAt
         self.updatedAt = updatedAt

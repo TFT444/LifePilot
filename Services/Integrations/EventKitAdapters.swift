@@ -95,12 +95,89 @@ public final class EventKitRemindersIntegration: RemindersIntegrating, @unchecke
                             dueDate: reminder.dueDateComponents?.date,
                             isCompleted: reminder.isCompleted,
                             completedAt: reminder.completionDate,
+                            recurrence: reminder.recurrenceRules?.first.flatMap(Self.domainRule),
                             source: .eventKitReminders,
+                            externalIdentifier: reminder.calendarItemExternalIdentifier,
                             syncState: .synced
                         )
                     }
                 continuation.resume(returning: mapped)
             }
         }
+    }
+
+    public func createReminder(
+        title: String,
+        notes: String?,
+        dueDate: Date?,
+        recurrence: RecurrenceRule?
+    ) async throws -> String {
+        let state = await authorizationState()
+        guard state == .authorized || state == .limited else {
+            throw DomainError.unavailableNamed("Reminders access denied")
+        }
+
+        let reminder = EKReminder(eventStore: store)
+        reminder.title = title
+        reminder.notes = notes
+        guard let calendar = store.defaultCalendarForNewReminders() else {
+            throw DomainError.unavailableNamed("No writable Reminders list is available")
+        }
+        reminder.calendar = calendar
+        if let dueDate {
+            reminder.dueDateComponents = Calendar.current.dateComponents(
+                [.calendar, .timeZone, .year, .month, .day, .hour, .minute],
+                from: dueDate
+            )
+        }
+        if let recurrence {
+            reminder.addRecurrenceRule(Self.eventKitRule(from: recurrence))
+        }
+        try store.save(reminder, commit: true)
+        let identifier = reminder.calendarItemExternalIdentifier
+        guard !identifier.isEmpty else {
+            throw DomainError.invalidState("EventKit did not return a reminder identifier.")
+        }
+        return identifier
+    }
+
+    private static func eventKitRule(from rule: RecurrenceRule) -> EKRecurrenceRule {
+        let frequency: EKRecurrenceFrequency = switch rule.frequency {
+        case .daily: .daily
+        case .weekly: .weekly
+        case .monthly: .monthly
+        case .yearly: .yearly
+        }
+        let days = rule.daysOfWeek.isEmpty
+            ? nil
+            : rule.daysOfWeek.map { EKRecurrenceDayOfWeek(EKWeekday(rawValue: $0) ?? .monday) }
+        let end = rule.endDate.map { EKRecurrenceEnd(end: $0) }
+        return EKRecurrenceRule(
+            recurrenceWith: frequency,
+            interval: rule.interval,
+            daysOfTheWeek: days,
+            daysOfTheMonth: nil,
+            monthsOfTheYear: nil,
+            weeksOfTheYear: nil,
+            daysOfTheYear: nil,
+            setPositions: nil,
+            end: end
+        )
+    }
+
+    private static func domainRule(from rule: EKRecurrenceRule) -> RecurrenceRule? {
+        let frequency: RecurrenceRule.Frequency = switch rule.frequency {
+        case .daily: .daily
+        case .weekly: .weekly
+        case .monthly: .monthly
+        case .yearly: .yearly
+        @unknown default: return nil
+        }
+        return RecurrenceRule(
+            frequency: frequency,
+            interval: rule.interval,
+            daysOfWeek: rule.daysOfTheWeek?.map { $0.dayOfTheWeek.rawValue } ?? [],
+            endDate: rule.recurrenceEnd?.endDate
+        )
     }
 }

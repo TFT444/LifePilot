@@ -81,10 +81,15 @@ public struct AppDependencies: Sendable {
         let notificationScheduler: any NotificationScheduling = testing
             ? NoOpNotificationScheduler()
             : UserNotificationsScheduler()
+        let remindersIntegration: any RemindersIntegrating = testing
+            ? UnavailableRemindersIntegration()
+            : EventKitRemindersIntegration()
         let executor = LocalActionExecutor(
+            policy: SecurityPolicy(allowReminderWrites: !testing),
             taskStore: taskStore,
             eventStore: eventStore,
             notificationScheduler: notificationScheduler,
+            remindersIntegration: remindersIntegration,
             approvalStore: approvalStore
         )
         let location: any LocationProviding = testing
@@ -106,9 +111,7 @@ public struct AppDependencies: Sendable {
             calendarIntegration: testing
                 ? UnavailableCalendarIntegration()
                 : EventKitCalendarIntegration(),
-            remindersIntegration: testing
-                ? UnavailableRemindersIntegration()
-                : EventKitRemindersIntegration(),
+            remindersIntegration: remindersIntegration,
             weatherIntegration: testing
                 ? UnavailableWeatherIntegration()
                 : WeatherKitIntegration(locationProvider: location),
