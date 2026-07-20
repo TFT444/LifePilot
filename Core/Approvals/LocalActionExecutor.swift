@@ -1,40 +1,71 @@
 import Foundation
 
+public enum ActionExecutionDisposition: Sendable, Equatable {
+    case allowed
+    case unsupported(String)
+    case denied(String)
+}
+
 /// Allow/deny policy for executable action types. Financial and auto-email
-/// actions are permanently denied.
+/// actions are permanently denied. External writes stay unsupported until a
+/// concrete, authorization-aware executor is injected.
 public struct SecurityPolicy: Sendable {
     public init() {}
 
-    public func isAllowed(_ actionType: ActionProposal.ActionType) -> Bool {
+    public func disposition(
+        for actionType: ActionProposal.ActionType
+    ) -> ActionExecutionDisposition {
         switch actionType {
-        case .forbiddenExternalFinancial, .forbiddenSendEmail:
-            return false
+        case .forbiddenExternalFinancial:
+            return .denied("Financial actions are outside LifePilot's scope.")
+        case .forbiddenSendEmail:
+            return .denied("LifePilot does not send messages automatically.")
+        case .rescheduleEventKitEvent:
+            return .unsupported("Calendar event writes are not connected yet.")
+        case .createEventKitReminder:
+            return .unsupported("Apple Reminder creation is not connected yet.")
         case .createLocalTask, .completeLocalTask, .rescheduleLocalTask,
              .createLocalEvent, .updateLocalEvent, .deleteLocalRecord,
-             .scheduleNotification, .cancelNotification,
-             .rescheduleEventKitEvent, .createEventKitReminder:
+             .scheduleNotification, .cancelNotification:
+            return .allowed
+        }
+    }
+
+    public func isAllowed(_ actionType: ActionProposal.ActionType) -> Bool {
+        if case .allowed = disposition(for: actionType) {
             return true
         }
+        return false
     }
 }
 
-/// Executes approved proposals against local stores. Revalidates the bound
-/// fingerprint before applying side effects.
+/// Executes approved proposals against local stores and injected system
+/// adapters. Every action type is handled explicitly; unsupported actions fail
+/// before any success state or audit entry can be produced.
 public actor LocalActionExecutor: ActionExecuting {
     private let policy: SecurityPolicy
-    private let taskStore: any TaskStore
-    private let eventStore: any EventStore
+    let taskStore: any TaskStore
+    let eventStore: any EventStore
+    let notificationScheduler: (any NotificationScheduling)?
+    private let approvalStore: (any ApprovalStore)?
+    let clock: any ClockProviding
     private var executedProposalIDs: Set<UUID> = []
     private var auditLog: [AuditEvent] = []
 
     public init(
         policy: SecurityPolicy = SecurityPolicy(),
         taskStore: any TaskStore,
-        eventStore: any EventStore
+        eventStore: any EventStore,
+        notificationScheduler: (any NotificationScheduling)? = nil,
+        approvalStore: (any ApprovalStore)? = nil,
+        clock: any ClockProviding = SystemClock()
     ) {
         self.policy = policy
         self.taskStore = taskStore
         self.eventStore = eventStore
+        self.notificationScheduler = notificationScheduler
+        self.approvalStore = approvalStore
+        self.clock = clock
     }
 
     public nonisolated func isAllowed(_ actionType: ActionProposal.ActionType) -> Bool {
@@ -45,126 +76,142 @@ public actor LocalActionExecutor: ActionExecuting {
         proposal: ActionProposal,
         approval: ApprovalRecord
     ) async throws -> ApprovalRecord {
-        var result = approval
+        do {
+            try validateBindingAndPolicy(proposal: proposal, approval: approval)
+        } catch {
+            await persistFailure(proposal: proposal, approval: approval, error: error)
+            throw error
+        }
 
-        try validate(proposal: proposal, approval: approval, result: &result)
+        if let completed = await persistedCompletion(for: proposal) {
+            return completed
+        }
+
+        do {
+            try validateExecutionState(proposal: proposal, approval: approval)
+        } catch {
+            await persistFailure(proposal: proposal, approval: approval, error: error)
+            throw error
+        }
 
         if executedProposalIDs.contains(proposal.id) {
+            var result = approval
             result.state = .completed
             result.executionResult = "Already executed"
+            result.decidedAt = clock.now()
+            try await persistSuccess(proposal: proposal, result: result, wasRetry: true)
             return result
         }
 
-        try await applySideEffects(for: proposal)
-        executedProposalIDs.insert(proposal.id)
-        result.state = .completed
-        result.executionResult = "Executed"
-        result.decidedAt = Date()
-        appendAudit(
-            category: "execution",
-            summary: "Executed \(proposal.actionType.rawValue)",
-            proposalID: proposal.id,
-            success: true
-        )
-        return result
+        do {
+            try await applySideEffects(for: proposal)
+            executedProposalIDs.insert(proposal.id)
+
+            var result = approval
+            result.state = .completed
+            result.executionResult = "Executed"
+            result.decidedAt = clock.now()
+            try await persistSuccess(proposal: proposal, result: result, wasRetry: false)
+            return result
+        } catch {
+            await persistFailure(proposal: proposal, approval: approval, error: error)
+            throw error
+        }
     }
 
     public func auditEvents() -> [AuditEvent] {
         auditLog
     }
 
-    private func validate(
+    private func validateBindingAndPolicy(
         proposal: ActionProposal,
-        approval: ApprovalRecord,
-        result: inout ApprovalRecord
+        approval: ApprovalRecord
     ) throws {
-        guard policy.isAllowed(proposal.actionType) else {
-            result.state = .failed
-            result.executionResult = "Action denied by security policy"
-            appendAudit(
-                category: "security",
-                summary: "Denied \(proposal.actionType.rawValue)",
-                proposalID: proposal.id,
-                success: false
-            )
-            throw DomainError.unauthorized
+        guard approval.proposalID == proposal.id else {
+            throw DomainError.validationFailed(field: "proposalID")
         }
-
-        guard approval.state == .approved else {
-            result.state = .failed
-            result.executionResult = "Approval not in approved state"
-            throw DomainError.unauthorized
-        }
-
         guard approval.boundFingerprint == proposal.parameterFingerprint else {
-            result.state = .failed
-            result.executionResult = "Approval fingerprint mismatch — parameters changed"
-            appendAudit(
-                category: "approval",
-                summary: "Stale fingerprint",
-                proposalID: proposal.id,
-                success: false
-            )
             throw DomainError.conflict
         }
 
-        if let expires = proposal.expiresAt, expires < Date() {
-            result.state = .expired
-            result.executionResult = "Proposal expired"
-            throw DomainError.unavailable
-        }
-    }
-
-    private func applySideEffects(for proposal: ActionProposal) async throws {
-        switch proposal.actionType {
-        case .createLocalTask:
-            let title = proposal.parameters["title"] ?? proposal.title
-            try await taskStore.save(TaskItem(title: title))
-        case .completeLocalTask:
-            try await completeTask(from: proposal)
-        case .createLocalEvent:
-            let title = proposal.parameters["title"] ?? proposal.title
-            let start = Date()
-            let end = start.addingTimeInterval(3600)
-            try await eventStore.save(
-                CalendarEvent(title: title, startDate: start, endDate: end)
-            )
-        case .forbiddenExternalFinancial, .forbiddenSendEmail:
-            throw DomainError.unauthorized
-        default:
+        switch policy.disposition(for: proposal.actionType) {
+        case .allowed:
             break
+        case let .unsupported(reason):
+            throw DomainError.invalidState(reason)
+        case let .denied(reason):
+            throw DomainError.unauthorizedNamed(reason)
         }
     }
 
-    private func completeTask(from proposal: ActionProposal) async throws {
-        guard let idString = proposal.parameters["taskID"],
-              let id = UUID(uuidString: idString)
-        else {
-            throw DomainError.validationFailed(field: "taskID")
+    private func validateExecutionState(
+        proposal: ActionProposal,
+        approval: ApprovalRecord
+    ) throws {
+        guard approval.state == .approved else {
+            throw DomainError.invalidState("Approval is not in the approved state.")
         }
-        let tasks = await taskStore.allTasks()
-        guard var task = tasks.first(where: { $0.id == id }) else {
-            throw DomainError.notFound
+        if let expiresAt = proposal.expiresAt, expiresAt < clock.now() {
+            throw DomainError.unavailableNamed("Proposal expired.")
         }
-        task.isCompleted = true
-        task.completedAt = Date()
-        task.updatedAt = Date()
-        try await taskStore.save(task)
     }
 
-    private func appendAudit(
-        category: String,
-        summary: String,
-        proposalID: UUID,
-        success: Bool
-    ) {
-        auditLog.append(
-            AuditEvent(
-                category: category,
-                summary: summary,
-                proposalID: proposalID,
-                success: success
-            )
+    private func persistedCompletion(for proposal: ActionProposal) async -> ApprovalRecord? {
+        guard let approvalStore else { return nil }
+        let stored = await approvalStore.all()
+        return stored.first { storedProposal, record in
+            storedProposal.id == proposal.id
+                && storedProposal.parameterFingerprint == proposal.parameterFingerprint
+                && record.state == .completed
+        }?.1
+    }
+
+    private func persistSuccess(
+        proposal: ActionProposal,
+        result: ApprovalRecord,
+        wasRetry: Bool
+    ) async throws {
+        let event = AuditEvent(
+            timestamp: clock.now(),
+            category: "execution",
+            summary: wasRetry
+                ? "Skipped duplicate \(proposal.actionType.rawValue)"
+                : "Executed \(proposal.actionType.rawValue)",
+            proposalID: proposal.id,
+            success: true
         )
+        auditLog.append(event)
+        if let approvalStore {
+            try await approvalStore.save(proposal: proposal, record: result)
+            try await approvalStore.appendAudit(event)
+        }
+    }
+
+    private func persistFailure(
+        proposal: ActionProposal,
+        approval: ApprovalRecord,
+        error: Error
+    ) async {
+        var failed = approval
+        failed.state = isExpiry(error) ? .expired : .failed
+        failed.executionResult = error.localizedDescription
+        failed.decidedAt = clock.now()
+        let event = AuditEvent(
+            timestamp: clock.now(),
+            category: "execution",
+            summary: "Failed \(proposal.actionType.rawValue): \(error.localizedDescription)",
+            proposalID: proposal.id,
+            success: false
+        )
+        auditLog.append(event)
+        if let approvalStore {
+            try? await approvalStore.save(proposal: proposal, record: failed)
+            try? await approvalStore.appendAudit(event)
+        }
+    }
+
+    private func isExpiry(_ error: Error) -> Bool {
+        guard let domainError = error as? DomainError else { return false }
+        return domainError == .unavailableNamed("Proposal expired.")
     }
 }

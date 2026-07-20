@@ -82,7 +82,7 @@ public final class ApprovalsViewModel {
             )
         } catch {
             record.state = .failed
-            record.executionResult = String(describing: error)
+            record.executionResult = error.localizedDescription
             recordsByID[proposal.id] = record
             lastError = record.executionResult
             try? await approvalStore.save(proposal: proposal, record: record)

@@ -3,46 +3,71 @@ import XCTest
 @testable import LifePilotCore
 
 final class SecurityPolicyAndApprovalTests: XCTestCase {
-    func testFinanceAndEmailActionsAreDenied() {
+    private let now = Date(timeIntervalSince1970: 1_700_000_000)
+
+    func testFinanceEmailAndUnwiredExternalActionsAreNotAllowed() {
         let policy = SecurityPolicy()
         XCTAssertFalse(policy.isAllowed(.forbiddenExternalFinancial))
         XCTAssertFalse(policy.isAllowed(.forbiddenSendEmail))
+        XCTAssertFalse(policy.isAllowed(.rescheduleEventKitEvent))
+        XCTAssertFalse(policy.isAllowed(.createEventKitReminder))
         XCTAssertTrue(policy.isAllowed(.createLocalTask))
-        XCTAssertTrue(policy.isAllowed(.createLocalEvent))
+        XCTAssertTrue(policy.isAllowed(.scheduleNotification))
     }
 
-    func testExecutorRejectsDeniedActions() async {
-        let executor = LocalActionExecutor(
-            taskStore: FakeTaskStore(),
-            eventStore: FakeEventStore()
-        )
+    func testExecutorRejectsDeniedActionAndPersistsFailureAudit() async throws {
+        let approvalStore = InMemoryApprovalStore()
+        let executor = makeExecutor(approvalStore: approvalStore)
         let proposal = ActionProposal(
             actionType: .forbiddenExternalFinancial,
             title: "Pay bill",
             detail: "Must never execute",
             parameters: ["amount": "100"]
         )
-        let approval = ApprovalRecord(
-            proposalID: proposal.id,
-            boundFingerprint: proposal.parameterFingerprint,
-            state: .approved
+
+        await assertDomainError(
+            .unauthorizedNamed("Financial actions are outside LifePilot's scope.")
+        ) {
+            _ = try await executor.execute(
+                proposal: proposal,
+                approval: approved(proposal)
+            )
+        }
+
+        let audit = await approvalStore.auditTrail()
+        XCTAssertEqual(audit.count, 1)
+        XCTAssertFalse(try XCTUnwrap(audit.first).success)
+    }
+
+    func testUnsupportedExternalActionCannotReportSuccess() async {
+        let approvalStore = InMemoryApprovalStore()
+        let executor = makeExecutor(approvalStore: approvalStore)
+        let proposal = ActionProposal(
+            actionType: .createEventKitReminder,
+            title: "Create reminder",
+            detail: "External write is not connected",
+            parameters: ["title": "Call Mum"]
         )
 
-        do {
-            _ = try await executor.execute(proposal: proposal, approval: approval)
-            XCTFail("Expected denial")
-        } catch is DomainError {
-            // expected
-        } catch {
-            XCTFail("Unexpected error \(error)")
+        await assertDomainError(
+            .invalidState("Apple Reminder creation is not connected yet.")
+        ) {
+            _ = try await executor.execute(
+                proposal: proposal,
+                approval: approved(proposal)
+            )
         }
+
+        let stored = await approvalStore.all()
+        XCTAssertEqual(stored.first?.1.state, .failed)
+        XCTAssertEqual(
+            stored.first?.1.executionResult,
+            "Apple Reminder creation is not connected yet."
+        )
     }
 
     func testFingerprintMismatchFails() async {
-        let executor = LocalActionExecutor(
-            taskStore: FakeTaskStore(),
-            eventStore: FakeEventStore()
-        )
+        let executor = makeExecutor()
         let proposal = ActionProposal(
             actionType: .createLocalTask,
             title: "Buy milk",
@@ -55,41 +80,108 @@ final class SecurityPolicyAndApprovalTests: XCTestCase {
             state: .approved
         )
 
-        do {
+        await assertDomainError(.conflict) {
             _ = try await executor.execute(proposal: proposal, approval: approval)
-            XCTFail("Expected conflict")
-        } catch is DomainError {
-            // expected
-        } catch {
-            XCTFail("Unexpected error \(error)")
         }
     }
 
-    func testIdempotentExecution() async throws {
-        let taskStore = FakeTaskStore()
-        let executor = LocalActionExecutor(
-            taskStore: taskStore,
-            eventStore: FakeEventStore()
+    func testProposalIDMismatchFails() async {
+        let executor = makeExecutor()
+        let proposal = ActionProposal(
+            actionType: .createLocalTask,
+            title: "Buy milk",
+            detail: "Grocery",
+            parameters: ["title": "Buy milk"]
         )
+        let approval = ApprovalRecord(
+            proposalID: UUID(),
+            boundFingerprint: proposal.parameterFingerprint,
+            state: .approved
+        )
+
+        await assertDomainError(.validationFailed(field: "proposalID")) {
+            _ = try await executor.execute(proposal: proposal, approval: approval)
+        }
+    }
+
+    func testExpiredProposalPersistsExpiredState() async {
+        let approvalStore = InMemoryApprovalStore()
+        let executor = makeExecutor(approvalStore: approvalStore)
+        let proposal = ActionProposal(
+            actionType: .createLocalTask,
+            title: "Expired",
+            detail: "Too late",
+            parameters: ["title": "Expired"],
+            expiresAt: now.addingTimeInterval(-1)
+        )
+
+        await assertDomainError(.unavailableNamed("Proposal expired.")) {
+            _ = try await executor.execute(
+                proposal: proposal,
+                approval: approved(proposal)
+            )
+        }
+
+        let stored = await approvalStore.all()
+        XCTAssertEqual(stored.first?.1.state, .expired)
+    }
+
+    func testCreateTaskIsIdempotentAcrossExecutorRestart() async throws {
+        let taskStore = FakeTaskStore()
+        let approvalStore = InMemoryApprovalStore()
         let proposal = ActionProposal(
             actionType: .createLocalTask,
             title: "Walk the dog",
             detail: "Evening",
             parameters: ["title": "Walk the dog"]
         )
-        let approval = ApprovalRecord(
-            proposalID: proposal.id,
-            boundFingerprint: proposal.parameterFingerprint,
-            state: .approved
-        )
+        let approval = approved(proposal)
 
-        let first = try await executor.execute(proposal: proposal, approval: approval)
-        let second = try await executor.execute(proposal: proposal, approval: approval)
+        let firstExecutor = makeExecutor(
+            taskStore: taskStore,
+            approvalStore: approvalStore
+        )
+        let first = try await firstExecutor.execute(proposal: proposal, approval: approval)
+
+        let restartedExecutor = makeExecutor(
+            taskStore: taskStore,
+            approvalStore: approvalStore
+        )
+        let second = try await restartedExecutor.execute(proposal: proposal, approval: approval)
+
+        let tasks = await taskStore.allTasks()
         XCTAssertEqual(first.state, .completed)
         XCTAssertEqual(second.state, .completed)
-        XCTAssertEqual(second.executionResult, "Already executed")
-        let saved = await taskStore.allTasks()
-        XCTAssertEqual(saved.count, 1)
+        XCTAssertEqual(tasks.count, 1)
+        XCTAssertEqual(tasks.first?.id, proposal.id)
+    }
+
+    func testSideEffectFailurePersistsFailedOutcomeAndAudit() async throws {
+        let taskStore = FakeTaskStore(saveError: .unavailableNamed("Disk unavailable."))
+        let approvalStore = InMemoryApprovalStore()
+        let executor = makeExecutor(
+            taskStore: taskStore,
+            approvalStore: approvalStore
+        )
+        let proposal = ActionProposal(
+            actionType: .createLocalTask,
+            title: "Write safely",
+            detail: "Persistence must succeed",
+            parameters: ["title": "Write safely"]
+        )
+
+        await assertDomainError(.unavailableNamed("Disk unavailable.")) {
+            _ = try await executor.execute(
+                proposal: proposal,
+                approval: approved(proposal)
+            )
+        }
+
+        let stored = await approvalStore.all()
+        let audit = await approvalStore.auditTrail()
+        XCTAssertEqual(stored.first?.1.state, .failed)
+        XCTAssertEqual(stored.first?.1.executionResult, "Disk unavailable.")
+        XCTAssertFalse(try XCTUnwrap(audit.first).success)
     }
 
     func testAgentKindExcludesFinanceShoppingHealth() {
@@ -98,41 +190,5 @@ final class SecurityPolicyAndApprovalTests: XCTestCase {
         XCTAssertFalse(raw.contains("shopping"))
         XCTAssertFalse(raw.contains("health"))
         XCTAssertFalse(raw.contains("email"))
-    }
-}
-
-private actor FakeTaskStore: TaskStore {
-    private var items: [TaskItem] = []
-
-    func allTasks() async -> [TaskItem] {
-        items
-    }
-
-    func save(_ task: TaskItem) async throws {
-        items.append(task)
-    }
-
-    func delete(id: UUID) async throws {
-        items.removeAll { $0.id == id }
-    }
-
-    func tasks(matching predicate: @Sendable (TaskItem) -> Bool) async -> [TaskItem] {
-        items.filter(predicate)
-    }
-}
-
-private actor FakeEventStore: EventStore {
-    private var items: [CalendarEvent] = []
-
-    func allEvents() async -> [CalendarEvent] {
-        items
-    }
-
-    func save(_ event: CalendarEvent) async throws {
-        items.append(event)
-    }
-
-    func delete(id: UUID) async throws {
-        items.removeAll { $0.id == id }
     }
 }
