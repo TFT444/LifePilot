@@ -276,7 +276,6 @@ public struct SettingsView: View {
                 + "owned by LifePilot. Apple Calendar and Reminders remain unchanged.")
         }
     }
-
 }
 
 private struct PermissionConnectionAction: View {
@@ -284,7 +283,6 @@ private struct PermissionConnectionAction: View {
     let connection: ConnectionCapability
     let onRequest: (PermissionKind) -> Void
 
-    @ViewBuilder
     var body: some View {
         if let kind = PermissionKind(rawValue: connection.id) {
             switch connection.state {
