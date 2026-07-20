@@ -65,7 +65,11 @@ public struct TfLTransitService: TransitProviding {
                 }
                 if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode) {
                     continuation
-                        .resume(throwing: DomainError.unavailable("TfL request failed: HTTP \(http.statusCode)"))
+                        .resume(
+                            throwing: DomainError.unavailableNamed(
+                                "TfL request failed: HTTP \(http.statusCode)"
+                            )
+                        )
                     return
                 }
                 guard let data else {
