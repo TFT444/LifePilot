@@ -22,13 +22,15 @@ final class CoreLocationProvider: NSObject, LocationProviding, CLLocationManager
         switch manager.authorizationStatus {
         case .notDetermined:
             return .notDetermined
-        case .restricted, .denied:
+        case .restricted:
+            return .restricted
+        case .denied:
             return .denied
         #if os(iOS) || os(tvOS) || os(watchOS)
         case .authorizedAlways, .authorizedWhenInUse:
             return .authorized
         #else
-        case .authorized:
+        case .authorized, .authorizedAlways:
             return .authorized
         #endif
         @unknown default:

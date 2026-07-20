@@ -5,6 +5,7 @@ public enum CapabilityState: String, Sendable, Codable, CaseIterable {
     case unavailable
     case notDetermined
     case denied
+    case restricted
     case limited
     case authorized
 }
@@ -12,12 +13,14 @@ public enum CapabilityState: String, Sendable, Codable, CaseIterable {
 /// Calendar read/write surface. Implementations may wrap EventKit.
 public protocol CalendarIntegrating: Sendable {
     func authorizationState() async -> CapabilityState
+    func requestAccess() async throws -> Bool
     func fetchEvents(from start: Date, to end: Date) async throws -> [CalendarEvent]
 }
 
 /// Reminders surface. Separate from Calendar for least privilege.
 public protocol RemindersIntegrating: Sendable {
     func authorizationState() async -> CapabilityState
+    func requestAccess() async throws -> Bool
     func fetchOpenReminders() async throws -> [TaskItem]
 }
 
@@ -45,7 +48,11 @@ public struct UnavailableCalendarIntegration: CalendarIntegrating {
     public init() {}
 
     public func authorizationState() async -> CapabilityState {
-        .denied
+        .unavailable
+    }
+
+    public func requestAccess() async throws -> Bool {
+        false
     }
 
     public func fetchEvents(from _: Date, to _: Date) async throws -> [CalendarEvent] {
@@ -57,7 +64,11 @@ public struct UnavailableRemindersIntegration: RemindersIntegrating {
     public init() {}
 
     public func authorizationState() async -> CapabilityState {
-        .denied
+        .unavailable
+    }
+
+    public func requestAccess() async throws -> Bool {
+        false
     }
 
     public func fetchOpenReminders() async throws -> [TaskItem] {

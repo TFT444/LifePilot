@@ -68,10 +68,10 @@ final class LoadableStateTests: XCTestCase {
 }
 
 final class IntegrationProtocolTests: XCTestCase {
-    func testDeniedCalendarThrowsUnavailable() async {
+    func testUnavailableCalendarThrowsUnavailable() async {
         let calendar = UnavailableCalendarIntegration()
         let state = await calendar.authorizationState()
-        XCTAssertEqual(state, .denied)
+        XCTAssertEqual(state, .unavailable)
         do {
             _ = try await calendar.fetchEvents(from: Date(), to: Date())
             XCTFail("Expected unavailable")

@@ -13,7 +13,8 @@ public final class EventKitCalendarIntegration: CalendarIntegrating, @unchecked 
     public func authorizationState() async -> CapabilityState {
         switch EKEventStore.authorizationStatus(for: .event) {
         case .notDetermined: return .notDetermined
-        case .restricted, .denied: return .denied
+        case .restricted: return .restricted
+        case .denied: return .denied
         case .fullAccess: return .authorized
         case .writeOnly: return .limited
         case .authorized: return .authorized
@@ -63,7 +64,8 @@ public final class EventKitRemindersIntegration: RemindersIntegrating, @unchecke
     public func authorizationState() async -> CapabilityState {
         switch EKEventStore.authorizationStatus(for: .reminder) {
         case .notDetermined: return .notDetermined
-        case .restricted, .denied: return .denied
+        case .restricted: return .restricted
+        case .denied: return .denied
         case .fullAccess: return .authorized
         case .writeOnly: return .limited
         case .authorized: return .authorized

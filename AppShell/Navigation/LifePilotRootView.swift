@@ -32,9 +32,15 @@ public struct LifePilotRootView: View {
             case .splash:
                 SplashView()
             case .onboarding:
-                OnboardingView(onFinish: {
-                    Task { await completeOnboarding() }
-                })
+                OnboardingView(
+                    permissions: permissionDependencies,
+                    skipHandler: { permission in
+                        await recordSkippedPermission(permission)
+                    },
+                    onFinish: {
+                        Task { await completeOnboarding() }
+                    }
+                )
             case .main:
                 RootTabView(dependencies: dependencies)
             }
@@ -87,6 +93,21 @@ public struct LifePilotRootView: View {
                 phase = .main
             }
         }
+    }
+
+    private func recordSkippedPermission(_ permission: PermissionKind) async {
+        var preferences = await dependencies.preferenceStore.loadPreferences()
+        preferences.skippedPermissionIDs.insert(permission.rawValue)
+        try? await dependencies.preferenceStore.savePreferences(preferences)
+    }
+
+    private var permissionDependencies: PermissionDependencies {
+        PermissionDependencies(
+            calendar: dependencies.calendarIntegration,
+            reminders: dependencies.remindersIntegration,
+            notifications: dependencies.notificationScheduler,
+            location: dependencies.locationProvider
+        )
     }
 
     private enum LaunchPhase {

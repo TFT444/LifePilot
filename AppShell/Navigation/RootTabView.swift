@@ -12,6 +12,7 @@ public struct RootTabView: View {
     @State private var captureKind: AppRoute.QuickCaptureKind = .task
     @State private var captureTitle = ""
     @State private var isSearching = false
+    @State private var permissionRevision = 0
 
     public init(dependencies: AppDependencies) {
         self.dependencies = dependencies
@@ -99,12 +100,14 @@ public struct RootTabView: View {
                     planningEngine: dependencies.planningEngine,
                     integrations: HomeBriefingIntegrations(
                         calendar: dependencies.calendarIntegration,
+                        reminders: dependencies.remindersIntegration,
                         weather: dependencies.weatherIntegration,
                         travel: dependencies.travelIntegration,
                         location: dependencies.locationProvider
                     )
                 )
             )
+            .id(permissionRevision)
             .navigationTitle("")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
@@ -126,10 +129,11 @@ public struct RootTabView: View {
                 approvalStore: dependencies.approvalStore,
                 connections: SettingsConnections(
                     cloudSync: dependencies.cloudSync,
-                    locationProvider: dependencies.locationProvider,
-                    calendarIntegration: dependencies.calendarIntegration,
-                    remindersIntegration: dependencies.remindersIntegration
-                )
+                    permissions: permissionDependencies
+                ),
+                onPermissionsChanged: {
+                    permissionRevision += 1
+                }
             )
         }
     }
@@ -158,6 +162,15 @@ public struct RootTabView: View {
         } catch {
             // Keep sheet open so the user can retry.
         }
+    }
+
+    private var permissionDependencies: PermissionDependencies {
+        PermissionDependencies(
+            calendar: dependencies.calendarIntegration,
+            reminders: dependencies.remindersIntegration,
+            notifications: dependencies.notificationScheduler,
+            location: dependencies.locationProvider
+        )
     }
 }
 

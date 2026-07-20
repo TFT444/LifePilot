@@ -4,11 +4,22 @@ import SwiftUI
 /// The onboarding flow shown on first launch. See `OnboardingViewModel`
 /// for step progression and `OnboardingStep` for step content.
 public struct OnboardingView: View {
-    @State private var viewModel = OnboardingViewModel()
+    @State private var viewModel: OnboardingViewModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.openURL) private var openURL
     private let onFinish: () -> Void
 
-    public init(onFinish: @escaping () -> Void) {
+    public init(
+        permissions: PermissionDependencies = PermissionDependencies(),
+        skipHandler: @escaping (PermissionKind) async -> Void = { _ in },
+        onFinish: @escaping () -> Void
+    ) {
+        _viewModel = State(
+            initialValue: OnboardingViewModel(
+                permissions: permissions,
+                skipHandler: skipHandler
+            )
+        )
         self.onFinish = onFinish
     }
 
@@ -58,6 +69,16 @@ public struct OnboardingView: View {
                         }
                         .padding(.horizontal, Spacing.lg)
                     }
+
+                    if let message = viewModel.permissionMessage {
+                        StatusBanner(
+                            message: message,
+                            style: viewModel.permissionState == .denied
+                                ? .warning
+                                : .info
+                        )
+                        .padding(.horizontal, Spacing.lg)
+                    }
                 }
                 .id(viewModel.currentStep.id)
                 .transition(reduceMotion
@@ -66,17 +87,8 @@ public struct OnboardingView: View {
 
                 Spacer()
 
-                Button(viewModel.isLastStep ? "Get Started" : "Continue") {
-                    if viewModel.isLastStep {
-                        onFinish()
-                    } else {
-                        withAnimation(reduceMotion ? nil : Motion.deliberate) {
-                            viewModel.advance()
-                        }
-                    }
-                }
-                .buttonStyle(.lifePilotPrimary)
-                .padding(.horizontal, Spacing.lg)
+                actionButtons
+                    .padding(.horizontal, Spacing.lg)
                 .padding(.bottom, Spacing.lg)
             }
         }
@@ -85,6 +97,58 @@ public struct OnboardingView: View {
             reduceMotion: reduceMotion,
             value: viewModel.currentStepIndex
         )
+        .task(id: viewModel.currentStep.id) {
+            await viewModel.refreshCurrentPermission()
+        }
+    }
+
+    @ViewBuilder
+    private var actionButtons: some View {
+        if !viewModel.permissionHandled, let permission = viewModel.currentStep.permission {
+            VStack(spacing: Spacing.sm) {
+                Button(
+                    viewModel.isRequestingPermission
+                        ? "Requesting..."
+                        : "Connect \(permission.displayName)"
+                ) {
+                    Task { await viewModel.requestCurrentPermission() }
+                }
+                .buttonStyle(.lifePilotPrimary)
+                .disabled(viewModel.isRequestingPermission)
+
+                Button("Not Now") {
+                    Task { await viewModel.skipCurrentPermission() }
+                }
+                .buttonStyle(.lifePilotSecondary)
+                .disabled(viewModel.isRequestingPermission)
+            }
+        } else {
+            VStack(spacing: Spacing.sm) {
+                if viewModel.permissionState == .denied {
+                    Button("Open System Settings") {
+                        if let url = PermissionSystemSettings.url {
+                            openURL(url)
+                        }
+                    }
+                    .buttonStyle(.lifePilotSecondary)
+                }
+
+                Button(viewModel.isLastStep ? "Get Started" : "Continue") {
+                    continueFlow()
+                }
+                .buttonStyle(.lifePilotPrimary)
+            }
+        }
+    }
+
+    private func continueFlow() {
+        if viewModel.isLastStep {
+            onFinish()
+        } else {
+            withAnimation(reduceMotion ? nil : Motion.deliberate) {
+                viewModel.advance()
+            }
+        }
     }
 }
 

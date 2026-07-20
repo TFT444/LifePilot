@@ -55,6 +55,20 @@ extension HomeViewModel {
         return (events, notes)
     }
 
+    func hydrateTasks(local: [TaskItem]) async -> (tasks: [TaskItem], notes: [String]) {
+        let remindersState = await integrations.reminders.authorizationState()
+        if remindersState == .authorized || remindersState == .limited {
+            if let reminders = try? await integrations.reminders.fetchOpenReminders() {
+                return (local + reminders, ["Reminders connected"])
+            }
+            return (local, ["Reminders unavailable - showing local tasks"])
+        }
+        if remindersState == .denied || remindersState == .restricted {
+            return (local, ["Reminders unavailable - showing local tasks"])
+        }
+        return (local, [])
+    }
+
     func enrichLeaveBy(
         events: [CalendarEvent],
         weather: WeatherSnapshot?,

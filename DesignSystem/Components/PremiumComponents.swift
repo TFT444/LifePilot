@@ -319,6 +319,7 @@ public struct ConnectionStatusRow: View {
         case .authorized: "checkmark.circle.fill"
         case .limited: "circle.lefthalf.filled"
         case .denied: "xmark.circle.fill"
+        case .restricted: "lock.circle.fill"
         case .unavailable: "minus.circle.fill"
         case .notRequested: "circle.dotted"
         }
@@ -327,7 +328,7 @@ public struct ConnectionStatusRow: View {
     private var tint: Color {
         switch state {
         case .authorized: Color.LifePilot.signalSuccess
-        case .denied: Color.LifePilot.signalRisk
+        case .denied, .restricted: Color.LifePilot.signalRisk
         case .limited: Color.LifePilot.accentStart
         case .unavailable, .notRequested: Color.LifePilot.textSecondary
         }
@@ -338,6 +339,7 @@ public struct ConnectionStatusRow: View {
         case .notRequested: "Not connected"
         case .authorized: "Connected"
         case .denied: "Denied"
+        case .restricted: "Restricted"
         case .limited: "Limited"
         case .unavailable: "Unavailable"
         }

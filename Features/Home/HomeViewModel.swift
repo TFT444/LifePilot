@@ -5,17 +5,20 @@ import LifePilotDesignSystem
 /// Optional system integrations for Home briefing enrichment.
 public struct HomeBriefingIntegrations: Sendable {
     public var calendar: any CalendarIntegrating
+    public var reminders: any RemindersIntegrating
     public var weather: any WeatherIntegrating
     public var travel: any TravelTimeIntegrating
     public var location: any LocationProviding
 
     public init(
         calendar: any CalendarIntegrating = UnavailableCalendarIntegration(),
+        reminders: any RemindersIntegrating = UnavailableRemindersIntegration(),
         weather: any WeatherIntegrating = UnavailableWeatherIntegration(),
         travel: any TravelTimeIntegrating = UnavailableTravelTimeIntegration(),
         location: any LocationProviding = UnavailableLocationProvider()
     ) {
         self.calendar = calendar
+        self.reminders = reminders
         self.weather = weather
         self.travel = travel
         self.location = location
@@ -81,7 +84,8 @@ public final class HomeViewModel {
 
         let now = clock.now()
         let preferences = await preferenceStore.loadPreferences()
-        let tasks = await taskStore.allTasks()
+        let localTasks = await taskStore.allTasks()
+        let hydratedTasks = await hydrateTasks(local: localTasks)
         let hydrated = await hydrateEvents(now: now)
         let weather = try? await integrations.weather.currentWeather()
         let leaveBy = await enrichLeaveBy(
@@ -94,7 +98,7 @@ public final class HomeViewModel {
         applyBriefing(
             now: now,
             preferences: preferences,
-            tasks: tasks,
+            tasks: hydratedTasks.tasks,
             events: hydrated.events,
             extraFindings: leaveBy.findings
         )
@@ -104,6 +108,7 @@ public final class HomeViewModel {
         }
 
         var notes = hydrated.notes
+        notes.append(contentsOf: hydratedTasks.notes)
         if weather != nil {
             notes.append("Weather")
         }

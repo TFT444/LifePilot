@@ -2,7 +2,7 @@ import Foundation
 import LifePilotCore
 import Observation
 
-/// Persisted settings and privacy controls for LifePilot-owned data.
+/// Persisted settings, permission connections, and privacy controls.
 @Observable
 @MainActor
 public final class SettingsViewModel {
@@ -10,33 +10,31 @@ public final class SettingsViewModel {
     public private(set) var memoryCount: Int = 0
     public private(set) var exportMessage: String?
     public private(set) var syncMessage: String?
-    public private(set) var locationMessage: String?
+    public private(set) var connectionMessage: String?
     public private(set) var cloudSyncEnabled = false
     public private(set) var connections: [ConnectionCapability]
 
     private let preferenceStore: any PreferenceStore
     private let cloudSync: any CloudSyncIntegrating
-    private let locationProvider: any LocationProviding
-    private let calendarIntegration: any CalendarIntegrating
-    private let remindersIntegration: any RemindersIntegrating
+    private let permissions: PermissionDependencies
 
     public init(
         preferenceStore: any PreferenceStore,
         cloudSync: any CloudSyncIntegrating = DisabledCloudSyncIntegration(),
-        locationProvider: any LocationProviding = UnavailableLocationProvider(),
-        calendarIntegration: any CalendarIntegrating = UnavailableCalendarIntegration(),
-        remindersIntegration: any RemindersIntegrating = UnavailableRemindersIntegration()
+        permissions: PermissionDependencies = PermissionDependencies()
     ) {
         self.preferenceStore = preferenceStore
         self.cloudSync = cloudSync
-        self.locationProvider = locationProvider
-        self.calendarIntegration = calendarIntegration
-        self.remindersIntegration = remindersIntegration
+        self.permissions = permissions
         preferences = UserPreferences()
         connections = [
             ConnectionCapability(id: "calendar", displayName: "Calendar", state: .notRequested),
             ConnectionCapability(id: "reminders", displayName: "Reminders", state: .notRequested),
-            ConnectionCapability(id: "notifications", displayName: "Notifications", state: .notRequested),
+            ConnectionCapability(
+                id: "notifications",
+                displayName: "Notifications",
+                state: .notRequested
+            ),
             ConnectionCapability(id: "location", displayName: "Location", state: .notRequested),
             ConnectionCapability(id: "weather", displayName: "Weather", state: .notRequested),
             ConnectionCapability(id: "cloudSync", displayName: "Cloud Sync", state: .notRequested),
@@ -90,17 +88,13 @@ public final class SettingsViewModel {
         }
     }
 
-    public func requestLocation() async {
-        let state = await locationProvider.requestAuthorization()
-        switch state {
-        case .authorized, .limited:
-            locationMessage = "Location enabled — weather can refresh on Home."
-        case .denied:
-            locationMessage = "Location denied in system Settings."
-        case .unavailable:
-            locationMessage = "Location is unavailable on this device."
-        case .notDetermined:
-            locationMessage = "Location permission still pending."
+    public func requestConnection(_ kind: PermissionKind) async {
+        connectionMessage = nil
+        do {
+            let state = try await permissions.request(kind)
+            connectionMessage = Self.connectionMessage(for: kind, state: state)
+        } catch {
+            connectionMessage = error.localizedDescription
         }
         await refreshConnections()
     }
@@ -125,21 +119,48 @@ public final class SettingsViewModel {
         }
     }
 
-    private func refreshConnections() async {
-        let calendar = await calendarIntegration.authorizationState()
-        let reminders = await remindersIntegration.authorizationState()
-        let location = await locationProvider.authorizationState()
+    public func refreshConnections() async {
+        async let calendar = permissions.state(for: .calendar)
+        async let reminders = permissions.state(for: .reminders)
+        async let notifications = permissions.state(for: .notifications)
+        async let location = permissions.state(for: .location)
         let sync = await cloudSync.authorizationState()
-        setConnection("calendar", Self.permission(from: calendar))
-        setConnection("reminders", Self.permission(from: reminders))
-        setConnection("location", Self.permission(from: location))
-        setConnection("weather", Self.permission(from: location))
+        setConnection("calendar", await calendar)
+        setConnection("reminders", await reminders)
+        setConnection("notifications", await notifications)
+        setConnection("location", await location)
+        setConnection("weather", await location)
         setConnection("cloudSync", Self.permission(from: sync))
+    }
+
+    public func state(for kind: PermissionKind) -> PermissionState {
+        connections.first(where: { $0.id == kind.rawValue })?.state ?? .unavailable
     }
 
     private func setConnection(_ id: String, _ state: PermissionState) {
         if let index = connections.firstIndex(where: { $0.id == id }) {
             connections[index].state = state
+            connections[index].lastCheckedAt = Date()
+        }
+    }
+
+    private static func connectionMessage(
+        for kind: PermissionKind,
+        state: PermissionState
+    ) -> String {
+        switch state {
+        case .authorized:
+            "\(kind.displayName) connected."
+        case .limited:
+            "\(kind.displayName) has limited access. Review access in system Settings."
+        case .denied:
+            "\(kind.displayName) is denied. Open system Settings to change access."
+        case .restricted:
+            "\(kind.displayName) is restricted by this device or account."
+        case .unavailable:
+            "\(kind.displayName) is unavailable on this device."
+        case .notRequested:
+            "\(kind.displayName) permission is still pending."
         }
     }
 
@@ -148,6 +169,7 @@ public final class SettingsViewModel {
         case .authorized: .authorized
         case .limited: .limited
         case .denied: .denied
+        case .restricted: .restricted
         case .unavailable: .unavailable
         case .notDetermined: .notRequested
         }

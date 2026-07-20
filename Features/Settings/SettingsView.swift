@@ -5,20 +5,14 @@ import SwiftUI
 /// Wiring bag so SettingsView stays under SwiftLint parameter limits.
 public struct SettingsConnections: Sendable {
     public var cloudSync: any CloudSyncIntegrating
-    public var locationProvider: any LocationProviding
-    public var calendarIntegration: any CalendarIntegrating
-    public var remindersIntegration: any RemindersIntegrating
+    public var permissions: PermissionDependencies
 
     public init(
         cloudSync: any CloudSyncIntegrating = DisabledCloudSyncIntegration(),
-        locationProvider: any LocationProviding = UnavailableLocationProvider(),
-        calendarIntegration: any CalendarIntegrating = UnavailableCalendarIntegration(),
-        remindersIntegration: any RemindersIntegrating = UnavailableRemindersIntegration()
+        permissions: PermissionDependencies = PermissionDependencies()
     ) {
         self.cloudSync = cloudSync
-        self.locationProvider = locationProvider
-        self.calendarIntegration = calendarIntegration
-        self.remindersIntegration = remindersIntegration
+        self.permissions = permissions
     }
 }
 
@@ -26,28 +20,31 @@ public struct SettingsConnections: Sendable {
 public struct SettingsView: View {
     @State private var viewModel: SettingsViewModel
     @State private var confirmDelete = false
+    @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
     private let preferenceStore: any PreferenceStore
     private let actionExecutor: any ActionExecuting
     private let approvalStore: any ApprovalStore
+    private let onPermissionsChanged: () -> Void
 
     public init(
         preferenceStore: any PreferenceStore,
         actionExecutor: any ActionExecuting,
         approvalStore: any ApprovalStore,
-        connections: SettingsConnections = SettingsConnections()
+        connections: SettingsConnections = SettingsConnections(),
+        onPermissionsChanged: @escaping () -> Void = {}
     ) {
         _viewModel = State(
             initialValue: SettingsViewModel(
                 preferenceStore: preferenceStore,
                 cloudSync: connections.cloudSync,
-                locationProvider: connections.locationProvider,
-                calendarIntegration: connections.calendarIntegration,
-                remindersIntegration: connections.remindersIntegration
+                permissions: connections.permissions
             )
         )
         self.preferenceStore = preferenceStore
         self.actionExecutor = actionExecutor
         self.approvalStore = approvalStore
+        self.onPermissionsChanged = onPermissionsChanged
     }
 
     public var body: some View {
@@ -143,19 +140,19 @@ public struct SettingsView: View {
 
             Section("Connections") {
                 ForEach(viewModel.connections) { connection in
-                    ConnectionStatusRow(
-                        title: connection.displayName,
-                        state: connection.state,
-                        detail: connection.lastCheckedAt.map {
-                            "Checked \($0.formatted(date: .omitted, time: .shortened))"
-                        }
-                    )
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        ConnectionStatusRow(
+                            title: connection.displayName,
+                            state: connection.state,
+                            detail: connection.lastCheckedAt.map {
+                                "Checked \($0.formatted(date: .omitted, time: .shortened))"
+                            }
+                        )
+                        connectionAction(for: connection)
+                    }
                 }
-                Button("Enable Location for weather") {
-                    Task { await viewModel.requestLocation() }
-                }
-                if let locationMessage = viewModel.locationMessage {
-                    Text(locationMessage)
+                if let connectionMessage = viewModel.connectionMessage {
+                    Text(connectionMessage)
                         .font(.LifePilot.caption)
                         .foregroundStyle(Color.LifePilot.textSecondary)
                 }
@@ -230,6 +227,13 @@ public struct SettingsView: View {
         .background(AmbientBackground())
         .navigationTitle("Settings")
         .task { await viewModel.load() }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            Task {
+                await viewModel.refreshConnections()
+                onPermissionsChanged()
+            }
+        }
         .confirmationDialog(
             "Delete all LifePilot-owned local data?",
             isPresented: $confirmDelete,
@@ -242,6 +246,33 @@ public struct SettingsView: View {
         } message: {
             Text("This removes tasks, preferences, Memory, approvals, and audit records "
                 + "owned by LifePilot. Apple Calendar and Reminders remain unchanged.")
+        }
+    }
+
+    @ViewBuilder
+    private func connectionAction(for connection: ConnectionCapability) -> some View {
+        if let kind = PermissionKind(rawValue: connection.id) {
+            switch connection.state {
+            case .notRequested:
+                Button("Connect \(kind.displayName)") {
+                    request(kind)
+                }
+            case .denied, .limited:
+                Button("Open System Settings") {
+                    if let url = PermissionSystemSettings.url {
+                        openURL(url)
+                    }
+                }
+            case .authorized, .restricted, .unavailable:
+                EmptyView()
+            }
+        }
+    }
+
+    private func request(_ kind: PermissionKind) {
+        Task {
+            await viewModel.requestConnection(kind)
+            onPermissionsChanged()
         }
     }
 }
