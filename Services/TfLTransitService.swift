@@ -75,8 +75,7 @@ public struct TfLTransitService: TransitProviding {
         request.timeoutInterval = timeoutInterval
         let (data, response) = try await session.data(for: request)
         try Task.checkCancellation()
-        if let http = response as? HTTPURLResponse,
-           !(200 ..< 300).contains(http.statusCode) {
+        if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode) {
             throw DomainError.unavailableNamed(
                 "TfL request failed: HTTP \(http.statusCode)"
             )

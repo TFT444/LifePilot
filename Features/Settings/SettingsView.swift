@@ -23,7 +23,6 @@ public struct SettingsView: View {
     @State private var transitStopID = ""
     @State private var transitStopName = ""
     @State private var transitLines = ""
-    @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
     private let preferenceStore: any PreferenceStore
     private let actionExecutor: any ActionExecuting
@@ -167,7 +166,12 @@ public struct SettingsView: View {
                                 "Checked \($0.formatted(date: .omitted, time: .shortened))"
                             }
                         )
-                        connectionAction(for: connection)
+                        PermissionConnectionAction(connection: connection) { kind in
+                            Task {
+                                await viewModel.requestConnection(kind)
+                                onPermissionsChanged()
+                            }
+                        }
                     }
                 }
                 if let connectionMessage = viewModel.connectionMessage {
@@ -273,13 +277,20 @@ public struct SettingsView: View {
         }
     }
 
+}
+
+private struct PermissionConnectionAction: View {
+    @Environment(\.openURL) private var openURL
+    let connection: ConnectionCapability
+    let onRequest: (PermissionKind) -> Void
+
     @ViewBuilder
-    private func connectionAction(for connection: ConnectionCapability) -> some View {
+    var body: some View {
         if let kind = PermissionKind(rawValue: connection.id) {
             switch connection.state {
             case .notRequested:
                 Button("Connect \(kind.displayName)") {
-                    request(kind)
+                    onRequest(kind)
                 }
             case .denied, .limited:
                 Button("Open System Settings") {
@@ -290,13 +301,6 @@ public struct SettingsView: View {
             case .authorized, .restricted, .unavailable:
                 EmptyView()
             }
-        }
-    }
-
-    private func request(_ kind: PermissionKind) {
-        Task {
-            await viewModel.requestConnection(kind)
-            onPermissionsChanged()
         }
     }
 }
@@ -311,8 +315,6 @@ private struct TransitSettingsSection: View {
     var body: some View {
         Section("Live transit") {
             TextField("Stop ID (for example 940GZZLUOXC)", text: $stopID)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
                 .accessibilityLabel("Transit stop identifier")
             TextField("Stop name (optional)", text: $stopName)
                 .accessibilityLabel("Transit stop name")

@@ -242,7 +242,6 @@ public struct HomeView: View {
         }
         return "A quiet day. Add only what matters."
     }
-
 }
 
 private struct TransitBriefingSection: View {

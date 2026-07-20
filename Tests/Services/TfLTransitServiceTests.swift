@@ -205,12 +205,16 @@ private struct TransitStub: TransitProviding {
     }
 
     func departures(at _: String) async throws -> [TransitDeparture] {
-        if let error { throw error }
+        if let error {
+            throw error
+        }
         return departureValues
     }
 
     func lineStatuses() async throws -> [TransitLineStatus] {
-        if let error { throw error }
+        if let error {
+            throw error
+        }
         return statusValues
     }
 }

@@ -171,17 +171,23 @@ private struct HomeTransitProvider: TransitProviding {
     }
 
     func departures(at _: String) async throws -> [TransitDeparture] {
-        if let errorMessage { throw DomainError.unavailableNamed(errorMessage) }
+        if let errorMessage {
+            throw DomainError.unavailableNamed(errorMessage)
+        }
         return snapshotValue?.departures ?? []
     }
 
     func lineStatuses() async throws -> [TransitLineStatus] {
-        if let errorMessage { throw DomainError.unavailableNamed(errorMessage) }
+        if let errorMessage {
+            throw DomainError.unavailableNamed(errorMessage)
+        }
         return snapshotValue?.lineStatuses ?? []
     }
 
     func snapshot(at _: String, lines _: [String]) async throws -> TransitSnapshot {
-        if let errorMessage { throw DomainError.unavailableNamed(errorMessage) }
+        if let errorMessage {
+            throw DomainError.unavailableNamed(errorMessage)
+        }
         return snapshotValue ?? TransitSnapshot(
             departures: [],
             lineStatuses: [],
