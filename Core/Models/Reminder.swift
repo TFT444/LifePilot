@@ -11,6 +11,7 @@ public struct Reminder: Identifiable, Hashable, Sendable {
     public let location: String?
     /// When the underlying event happens (e.g. the appointment time).
     public let dueDate: Date
+    public let recurrence: RecurrenceRule?
     /// How far ahead of `dueDate` the first alert should fire.
     public let leadTime: TimeInterval
     /// Whether this reminder rings with a full-screen, must-dismiss alarm
@@ -26,6 +27,7 @@ public struct Reminder: Identifiable, Hashable, Sendable {
         notes: String? = nil,
         location: String? = nil,
         dueDate: Date,
+        recurrence: RecurrenceRule? = nil,
         leadTime: TimeInterval = 30 * 60,
         isAlarm: Bool = true,
         sound: AlarmSound = .aurora,
@@ -37,6 +39,7 @@ public struct Reminder: Identifiable, Hashable, Sendable {
         self.notes = notes
         self.location = location
         self.dueDate = dueDate
+        self.recurrence = recurrence
         self.leadTime = max(0, leadTime)
         self.isAlarm = isAlarm
         self.sound = sound

@@ -79,6 +79,7 @@ final class EventTextParserTests: XCTestCase {
         XCTAssertEqual(comps.month, 7)
         XCTAssertEqual(comps.day, 20)
         XCTAssertEqual(comps.hour, 9)
+        XCTAssertTrue(event.ambiguities.contains(.missingTime))
     }
 
     func testNoDateOrTimeYieldsNilDateAndLowConfidence() {
@@ -104,5 +105,76 @@ final class EventTextParserTests: XCTestCase {
         let reminder = try XCTUnwrap(event.makeReminder())
         XCTAssertEqual(reminder.dueDate, event.date)
         XCTAssertEqual(reminder.sourceAgent, .reminder)
+    }
+
+    func testRecurringInputCapturesIntervalWithoutInventingMissingDate() throws {
+        let parser = EventTextParser(calendar: utcCalendar())
+        let event = parser.parse("Take medicine every 2 days at 8am", now: referenceNow())
+
+        XCTAssertEqual(event.title, "Take medicine")
+        XCTAssertEqual(event.recurrence?.frequency, .daily)
+        XCTAssertEqual(event.recurrence?.interval, 2)
+        XCTAssertFalse(event.ambiguities.contains(.missingDate))
+        let date = try XCTUnwrap(event.date)
+        XCTAssertEqual(parts(date).hour, 8)
+    }
+
+    func testAmbiguousNumericDateRequiresClarification() {
+        let parser = EventTextParser(calendar: utcCalendar())
+        let event = parser.parse("Project review 03/04 at 10:00", now: referenceNow())
+
+        XCTAssertNil(event.date)
+        XCTAssertTrue(event.ambiguities.contains(.ambiguousNumericDate))
+    }
+
+    func testISODateIsDeterministic() throws {
+        let parser = EventTextParser(calendar: utcCalendar())
+        let event = parser.parse("Project review 2026-07-20 at 10:00", now: referenceNow())
+        let date = try XCTUnwrap(event.date)
+        let components = parts(date)
+
+        XCTAssertEqual(components.year, 2026)
+        XCTAssertEqual(components.month, 7)
+        XCTAssertEqual(components.day, 20)
+        XCTAssertFalse(event.ambiguities.contains(.ambiguousNumericDate))
+    }
+
+    func testUnambiguousNumericDatesDoNotGuessLocaleOrder() throws {
+        let parser = EventTextParser(calendar: utcCalendar())
+        let dayFirst = parser.parse("Review 13/04/2026 at 10:00", now: referenceNow())
+        let monthFirst = parser.parse("Review 04/13/2026 at 10:00", now: referenceNow())
+
+        let firstDate = try XCTUnwrap(dayFirst.date)
+        let secondDate = try XCTUnwrap(monthFirst.date)
+        let firstComponents = parts(firstDate)
+        let secondComponents = parts(secondDate)
+        XCTAssertEqual(firstComponents.month, 4)
+        XCTAssertEqual(firstComponents.day, 13)
+        XCTAssertEqual(secondComponents.month, 4)
+        XCTAssertEqual(secondComponents.day, 13)
+    }
+
+    func testInvalidDateIsNotNormalizedSilently() {
+        let parser = EventTextParser(calendar: utcCalendar())
+        let event = parser.parse("Submit report 31/02/2026 at 10:00", now: referenceNow())
+
+        XCTAssertNil(event.date)
+        XCTAssertTrue(event.ambiguities.contains(.invalidDate))
+    }
+
+    func testDaylightSavingGapIsFlagged() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "America/New_York") ?? .gmt
+        let now = calendar.date(from: DateComponents(
+            year: 2026,
+            month: 3,
+            day: 7,
+            hour: 12
+        )) ?? Date(timeIntervalSince1970: 0)
+        let parser = EventTextParser(calendar: calendar)
+
+        let event = parser.parse("Call Mum 8 March at 2:30am", now: now)
+
+        XCTAssertTrue(event.ambiguities.contains(.daylightSavingAdjustment))
     }
 }
