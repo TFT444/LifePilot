@@ -111,15 +111,13 @@ private extension EventTextParser {
         // "14 July" / "14 Jul"
         if let match = Self.firstMatch(#"\b(\d{1,2})\s+([A-Za-z]{3,9})\b"#, in: text, caseInsensitive: true),
            let month = Self.monthNumber(match.group(2)),
-           let date = makeDate(day: Int(match.group(1) ?? "") ?? 0, month: month, now: now)
-        {
+           let date = makeDate(day: Int(match.group(1) ?? "") ?? 0, month: month, now: now) {
             return (date, match.matched)
         }
         // "July 14" / "Jul 14"
         if let match = Self.firstMatch(#"\b([A-Za-z]{3,9})\s+(\d{1,2})\b"#, in: text, caseInsensitive: true),
            let month = Self.monthNumber(match.group(1)),
-           let date = makeDate(day: Int(match.group(2) ?? "") ?? 0, month: month, now: now)
-        {
+           let date = makeDate(day: Int(match.group(2) ?? "") ?? 0, month: month, now: now) {
             return (date, match.matched)
         }
         return nil
