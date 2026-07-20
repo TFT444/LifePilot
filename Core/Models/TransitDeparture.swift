@@ -4,7 +4,7 @@ import Foundation
 /// feed (e.g. the TfL Unified API) into the shape the Travel Agent reasons
 /// over. Providers are adapters; this Domain type is the source of truth for
 /// meaning, per docs/ARCHITECTURE.md's Dependency Rules.
-public struct TransitDeparture: Identifiable, Hashable, Sendable {
+public struct TransitDeparture: Identifiable, Hashable, Sendable, Codable {
     public let id: String
     public let lineName: String
     public let destination: String

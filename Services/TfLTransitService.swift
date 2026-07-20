@@ -20,9 +20,19 @@ public struct TfLTransitService: TransitProviding {
     private let fetch: @Sendable (URL) async throws -> Data
 
     /// Production initialiser using `URLSession`.
-    public init(appKey: String? = nil, session: URLSession = .shared) {
+    public init(
+        appKey: String? = nil,
+        timeoutInterval: TimeInterval = 8,
+        session: URLSession = .shared
+    ) {
         self.appKey = appKey
-        fetch = { url in try await Self.load(url, session: session) }
+        fetch = { url in
+            try await Self.load(
+                url,
+                timeoutInterval: timeoutInterval,
+                session: session
+            )
+        }
     }
 
     /// Testing initialiser with an injected fetch (no network).
@@ -56,32 +66,21 @@ public struct TfLTransitService: TransitProviding {
 
     // MARK: - Networking
 
-    private static func load(_ url: URL, session: URLSession) async throws -> Data {
-        try await withCheckedThrowingContinuation { continuation in
-            let task = session.dataTask(with: url) { data, response, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode) {
-                    continuation
-                        .resume(
-                            throwing: DomainError.unavailableNamed(
-                                "TfL request failed: HTTP \(http.statusCode)"
-                            )
-                        )
-                    return
-                }
-                guard let data else {
-                    continuation.resume(
-                        throwing: DomainError.unavailableNamed("TfL returned no data")
-                    )
-                    return
-                }
-                continuation.resume(returning: data)
-            }
-            task.resume()
+    private static func load(
+        _ url: URL,
+        timeoutInterval: TimeInterval,
+        session: URLSession
+    ) async throws -> Data {
+        var request = URLRequest(url: url)
+        request.timeoutInterval = timeoutInterval
+        let (data, response) = try await session.data(for: request)
+        try Task.checkCancellation()
+        if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode) {
+            throw DomainError.unavailableNamed(
+                "TfL request failed: HTTP \(http.statusCode)"
+            )
         }
+        return data
     }
 
     // MARK: - Decoding (pure, unit-testable)

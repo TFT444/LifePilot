@@ -20,6 +20,7 @@ public struct AppDependencies: Sendable {
     public let remindersIntegration: any RemindersIntegrating
     public let weatherIntegration: any WeatherIntegrating
     public let travelIntegration: any TravelTimeIntegrating
+    public let transitIntegration: any TransitProviding
     public let cloudSync: any CloudSyncIntegrating
     public let locationProvider: any LocationProviding
 
@@ -37,6 +38,7 @@ public struct AppDependencies: Sendable {
         remindersIntegration: any RemindersIntegrating = UnavailableRemindersIntegration(),
         weatherIntegration: any WeatherIntegrating = UnavailableWeatherIntegration(),
         travelIntegration: any TravelTimeIntegrating = UnavailableTravelTimeIntegration(),
+        transitIntegration: any TransitProviding = UnavailableTransitProvider(),
         cloudSync: any CloudSyncIntegrating = DisabledCloudSyncIntegration(),
         locationProvider: any LocationProviding = UnavailableLocationProvider()
     ) {
@@ -53,6 +55,7 @@ public struct AppDependencies: Sendable {
         self.remindersIntegration = remindersIntegration
         self.weatherIntegration = weatherIntegration
         self.travelIntegration = travelIntegration
+        self.transitIntegration = transitIntegration
         self.cloudSync = cloudSync
         self.locationProvider = locationProvider
     }
@@ -118,6 +121,9 @@ public struct AppDependencies: Sendable {
             travelIntegration: testing
                 ? UnavailableTravelTimeIntegration()
                 : MapKitTravelTimeIntegration(),
+            transitIntegration: testing
+                ? UnavailableTransitProvider()
+                : CachedTransitProvider(upstream: TfLTransitService()),
             cloudSync: testing ? DisabledCloudSyncIntegration() : cloudSync,
             locationProvider: location
         )
@@ -166,6 +172,7 @@ public struct AppDependencies: Sendable {
             remindersIntegration: UnavailableRemindersIntegration(),
             weatherIntegration: StaticWeatherIntegration(snapshot: MockWeather.snapshot()),
             travelIntegration: StaticTravelTimeIntegration(minutes: 18),
+            transitIntegration: UnavailableTransitProvider(),
             cloudSync: DisabledCloudSyncIntegration(),
             locationProvider: location
         )

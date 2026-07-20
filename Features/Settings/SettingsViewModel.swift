@@ -11,6 +11,7 @@ public final class SettingsViewModel {
     public private(set) var exportMessage: String?
     public private(set) var syncMessage: String?
     public private(set) var connectionMessage: String?
+    public private(set) var transitMessage: String?
     public private(set) var cloudSyncEnabled = false
     public private(set) var connections: [ConnectionCapability]
 
@@ -72,6 +73,24 @@ public final class SettingsViewModel {
     public func setAppearance(_ appearance: UserPreferences.AppearancePreference) async throws {
         preferences.appearance = appearance
         try await preferenceStore.savePreferences(preferences)
+    }
+
+    public func setTransitConfiguration(
+        stopID: String,
+        stopName: String,
+        linesText: String
+    ) async {
+        preferences.transitStopID = stopID.trimmingCharacters(in: .whitespacesAndNewlines)
+        preferences.transitStopName = stopName.trimmingCharacters(in: .whitespacesAndNewlines)
+        preferences.transitLineNames = Self.normalizedLines(linesText)
+        do {
+            try await preferenceStore.savePreferences(preferences)
+            transitMessage = preferences.transitStopID.isEmpty
+                ? "Live transit is off. The rest of your briefing still works."
+                : "Transit stop saved. Pull to refresh Home for live departures."
+        } catch {
+            transitMessage = "Could not save the transit stop."
+        }
     }
 
     public func setCloudSyncEnabled(_ enabled: Bool) async {
@@ -173,5 +192,12 @@ public final class SettingsViewModel {
         case .unavailable: .unavailable
         case .notDetermined: .notRequested
         }
+    }
+
+    private static func normalizedLines(_ text: String) -> [String] {
+        var seen: Set<String> = []
+        return text.split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty && seen.insert($0.lowercased()).inserted }
     }
 }
