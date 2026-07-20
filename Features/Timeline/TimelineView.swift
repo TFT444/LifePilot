@@ -13,6 +13,22 @@ public struct TimelineView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(Date().formatted(.dateTime.weekday(.wide).month(.wide).day()))
+                        .font(.LifePilot.titleMedium)
+                        .foregroundStyle(Color.LifePilot.textPrimary)
+                    Text("\(viewModel.entries.count) items in this view")
+                        .font(.LifePilot.caption)
+                        .foregroundStyle(Color.LifePilot.textSecondary)
+                }
+                Spacer()
+                Label("Today", systemImage: "location.fill")
+                    .font(.LifePilot.caption)
+                    .foregroundStyle(Color.LifePilot.accentTeal)
+            }
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, Spacing.sm)
             filterBar
             ScrollView {
                 if viewModel.isEmpty {
@@ -49,27 +65,11 @@ public struct TimelineView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.sm) {
                 ForEach(TimelineViewModel.Filter.allCases, id: \.self) { filter in
-                    Button {
-                        viewModel.setFilter(filter)
-                    } label: {
-                        Text(filter.title)
-                            .font(.LifePilot.caption)
-                            .padding(.horizontal, Spacing.md)
-                            .padding(.vertical, Spacing.sm)
-                            .foregroundStyle(
-                                viewModel.filter == filter
-                                    ? Color.white
-                                    : Color.LifePilot.textSecondary
-                            )
-                            .background(
-                                viewModel.filter == filter
-                                    ? AnyShapeStyle(LinearGradient.LifePilot.accent)
-                                    : AnyShapeStyle(Color.LifePilot.backgroundElevated)
-                            )
-                            .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(viewModel.filter == filter ? .isSelected : [])
+                    FilterChip(
+                        title: filter.title,
+                        isSelected: viewModel.filter == filter,
+                        action: { viewModel.setFilter(filter) }
+                    )
                 }
             }
             .padding(.horizontal, Spacing.lg)

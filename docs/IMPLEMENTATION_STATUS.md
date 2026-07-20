@@ -1,8 +1,8 @@
 # LifePilot Implementation Status
 
-**Branch:** `cursor/complete-remaining-mvp-4d5a` (PR #43 — ship candidate)  
+**Branch:** `cursor/production-ui-uk-4d5a` (PR #44)  
 **Base:** `origin/develop`  
-**Last updated:** 2026-07-18  
+**Last updated:** 2026-07-19  
 **Environment:** Cloud agent (Linux). Device/VoiceOver verification requires owner Xcode.
 
 ---
@@ -12,7 +12,7 @@
 | Area | Reality |
 |---|---|
 | App shell | Splash → Onboarding → Home / Timeline / Tasks / Insights / Settings |
-| Visual pass | Phase 2 dark-glass: `AmbientBackground`, `GlowCard`, `ContextTile`, hero briefing, Approvals cards |
+| Visual pass | Production pass: editorial briefing, bounded depth, ambient layers, selective glass, accessible fallbacks |
 | Persistence | SwiftData; optional CloudKit toggle |
 | Home | Planning + weather/leave-by + status banners (denied/offline) |
 | Timeline | Filters All / Calendar / Travel / Tasks |
@@ -25,12 +25,13 @@
 | Widgets | Providers in AppShell; Extension entry `App/LifePilotWidgets/` (attach once in Xcode) |
 | Icons | Raster app icon + favicons |
 | Scope | No finance / mail send / Uber / HealthKit medical |
+| UK readiness | Evidence-backed production plan, privacy draft, privacy manifest; legal/owner fields still required |
 
 ---
 
 ## Owner merge / TestFlight checklist
 
-1. Merge PR #43 into `develop`, then release to `main` when ready  
+1. Merge PR #44 into `develop`, then release to `main` when ready  
 2. In Xcode: attach Widget Extension target (see `Widgets/README.md`)  
 3. Signing + capability: Calendar, Reminders, Location When-In-Use, Background Modes (fetch)  
 4. Device QA: permissions, offline, VoiceOver, Dynamic Type, Reduce Motion  
@@ -43,6 +44,8 @@
 - Simulator / device UI screenshots  
 - Live WeatherKit without Apple credentials on device  
 - Widget appearance on Home Screen until Extension target is embedded  
+- Final privacy policy controller/contact/lawful-basis wording (owner + legal review)
+- App Store privacy labels, metadata, signing, and TestFlight (Apple account required)
 
 ---
 
@@ -52,3 +55,4 @@
 |---|---|---|
 | 2026-07-17 | GHA on prior #43 commits | Build/Lint/Tests green |
 | 2026-07-18 | Ship UI + search + location pass (`164ba92`) | Build / Lint / Format / Unit Tests **green** |
+| 2026-07-19 | Production UK UI pass (`df532ce`) | Build / Lint / Format / Unit Tests **green** |

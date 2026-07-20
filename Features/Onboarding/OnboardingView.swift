@@ -5,6 +5,7 @@ import SwiftUI
 /// for step progression and `OnboardingStep` for step content.
 public struct OnboardingView: View {
     @State private var viewModel = OnboardingViewModel()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let onFinish: () -> Void
 
     public init(onFinish: @escaping () -> Void) {
@@ -13,8 +14,7 @@ public struct OnboardingView: View {
 
     public var body: some View {
         ZStack {
-            Color.LifePilot.backgroundPrimary
-                .ignoresSafeArea()
+            AmbientBackground()
 
             VStack(spacing: Spacing.xl) {
                 ProgressView(value: viewModel.progress)
@@ -24,9 +24,15 @@ public struct OnboardingView: View {
                 Spacer()
 
                 VStack(spacing: Spacing.lg) {
-                    Image(systemName: viewModel.currentStep.symbolName)
-                        .font(.system(size: IconSize.xl, weight: .medium))
-                        .foregroundStyle(LinearGradient.LifePilot.accent)
+                    ZStack {
+                        Circle()
+                            .fill(LinearGradient.LifePilot.hero.opacity(0.18))
+                            .frame(width: 112, height: 112)
+                        Image(systemName: viewModel.currentStep.symbolName)
+                            .font(.system(size: IconSize.xl, weight: .medium))
+                            .foregroundStyle(LinearGradient.LifePilot.hero)
+                    }
+                    .accessibilityHidden(true)
 
                     Text(viewModel.currentStep.title)
                         .font(.LifePilot.titleLarge)
@@ -38,9 +44,25 @@ public struct OnboardingView: View {
                         .foregroundStyle(Color.LifePilot.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, Spacing.lg)
+
+                    if viewModel.currentStepIndex == 0 {
+                        GlassSurface(cornerRadius: CornerRadius.md) {
+                            HStack(spacing: Spacing.sm) {
+                                Image(systemName: "lock.shield.fill")
+                                    .foregroundStyle(Color.LifePilot.accentTeal)
+                                Text("Useful without an account. Permissions stay optional.")
+                                    .font(.LifePilot.caption)
+                                    .foregroundStyle(Color.LifePilot.textSecondary)
+                            }
+                            .padding(Spacing.md)
+                        }
+                        .padding(.horizontal, Spacing.lg)
+                    }
                 }
                 .id(viewModel.currentStep.id)
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                .transition(reduceMotion
+                    ? .opacity
+                    : .opacity.combined(with: .move(edge: .trailing)))
 
                 Spacer()
 
@@ -48,7 +70,7 @@ public struct OnboardingView: View {
                     if viewModel.isLastStep {
                         onFinish()
                     } else {
-                        withAnimation(Motion.deliberate) {
+                        withAnimation(reduceMotion ? nil : Motion.deliberate) {
                             viewModel.advance()
                         }
                     }
@@ -58,7 +80,11 @@ public struct OnboardingView: View {
                 .padding(.bottom, Spacing.lg)
             }
         }
-        .animation(Motion.deliberate, value: viewModel.currentStepIndex)
+        .lifePilotAnimation(
+            Motion.deliberate,
+            reduceMotion: reduceMotion,
+            value: viewModel.currentStepIndex
+        )
     }
 }
 

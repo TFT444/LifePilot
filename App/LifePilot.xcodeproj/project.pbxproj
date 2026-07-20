@@ -10,12 +10,14 @@
 		578B8AF92FA6A7874507FA64 /* LifePilotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7900B2EBC7193A39ABFD3D94 /* LifePilotApp.swift */; };
 		E51CB1F9027565D809C3F7C3 /* LifePilotAppShell in Frameworks */ = {isa = PBXBuildFile; productRef = 3455CB631F89B07FB8A0F5C9 /* LifePilotAppShell */; };
 		5EFF68C60CA3629B2A3EFBF6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC34045892F8751149531202 /* Assets.xcassets */; };
+		A11B22C33D44E55F66778899 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B22C33D44E55F66778899AA /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		9BD14A8874048AE7344A39E6 /* LifePilot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LifePilot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7900B2EBC7193A39ABFD3D94 /* LifePilotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifePilotApp.swift; sourceTree = "<group>"; };
 		FC34045892F8751149531202 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B22C33D44E55F66778899AA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +53,7 @@
 			children = (
 				7900B2EBC7193A39ABFD3D94 /* LifePilotApp.swift */,
 				FC34045892F8751149531202 /* Assets.xcassets */,
+				B22C33D44E55F66778899AA /* PrivacyInfo.xcprivacy */,
 			);
 			path = LifePilotApp;
 			sourceTree = "<group>";
@@ -120,6 +123,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5EFF68C60CA3629B2A3EFBF6 /* Assets.xcassets in Resources */,
+				A11B22C33D44E55F66778899 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

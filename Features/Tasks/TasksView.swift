@@ -17,45 +17,56 @@ public struct TasksView: View {
             captureRow
             taskList
         }
-        .background(Color.LifePilot.backgroundPrimary)
+        .background(AmbientBackground())
         .navigationTitle("Tasks")
         .task { await viewModel.load() }
     }
 
     private var filterPicker: some View {
-        Picker(
-            "Filter",
-            selection: Binding(
-                get: { viewModel.filter },
-                set: { newValue in Task { await viewModel.setFilter(newValue) } }
-            )
-        ) {
-            ForEach(TasksViewModel.TaskFilter.allCases, id: \.self) { filter in
-                Text(filter.rawValue.capitalized).tag(filter)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Spacing.sm) {
+                ForEach(TasksViewModel.TaskFilter.allCases, id: \.self) { filter in
+                    FilterChip(
+                        title: filter.rawValue.capitalized,
+                        isSelected: viewModel.filter == filter,
+                        action: { Task { await viewModel.setFilter(filter) } }
+                    )
+                }
             }
+            .padding(.horizontal, Spacing.lg)
         }
-        .pickerStyle(.segmented)
-        .padding(.horizontal, Spacing.lg)
         .padding(.vertical, Spacing.sm)
     }
 
     private var searchField: some View {
-        TextField("Search", text: $viewModel.searchText)
-            .textFieldStyle(.roundedBorder)
-            .padding(.horizontal, Spacing.lg)
-            .padding(.bottom, Spacing.sm)
-            .onChange(of: viewModel.searchText) { _, _ in
-                Task { await viewModel.load() }
-            }
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(Color.LifePilot.textSecondary)
+            TextField("Search tasks", text: $viewModel.searchText)
+                .onChange(of: viewModel.searchText) { _, _ in
+                    Task { await viewModel.load() }
+                }
+        }
+        .lifePilotField()
+        .padding(.horizontal, Spacing.lg)
+        .padding(.bottom, Spacing.sm)
     }
 
     private var captureRow: some View {
-        HStack {
-            TextField("Quick capture (no due date)", text: $viewModel.draftTitle)
-                .textFieldStyle(.roundedBorder)
-            Button("Add") {
+        HStack(spacing: Spacing.sm) {
+            TextField("Add to Inbox — no due date", text: $viewModel.draftTitle)
+                .lifePilotField()
+            Button {
                 Task { try? await viewModel.quickCapture() }
+            } label: {
+                Image(systemName: "arrow.up")
+                    .font(.system(size: IconSize.sm, weight: .bold))
+                    .foregroundStyle(Color.LifePilot.onAccent)
+                    .frame(width: 48, height: 48)
+                    .background(LinearGradient.LifePilot.accent)
+                    .clipShape(Circle())
             }
+            .accessibilityLabel("Add task to Inbox")
             .disabled(viewModel.draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
         .padding(.horizontal, Spacing.lg)
@@ -74,6 +85,7 @@ public struct TasksView: View {
             List {
                 ForEach(viewModel.tasks) { task in
                     taskRow(task)
+                        .listRowBackground(Color.LifePilot.backgroundElevated.opacity(0.82))
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             trailingSwipeActions(for: task)
                         }
@@ -86,6 +98,7 @@ public struct TasksView: View {
                 }
             }
             .listStyle(.plain)
+            .scrollContentBackground(.hidden)
         }
     }
 
@@ -166,15 +179,26 @@ public struct TasksView: View {
                     )
                 VStack(alignment: .leading, spacing: 2) {
                     Text(task.title)
-                        .font(.body)
+                        .font(.LifePilot.body)
                         .strikethrough(task.isCompleted)
                         .foregroundStyle(Color.LifePilot.textPrimary)
                     dueCaption(for: task)
                 }
                 Spacer()
-                Text(task.priority.rawValue)
-                    .font(.caption2)
-                    .foregroundStyle(Color.LifePilot.textSecondary)
+                VStack(alignment: .trailing, spacing: Spacing.xs) {
+                    Text(task.priority.rawValue.capitalized)
+                        .font(.LifePilot.caption)
+                        .foregroundStyle(Color.LifePilot.textSecondary)
+                    if task.recurrence != nil {
+                        Menu {
+                            recurrenceMenu(for: task)
+                        } label: {
+                            Image(systemName: "repeat.circle")
+                                .frame(width: 32, height: 32)
+                        }
+                        .accessibilityLabel("Recurrence actions for \(task.title)")
+                    }
+                }
             }
         }
         .buttonStyle(.plain)
@@ -191,11 +215,11 @@ public struct TasksView: View {
                     Text(task.recurrence?.frequency.rawValue ?? "")
                 }
             }
-            .font(.caption)
+            .font(.LifePilot.caption)
             .foregroundStyle(Color.LifePilot.textSecondary)
         } else {
             Text("Inbox · unscheduled")
-                .font(.caption)
+                .font(.LifePilot.caption)
                 .foregroundStyle(Color.LifePilot.textSecondary)
         }
     }

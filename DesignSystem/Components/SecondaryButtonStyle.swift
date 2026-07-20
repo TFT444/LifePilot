@@ -4,6 +4,8 @@ import SwiftUI
 /// "not now." Uses a flat elevated background rather than the brand
 /// gradient, keeping the gradient reserved for primary actions.
 public struct SecondaryButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     public init() {}
 
     public func makeBody(configuration: Configuration) -> some View {
@@ -16,7 +18,7 @@ public struct SecondaryButtonStyle: ButtonStyle {
             .background(Color.LifePilot.backgroundElevated)
             .clipShape(RoundedRectangle(cornerRadius: CornerRadius.md, style: .continuous))
             .opacity(configuration.isPressed ? 0.7 : 1)
-            .animation(Motion.quick, value: configuration.isPressed)
+            .animation(reduceMotion ? nil : Motion.quick, value: configuration.isPressed)
     }
 }
 

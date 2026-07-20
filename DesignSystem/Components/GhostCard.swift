@@ -54,7 +54,7 @@ public struct GhostCard: View {
 #Preview {
     VStack(spacing: Spacing.sm) {
         GhostCard(title: "Rain expected this afternoon", subtitle: "60% chance starting around 3:00 PM")
-        GhostCard(title: "Unusual charge detected", subtitle: "$340 at an unfamiliar merchant")
+        GhostCard(title: "Tight turnaround detected", subtitle: "Only 10 minutes between events")
     }
     .padding()
 }
