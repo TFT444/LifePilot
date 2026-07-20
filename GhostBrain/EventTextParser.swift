@@ -10,7 +10,7 @@ import LifePilotCore
 /// The parser is intentionally pure and calendar-injectable so its behaviour is
 /// fully testable and time-zone independent.
 public struct EventTextParser: Sendable {
-    private let calendar: Calendar
+    let calendar: Calendar
 
     public init(calendar: Calendar = .current) {
         self.calendar = calendar
@@ -27,13 +27,32 @@ public struct EventTextParser: Sendable {
         let time = Self.findTime(in: text)
         let day = findDay(in: text, now: now)
         let location = Self.findLocation(in: text)
+        let recurrence = Self.findRecurrence(in: text)
 
-        let resolvedDate = resolveDate(day: day?.date, time: time, now: now)
+        var resolvedDate = resolveDate(day: day?.date, time: time, now: now)
+        let ambiguities = Self.captureAmbiguities(
+            in: text,
+            day: day?.date,
+            time: time,
+            resolvedDate: resolvedDate,
+            recurrence: recurrence,
+            calendar: calendar,
+            now: now
+        )
+        if !ambiguities.isDisjoint(with: [.ambiguousNumericDate, .invalidDate]) {
+            resolvedDate = nil
+        }
 
         // Build a title by stripping the tokens we already understood. Location
         // is removed first because its match can contain the time substring.
         var titleSource = text
-        for token in [location?.matched, time?.matched, day?.matched].compactMap({ $0 }) {
+        let understoodTokens = [
+            location?.matched,
+            time?.matched,
+            recurrence?.matched,
+            day?.matched,
+        ]
+        for token in understoodTokens.compactMap({ $0 }) {
             titleSource = titleSource.replacingOccurrences(of: token, with: " ")
         }
         let title = Self.cleanTitle(titleSource, fallback: text)
@@ -54,6 +73,8 @@ public struct EventTextParser: Sendable {
             date: resolvedDate,
             location: location?.value,
             details: nil,
+            recurrence: recurrence?.rule,
+            ambiguities: ambiguities,
             confidence: confidence
         )
     }
@@ -88,6 +109,9 @@ private extension EventTextParser {
         if lower.contains("today") || lower.contains("tonight") {
             let token = lower.contains("today") ? "today" : "tonight"
             return (startOfDay(now, offsetDays: 0), matchedSlice(token, in: text))
+        }
+        if let numeric = findNumericDate(in: text, now: now) {
+            return numeric
         }
         if let weekday = findWeekday(in: text, lower: lower, now: now) {
             return weekday
@@ -171,15 +195,6 @@ private extension EventTextParser {
         return calendar.date(byAdding: .day, value: delta, to: today) ?? today
     }
 
-    func makeDate(day: Int, month: Int, now: Date) -> Date? {
-        guard day >= 1, day <= 31 else { return nil }
-        let year = calendar.component(.year, from: now)
-        var comps = DateComponents()
-        comps.year = year
-        comps.month = month
-        comps.day = day
-        return calendar.date(from: comps)
-    }
 }
 
 // MARK: - Time parsing

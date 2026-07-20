@@ -10,7 +10,7 @@ public struct RootTabView: View {
     @State private var selectedTab: AppTab = .home
     @State private var isCapturing = false
     @State private var captureKind: AppRoute.QuickCaptureKind = .task
-    @State private var captureTitle = ""
+    @State private var captureConfirmation: String?
     @State private var isSearching = false
     @State private var permissionRevision = 0
 
@@ -61,17 +61,28 @@ public struct RootTabView: View {
         }
         .sheet(isPresented: $isCapturing) {
             QuickCaptureView(
-                title: $captureTitle,
-                kind: $captureKind,
-                onSubmit: {
-                    Task { await submitCapture() }
+                dependencies: quickCaptureDependencies,
+                initialDestination: captureKind,
+                onSaved: { message in
+                    isCapturing = false
+                    captureConfirmation = message
                 },
                 onCancel: {
                     isCapturing = false
-                    captureTitle = ""
                 }
             )
-            .presentationDetents([.medium])
+            .presentationDetents([.medium, .large])
+        }
+        .alert(
+            "Capture Saved",
+            isPresented: Binding(
+                get: { captureConfirmation != nil },
+                set: { if !$0 { captureConfirmation = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { captureConfirmation = nil }
+        } message: {
+            Text(captureConfirmation ?? "")
         }
         .sheet(isPresented: $isSearching) {
             NavigationStack {
@@ -138,38 +149,21 @@ public struct RootTabView: View {
         }
     }
 
-    private func submitCapture() async {
-        let title = captureTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !title.isEmpty else { return }
-        do {
-            switch captureKind {
-            case .task, .reminder:
-                try await dependencies.taskStore.save(
-                    TaskItem(title: title, listID: TaskList.inbox.id)
-                )
-            case .event:
-                let start = Date().addingTimeInterval(30 * 60)
-                try await dependencies.eventStore.save(
-                    CalendarEvent(
-                        title: title,
-                        startDate: start,
-                        endDate: start.addingTimeInterval(30 * 60)
-                    )
-                )
-            }
-            isCapturing = false
-            captureTitle = ""
-        } catch {
-            // Keep sheet open so the user can retry.
-        }
-    }
-
     private var permissionDependencies: PermissionDependencies {
         PermissionDependencies(
             calendar: dependencies.calendarIntegration,
             reminders: dependencies.remindersIntegration,
             notifications: dependencies.notificationScheduler,
             location: dependencies.locationProvider
+        )
+    }
+
+    private var quickCaptureDependencies: QuickCaptureDependencies {
+        QuickCaptureDependencies(
+            taskStore: dependencies.taskStore,
+            eventStore: dependencies.eventStore,
+            approvalStore: dependencies.approvalStore,
+            reminders: dependencies.remindersIntegration
         )
     }
 }
