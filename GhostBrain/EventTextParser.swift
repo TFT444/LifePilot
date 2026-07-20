@@ -32,12 +32,14 @@ public struct EventTextParser: Sendable {
         var resolvedDate = resolveDate(day: day?.date, time: time, now: now)
         let ambiguities = Self.captureAmbiguities(
             in: text,
-            day: day?.date,
-            time: time,
-            resolvedDate: resolvedDate,
-            recurrence: recurrence,
-            calendar: calendar,
-            now: now
+            context: AmbiguityContext(
+                day: day?.date,
+                time: time,
+                resolvedDate: resolvedDate,
+                recurrence: recurrence,
+                calendar: calendar,
+                now: now
+            )
         )
         if !ambiguities.isDisjoint(with: [.ambiguousNumericDate, .invalidDate]) {
             resolvedDate = nil
@@ -45,28 +47,16 @@ public struct EventTextParser: Sendable {
 
         // Build a title by stripping the tokens we already understood. Location
         // is removed first because its match can contain the time substring.
-        var titleSource = text
-        let understoodTokens = [
-            location?.matched,
-            time?.matched,
-            recurrence?.matched,
-            day?.matched,
-        ]
-        for token in understoodTokens.compactMap({ $0 }) {
-            titleSource = titleSource.replacingOccurrences(of: token, with: " ")
-        }
-        let title = Self.cleanTitle(titleSource, fallback: text)
+        let title = Self.captureTitle(
+            from: text,
+            removing: [location?.matched, time?.matched, recurrence?.matched, day?.matched]
+        )
 
-        var confidence = 0.5
-        if time != nil {
-            confidence += 0.25
-        }
-        if day != nil {
-            confidence += 0.2
-        }
-        if location != nil {
-            confidence += 0.05
-        }
+        let confidence = Self.captureConfidence(
+            foundTime: time != nil,
+            foundDay: day != nil,
+            foundLocation: location != nil
+        )
 
         return CapturedEvent(
             title: title,
@@ -194,7 +184,6 @@ private extension EventTextParser {
         }
         return calendar.date(byAdding: .day, value: delta, to: today) ?? today
     }
-
 }
 
 // MARK: - Time parsing

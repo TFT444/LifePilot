@@ -77,7 +77,11 @@ public struct RootTabView: View {
             "Capture Saved",
             isPresented: Binding(
                 get: { captureConfirmation != nil },
-                set: { if !$0 { captureConfirmation = nil } }
+                set: {
+                    if !$0 {
+                        captureConfirmation = nil
+                    }
+                }
             )
         ) {
             Button("OK", role: .cancel) { captureConfirmation = nil }

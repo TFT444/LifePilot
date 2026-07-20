@@ -115,7 +115,8 @@ final class EventTextParserTests: XCTestCase {
         XCTAssertEqual(event.recurrence?.frequency, .daily)
         XCTAssertEqual(event.recurrence?.interval, 2)
         XCTAssertFalse(event.ambiguities.contains(.missingDate))
-        XCTAssertEqual(parts(try XCTUnwrap(event.date)).hour, 8)
+        let date = try XCTUnwrap(event.date)
+        XCTAssertEqual(parts(date).hour, 8)
     }
 
     func testAmbiguousNumericDateRequiresClarification() {
@@ -129,7 +130,8 @@ final class EventTextParserTests: XCTestCase {
     func testISODateIsDeterministic() throws {
         let parser = EventTextParser(calendar: utcCalendar())
         let event = parser.parse("Project review 2026-07-20 at 10:00", now: referenceNow())
-        let components = parts(try XCTUnwrap(event.date))
+        let date = try XCTUnwrap(event.date)
+        let components = parts(date)
 
         XCTAssertEqual(components.year, 2026)
         XCTAssertEqual(components.month, 7)
@@ -142,8 +144,10 @@ final class EventTextParserTests: XCTestCase {
         let dayFirst = parser.parse("Review 13/04/2026 at 10:00", now: referenceNow())
         let monthFirst = parser.parse("Review 04/13/2026 at 10:00", now: referenceNow())
 
-        let firstComponents = parts(try XCTUnwrap(dayFirst.date))
-        let secondComponents = parts(try XCTUnwrap(monthFirst.date))
+        let firstDate = try XCTUnwrap(dayFirst.date)
+        let secondDate = try XCTUnwrap(monthFirst.date)
+        let firstComponents = parts(firstDate)
+        let secondComponents = parts(secondDate)
         XCTAssertEqual(firstComponents.month, 4)
         XCTAssertEqual(firstComponents.day, 13)
         XCTAssertEqual(secondComponents.month, 4)

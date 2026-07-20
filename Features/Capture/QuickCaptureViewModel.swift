@@ -212,7 +212,7 @@ public final class QuickCaptureViewModel {
 
     private static func choice(from rule: RecurrenceRule?) -> CaptureRecurrenceChoice {
         guard let rule else { return .none }
-        switch rule.frequency {
+        return switch rule.frequency {
         case .daily: .daily
         case .weekly: .weekly
         case .monthly: .monthly

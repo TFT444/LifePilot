@@ -2,14 +2,18 @@ import Foundation
 import LifePilotCore
 
 extension EventTextParser {
+    struct AmbiguityContext {
+        let day: Date?
+        let time: ParsedTime?
+        let resolvedDate: Date?
+        let recurrence: ParsedRecurrence?
+        let calendar: Calendar
+        let now: Date
+    }
+
     static func captureAmbiguities(
         in text: String,
-        day: Date?,
-        time: ParsedTime?,
-        resolvedDate: Date?,
-        recurrence: ParsedRecurrence?,
-        calendar: Calendar,
-        now: Date
+        context: AmbiguityContext
     ) -> Set<CaptureAmbiguity> {
         var result: Set<CaptureAmbiguity> = []
         let ambiguousNumericDate = hasAmbiguousNumericDate(in: text)
@@ -17,26 +21,40 @@ extension EventTextParser {
 
         if ambiguousNumericDate {
             result.insert(.ambiguousNumericDate)
-        } else if containsDateToken, day == nil {
+        } else if containsDateToken, context.day == nil {
             result.insert(.invalidDate)
         }
-        if time != nil, day == nil, recurrence == nil, !containsDateToken {
+        let needsDate = context.time != nil && context.day == nil
+            && context.recurrence == nil && !containsDateToken
+        if needsDate {
             result.insert(.missingDate)
         }
-        if day != nil, time == nil {
+        if context.day != nil, context.time == nil {
             result.insert(.missingTime)
         }
-        if let resolvedDate, resolvedDate < now, recurrence == nil {
+        let isPast = context.resolvedDate.map { $0 < context.now } ?? false
+        if isPast, context.recurrence == nil {
             result.insert(.pastDate)
         }
         if isDaylightSavingAdjustment(
-            requestedTime: time,
-            resolvedDate: resolvedDate,
-            calendar: calendar
+            requestedTime: context.time,
+            resolvedDate: context.resolvedDate,
+            calendar: context.calendar
         ) {
             result.insert(.daylightSavingAdjustment)
         }
         return result
+    }
+
+    static func captureConfidence(
+        foundTime: Bool,
+        foundDay: Bool,
+        foundLocation: Bool
+    ) -> Double {
+        0.5
+            + (foundTime ? 0.25 : 0)
+            + (foundDay ? 0.2 : 0)
+            + (foundLocation ? 0.05 : 0)
     }
 
     private static func hasAmbiguousNumericDate(in text: String) -> Bool {

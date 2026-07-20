@@ -32,6 +32,14 @@ extension EventTextParser {
         return nil
     }
 
+    static func captureTitle(from text: String, removing tokens: [String?]) -> String {
+        var title = text
+        for token in tokens.compactMap({ $0 }) {
+            title = title.replacingOccurrences(of: token, with: " ")
+        }
+        return cleanTitle(title, fallback: text)
+    }
+
     private static func recurringWeekday(in text: String) -> ParsedRecurrence? {
         let weekdays: [(name: String, value: Int)] = [
             ("sunday", 1),
