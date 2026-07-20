@@ -134,8 +134,9 @@ public final class EventKitRemindersIntegration: RemindersIntegrating, @unchecke
             reminder.addRecurrenceRule(Self.eventKitRule(from: recurrence))
         }
         try store.save(reminder, commit: true)
-        let identifier = reminder.calendarItemExternalIdentifier
-        guard !identifier.isEmpty else {
+        guard let identifier = reminder.calendarItemExternalIdentifier,
+              !identifier.isEmpty
+        else {
             throw DomainError.invalidState("EventKit did not return a reminder identifier.")
         }
         return identifier
@@ -166,11 +167,12 @@ public final class EventKitRemindersIntegration: RemindersIntegrating, @unchecke
     }
 
     private static func domainRule(from rule: EKRecurrenceRule) -> RecurrenceRule? {
-        let frequency: RecurrenceRule.Frequency = switch rule.frequency {
-        case .daily: .daily
-        case .weekly: .weekly
-        case .monthly: .monthly
-        case .yearly: .yearly
+        let frequency: RecurrenceRule.Frequency
+        switch rule.frequency {
+        case .daily: frequency = .daily
+        case .weekly: frequency = .weekly
+        case .monthly: frequency = .monthly
+        case .yearly: frequency = .yearly
         @unknown default: return nil
         }
         return RecurrenceRule(
