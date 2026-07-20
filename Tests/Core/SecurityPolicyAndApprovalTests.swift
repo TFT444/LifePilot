@@ -66,6 +66,64 @@ final class SecurityPolicyAndApprovalTests: XCTestCase {
         )
     }
 
+    func testApprovedReminderWriteReturnsStableIdentifierAndIsIdempotent() async throws {
+        let reminders = FakeRemindersIntegration()
+        let approvalStore = InMemoryApprovalStore()
+        let executor = makeExecutor(
+            remindersIntegration: reminders,
+            approvalStore: approvalStore
+        )
+        let proposal = ActionProposal(
+            actionType: .createEventKitReminder,
+            title: "Create reminder",
+            detail: "Review first",
+            parameters: [
+                "title": "Call Mum",
+                "notes": "Weekend plan",
+                "dueDate": "2026-07-21T09:30:00Z",
+                "recurrenceFrequency": "weekly",
+                "recurrenceInterval": "1",
+                "recurrenceDays": "3",
+            ]
+        )
+
+        let first = try await executor.execute(proposal: proposal, approval: approved(proposal))
+        let restarted = makeExecutor(
+            remindersIntegration: reminders,
+            approvalStore: approvalStore
+        )
+        let second = try await restarted.execute(proposal: proposal, approval: approved(proposal))
+
+        XCTAssertEqual(first.executionResult, "Created Apple Reminder (external-reminder-id)")
+        XCTAssertEqual(second.executionResult, first.executionResult)
+        let firstCreationCount = await reminders.creationCount()
+        XCTAssertEqual(firstCreationCount, 1)
+        let creation = await reminders.lastCreation()
+        XCTAssertEqual(creation?.title, "Call Mum")
+        XCTAssertEqual(creation?.recurrence?.frequency, .weekly)
+        XCTAssertEqual(creation?.recurrence?.daysOfWeek, [3])
+    }
+
+    func testReminderWriteRecoversAfterPermissionIsRestored() async throws {
+        let reminders = FakeRemindersIntegration(state: .denied)
+        let executor = makeExecutor(remindersIntegration: reminders)
+        let proposal = ActionProposal(
+            actionType: .createEventKitReminder,
+            title: "Create reminder",
+            detail: "Review first",
+            parameters: ["title": "Call Mum"]
+        )
+        await assertDomainError(.unavailableNamed("Reminders access denied")) {
+            _ = try await executor.execute(proposal: proposal, approval: approved(proposal))
+        }
+
+        await reminders.setState(.authorized)
+        let result = try await executor.execute(proposal: proposal, approval: approved(proposal))
+        XCTAssertEqual(result.state, .completed)
+        let recoveredCreationCount = await reminders.creationCount()
+        XCTAssertEqual(recoveredCreationCount, 1)
+    }
+
     func testFingerprintMismatchFails() async {
         let executor = makeExecutor()
         let proposal = ActionProposal(

@@ -9,6 +9,7 @@ public struct QuickCaptureDependencies: Sendable {
     public var reminders: any RemindersIntegrating
     public var parser: EventTextParser
     public var clock: any ClockProviding
+    public var notifications: TaskNotificationCoordinator?
 
     public init(
         taskStore: any TaskStore,
@@ -16,7 +17,8 @@ public struct QuickCaptureDependencies: Sendable {
         approvalStore: any ApprovalStore,
         reminders: any RemindersIntegrating = UnavailableRemindersIntegration(),
         parser: EventTextParser = EventTextParser(),
-        clock: any ClockProviding = SystemClock()
+        clock: any ClockProviding = SystemClock(),
+        notifications: TaskNotificationCoordinator? = nil
     ) {
         self.taskStore = taskStore
         self.eventStore = eventStore
@@ -24,6 +26,7 @@ public struct QuickCaptureDependencies: Sendable {
         self.reminders = reminders
         self.parser = parser
         self.clock = clock
+        self.notifications = notifications
     }
 }
 
@@ -129,15 +132,15 @@ public final class QuickCaptureViewModel {
     }
 
     private func saveLocalTask() async throws {
-        try await dependencies.taskStore.save(
-            TaskItem(
-                title: normalizedTitle,
-                notes: normalized(notes),
-                dueDate: hasSchedule ? scheduledAt : nil,
-                listID: TaskList.inbox.id,
-                recurrence: recurrenceRule
-            )
+        let task = TaskItem(
+            title: normalizedTitle,
+            notes: normalized(notes),
+            dueDate: hasSchedule ? scheduledAt : nil,
+            listID: TaskList.inbox.id,
+            recurrence: recurrenceRule
         )
+        try await dependencies.taskStore.save(task)
+        await dependencies.notifications?.reconcile(task)
     }
 
     private func saveLocalEvent() async throws {

@@ -241,4 +241,13 @@ private actor CaptureReminders: RemindersIntegrating {
     func fetchOpenReminders() async throws -> [TaskItem] {
         []
     }
+
+    func createReminder(
+        title _: String,
+        notes _: String?,
+        dueDate _: Date?,
+        recurrence _: RecurrenceRule?
+    ) async throws -> String {
+        "capture-reminder-id"
+    }
 }

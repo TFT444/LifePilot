@@ -1,29 +1,95 @@
 import Foundation
 
 extension LocalActionExecutor {
-    func applySideEffects(for proposal: ActionProposal) async throws {
+    func applySideEffects(for proposal: ActionProposal) async throws -> String? {
         switch proposal.actionType {
         case .createLocalTask:
             try await createLocalTask(from: proposal)
+            return nil
         case .completeLocalTask:
             try await completeTask(from: proposal)
+            return nil
         case .rescheduleLocalTask:
             try await rescheduleTask(from: proposal)
+            return nil
         case .createLocalEvent:
             try await createLocalEvent(from: proposal)
+            return nil
         case .updateLocalEvent:
             try await updateLocalEvent(from: proposal)
+            return nil
         case .deleteLocalRecord:
             try await deleteLocalRecord(from: proposal)
+            return nil
         case .scheduleNotification:
             try await scheduleNotification(from: proposal)
+            return nil
         case .cancelNotification:
             try await cancelNotification(from: proposal)
-        case .rescheduleEventKitEvent, .createEventKitReminder:
+            return nil
+        case .rescheduleEventKitEvent, .createEventKitReminder,
+             .forbiddenExternalFinancial, .forbiddenSendEmail:
+            return try await applyExternalSideEffects(for: proposal)
+        }
+    }
+
+    private func applyExternalSideEffects(for proposal: ActionProposal) async throws -> String? {
+        switch proposal.actionType {
+        case .createEventKitReminder:
+            return try await createEventKitReminder(from: proposal)
+        case .rescheduleEventKitEvent:
             throw DomainError.invalidState("External write is not connected yet.")
         case .forbiddenExternalFinancial, .forbiddenSendEmail:
             throw DomainError.unauthorized
+        case .createLocalTask, .completeLocalTask, .rescheduleLocalTask,
+             .createLocalEvent, .updateLocalEvent, .deleteLocalRecord,
+             .scheduleNotification, .cancelNotification:
+            throw DomainError.invalidState("Expected an external action.")
         }
+    }
+
+    private func createEventKitReminder(from proposal: ActionProposal) async throws -> String {
+        guard let remindersIntegration else {
+            throw DomainError.invalidState("Apple Reminder creation is not configured.")
+        }
+        let title = try requiredString("title", in: proposal, fallback: proposal.title)
+        let dueDate = try optionalDate("dueDate", in: proposal)
+        let recurrence = try recurrenceRule(in: proposal)
+        let identifier = try await remindersIntegration.createReminder(
+            title: title,
+            notes: proposal.parameters["notes"],
+            dueDate: dueDate,
+            recurrence: recurrence
+        )
+        return "Created Apple Reminder (\(identifier))"
+    }
+
+    private func recurrenceRule(in proposal: ActionProposal) throws -> RecurrenceRule? {
+        guard let rawFrequency = proposal.parameters["recurrenceFrequency"] else { return nil }
+        guard let frequency = RecurrenceRule.Frequency(rawValue: rawFrequency) else {
+            throw DomainError.validationFailed(field: "recurrenceFrequency")
+        }
+        let interval: Int
+        if let rawInterval = proposal.parameters["recurrenceInterval"] {
+            guard let parsed = Int(rawInterval), parsed > 0 else {
+                throw DomainError.validationFailed(field: "recurrenceInterval")
+            }
+            interval = parsed
+        } else {
+            interval = 1
+        }
+        let days: [Int]
+        if let values = proposal.parameters["recurrenceDays"]?.split(separator: ",") {
+            days = try values.map { value in
+                guard let day = Int(value), (1 ... 7).contains(day) else {
+                    throw DomainError.validationFailed(field: "recurrenceDays")
+                }
+                return day
+            }
+        } else {
+            days = []
+        }
+        return RecurrenceRule(frequency: frequency, interval: interval, daysOfWeek: days)
     }
 
     private func createLocalTask(from proposal: ActionProposal) async throws {

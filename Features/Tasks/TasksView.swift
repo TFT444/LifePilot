@@ -6,8 +6,14 @@ import SwiftUI
 public struct TasksView: View {
     @State private var viewModel: TasksViewModel
 
-    public init(taskStore: any TaskStore) {
-        _viewModel = State(initialValue: TasksViewModel(taskStore: taskStore))
+    public init(
+        taskStore: any TaskStore,
+        notifications: TaskNotificationCoordinator? = nil
+    ) {
+        _viewModel = State(initialValue: TasksViewModel(
+            taskStore: taskStore,
+            notifications: notifications
+        ))
     }
 
     public var body: some View {

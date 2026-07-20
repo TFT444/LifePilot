@@ -22,6 +22,7 @@ public final class PersistedTaskEntity {
     public var contextRaw: String
     public var recurrenceJSON: Data?
     public var sourceRaw: String
+    public var externalIdentifier: String?
     public var syncStateRaw: String
     public var createdAt: Date
     public var updatedAt: Date
@@ -42,6 +43,7 @@ public final class PersistedTaskEntity {
         contextRaw = task.context.rawValue
         recurrenceJSON = task.recurrence.map { PersistenceCoding.encode($0) }
         sourceRaw = task.source.rawValue
+        externalIdentifier = task.externalIdentifier
         syncStateRaw = task.syncState.rawValue
         createdAt = task.createdAt
         updatedAt = task.updatedAt
@@ -62,6 +64,7 @@ public final class PersistedTaskEntity {
         contextRaw = task.context.rawValue
         recurrenceJSON = task.recurrence.map { PersistenceCoding.encode($0) }
         sourceRaw = task.source.rawValue
+        externalIdentifier = task.externalIdentifier
         syncStateRaw = task.syncState.rawValue
         createdAt = task.createdAt
         updatedAt = task.updatedAt
@@ -84,6 +87,7 @@ public final class PersistedTaskEntity {
             context: LifeContext(rawValue: contextRaw) ?? .personal,
             recurrence: recurrenceJSON.flatMap { PersistenceCoding.decode(RecurrenceRule.self, from: $0) },
             source: DataSource(rawValue: sourceRaw) ?? .local,
+            externalIdentifier: externalIdentifier,
             syncState: SyncState(rawValue: syncStateRaw) ?? .localOnly,
             createdAt: createdAt,
             updatedAt: updatedAt

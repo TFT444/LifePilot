@@ -131,7 +131,10 @@ public struct RootTabView: View {
         case .timeline:
             TimelineView(timelineProvider: dependencies.timelineProvider)
         case .tasks:
-            TasksView(taskStore: dependencies.taskStore)
+            TasksView(
+                taskStore: dependencies.taskStore,
+                notifications: taskNotificationCoordinator
+            )
         case .insights:
             InsightsView(
                 taskStore: dependencies.taskStore,
@@ -168,7 +171,15 @@ public struct RootTabView: View {
             taskStore: dependencies.taskStore,
             eventStore: dependencies.eventStore,
             approvalStore: dependencies.approvalStore,
-            reminders: dependencies.remindersIntegration
+            reminders: dependencies.remindersIntegration,
+            notifications: taskNotificationCoordinator
+        )
+    }
+
+    private var taskNotificationCoordinator: TaskNotificationCoordinator {
+        TaskNotificationCoordinator(
+            scheduler: dependencies.notificationScheduler,
+            preferenceStore: dependencies.preferenceStore
         )
     }
 }

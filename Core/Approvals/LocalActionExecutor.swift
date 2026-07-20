@@ -10,7 +10,11 @@ public enum ActionExecutionDisposition: Sendable, Equatable {
 /// actions are permanently denied. External writes stay unsupported until a
 /// concrete, authorization-aware executor is injected.
 public struct SecurityPolicy: Sendable {
-    public init() {}
+    private let allowReminderWrites: Bool
+
+    public init(allowReminderWrites: Bool = false) {
+        self.allowReminderWrites = allowReminderWrites
+    }
 
     public func disposition(
         for actionType: ActionProposal.ActionType
@@ -23,7 +27,9 @@ public struct SecurityPolicy: Sendable {
         case .rescheduleEventKitEvent:
             return .unsupported("Calendar event writes are not connected yet.")
         case .createEventKitReminder:
-            return .unsupported("Apple Reminder creation is not connected yet.")
+            return allowReminderWrites
+                ? .allowed
+                : .unsupported("Apple Reminder creation is not connected yet.")
         case .createLocalTask, .completeLocalTask, .rescheduleLocalTask,
              .createLocalEvent, .updateLocalEvent, .deleteLocalRecord,
              .scheduleNotification, .cancelNotification:
@@ -47,6 +53,7 @@ public actor LocalActionExecutor: ActionExecuting {
     let taskStore: any TaskStore
     let eventStore: any EventStore
     let notificationScheduler: (any NotificationScheduling)?
+    let remindersIntegration: (any RemindersIntegrating)?
     private let approvalStore: (any ApprovalStore)?
     let clock: any ClockProviding
     private var executedProposalIDs: Set<UUID> = []
@@ -57,6 +64,7 @@ public actor LocalActionExecutor: ActionExecuting {
         taskStore: any TaskStore,
         eventStore: any EventStore,
         notificationScheduler: (any NotificationScheduling)? = nil,
+        remindersIntegration: (any RemindersIntegrating)? = nil,
         approvalStore: (any ApprovalStore)? = nil,
         clock: any ClockProviding = SystemClock()
     ) {
@@ -64,6 +72,7 @@ public actor LocalActionExecutor: ActionExecuting {
         self.taskStore = taskStore
         self.eventStore = eventStore
         self.notificationScheduler = notificationScheduler
+        self.remindersIntegration = remindersIntegration
         self.approvalStore = approvalStore
         self.clock = clock
     }
@@ -104,12 +113,12 @@ public actor LocalActionExecutor: ActionExecuting {
         }
 
         do {
-            try await applySideEffects(for: proposal)
+            let executionResult = try await applySideEffects(for: proposal)
             executedProposalIDs.insert(proposal.id)
 
             var result = approval
             result.state = .completed
-            result.executionResult = "Executed"
+            result.executionResult = executionResult ?? "Executed"
             result.decidedAt = clock.now()
             try await persistSuccess(proposal: proposal, result: result, wasRetry: false)
             return result

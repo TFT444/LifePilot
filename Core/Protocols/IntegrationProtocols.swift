@@ -22,6 +22,13 @@ public protocol RemindersIntegrating: Sendable {
     func authorizationState() async -> CapabilityState
     func requestAccess() async throws -> Bool
     func fetchOpenReminders() async throws -> [TaskItem]
+    @discardableResult
+    func createReminder(
+        title: String,
+        notes: String?,
+        dueDate: Date?,
+        recurrence: RecurrenceRule?
+    ) async throws -> String
 }
 
 /// Weather context for briefings and outdoor plans.
@@ -72,6 +79,15 @@ public struct UnavailableRemindersIntegration: RemindersIntegrating {
     }
 
     public func fetchOpenReminders() async throws -> [TaskItem] {
+        throw DomainError.unavailable
+    }
+
+    public func createReminder(
+        title _: String,
+        notes _: String?,
+        dueDate _: Date?,
+        recurrence _: RecurrenceRule?
+    ) async throws -> String {
         throw DomainError.unavailable
     }
 }

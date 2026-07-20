@@ -193,6 +193,34 @@ final class PermissionFlowTests: XCTestCase {
         XCTAssertTrue(viewModel.freshnessSummary.contains("Reminders connected"))
     }
 
+    func testHomeReconcilesReminderByExternalIdentifierWithoutDuplicates() async {
+        let reminder = TaskItem(
+            title: "Call Mum",
+            source: .eventKitReminders,
+            externalIdentifier: "stable-reminder-id",
+            syncState: .synced
+        )
+        let store = InMemoryTaskStore()
+        let viewModel = HomeViewModel(
+            taskStore: store,
+            eventStore: InMemoryEventStore(),
+            preferenceStore: InMemoryPreferenceStore(),
+            integrations: HomeBriefingIntegrations(
+                reminders: PermissionReminders(initialState: .authorized, reminders: [reminder])
+            )
+        )
+
+        await viewModel.load()
+        await viewModel.refresh()
+
+        let tasks = await store.allTasks()
+        let imported = tasks.filter {
+            $0.externalIdentifier == "stable-reminder-id"
+        }
+        XCTAssertEqual(imported.count, 1)
+        XCTAssertEqual(imported.first?.source, .eventKitReminders)
+    }
+
     func testLegacyPreferencesDecodeWithNoFalsePermissionAuthorization() throws {
         let legacy = """
         {
@@ -287,6 +315,15 @@ private actor PermissionReminders: RemindersIntegrating {
 
     func fetchOpenReminders() async throws -> [TaskItem] {
         reminders
+    }
+
+    func createReminder(
+        title _: String,
+        notes _: String?,
+        dueDate _: Date?,
+        recurrence _: RecurrenceRule?
+    ) async throws -> String {
+        "permission-reminder-id"
     }
 
     func setState(_ state: CapabilityState) {
