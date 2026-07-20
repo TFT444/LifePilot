@@ -68,7 +68,7 @@ jobs:
             2>&1 | tee "$CI_ARTIFACTS/native-build.log"
 
       - name: Install and launch simulator smoke test
-        timeout-minutes: 8
+        timeout-minutes: 5
         run: |
           set -euo pipefail
 
@@ -92,8 +92,22 @@ jobs:
           trap cleanup EXIT
 
           xcrun simctl boot "$simulator_id"
-          xcrun simctl bootstatus "$simulator_id" -b
-          xcrun simctl install "$simulator_id" "$APP_PATH"
+          installed=false
+          for attempt in $(seq 1 60); do
+            if xcrun simctl install "$simulator_id" "$APP_PATH" \
+              >> "$CI_ARTIFACTS/simulator-boot.log" 2>&1; then
+              installed=true
+              break
+            fi
+            echo "Waiting for simulator readiness ($attempt/60)..."
+            sleep 2
+          done
+          if [[ "$installed" != "true" ]]; then
+            xcrun simctl list devices \
+              > "$CI_ARTIFACTS/simulator-devices.log" || true
+            echo "Simulator was not ready to install LifePilot within two minutes." >&2
+            exit 1
+          fi
 
           launch_output="$(
             xcrun simctl launch \
